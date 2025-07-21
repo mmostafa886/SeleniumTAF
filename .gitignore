@@ -7,3 +7,5 @@ target/
 ### Mac OS ###
 .DS_Store
 /.idea/
+/test-outputs/Logs/*
+/test-outputs/ScreenShots/*

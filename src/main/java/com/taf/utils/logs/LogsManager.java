@@ -2,7 +2,7 @@ package com.taf.utils.logs;
 
 import org.apache.logging.log4j.Logger;
 
-public class LogManager {
+public class LogsManager {
 
     private static Logger logger() {
       return org.apache.logging.log4j.LogManager.getLogger(Thread.currentThread().getStackTrace()[3].getClassName());

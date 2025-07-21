@@ -1,9 +1,10 @@
 package com.taf.utils.dataReader;
 
 import com.jayway.jsonpath.JsonPath;
+import io.qameta.allure.Step;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import com.taf.utils.logs.LogManager;
+import com.taf.utils.logs.LogsManager;
 
 import java.io.FileReader;
 
@@ -12,23 +13,27 @@ public class JsonReader {
     String jsonReader;
     String jsonFileName;
 
-    private final String test_data_path = "src/main/resources/test-data/";
+    private final String Test_DATA_PATH = "src/main/resources/test-data/";
 
     public JsonReader(String jsonFileName) {
         this.jsonFileName = jsonFileName;
         try {
-            JSONObject data = (JSONObject) new JSONParser().parse(new FileReader(test_data_path + jsonFileName+".json"));
+            JSONObject data = (JSONObject) new JSONParser().parse(new FileReader(Test_DATA_PATH + jsonFileName+".json"));
             jsonReader = data.toJSONString();
+            LogsManager.info("JSON file read successfully: ", Test_DATA_PATH, jsonFileName,".json");
         } catch (Exception e) {
-            LogManager.error("Error reading json file: ", test_data_path , jsonFileName,".json\n" , e.getMessage());
+            LogsManager.error("Error reading json file: ", Test_DATA_PATH, jsonFileName,".json\n" , e.getMessage());
+            jsonReader = "{}"; // Fallback to an empty JSON object in case of error
         }
     }
 
+    @Step("Get JSON data by property name: {jsonPropertyName}")
     public String getJsonData(String jsonPropertyName) {
         try {
+            LogsManager.info("Reading json data with property_path:", jsonPropertyName);
             return JsonPath.read(jsonReader, jsonPropertyName);
         } catch (Exception e) {
-            LogManager.error("Error reading json data with path: " , jsonPropertyName , "\n" , e.getMessage());
+            LogsManager.error("Error reading json data with property_path:" , jsonPropertyName , "\n" , e.getMessage());
             return "";
         }
     }

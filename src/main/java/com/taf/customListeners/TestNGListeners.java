@@ -1,39 +1,42 @@
 package com.taf.customListeners;
 
+import com.taf.utils.reporting.AllureManager;
 import org.testng.*;
-import com.taf.utils.logs.LogManager;
+import com.taf.utils.logs.LogsManager;
 import com.taf.utils.dataReader.PropertyReader;
 
 public class TestNGListeners implements IInvokedMethodListener, ITestListener, IExecutionListener {
 
         public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
             if (method.isTestMethod())
-                LogManager.info("Test Execution Started for:", method.getTestMethod().getMethodName());
+                LogsManager.info("Test Execution Started for:", method.getTestMethod().getMethodName());
         }
 
         public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
             if (method.isTestMethod())
-                LogManager.info("Test Execution Started for:", method.getTestMethod().getMethodName());
+                LogsManager.info("Test Execution Started for:", method.getTestMethod().getMethodName());
         }
 
         public void onTestSuccess(ITestResult result) {
-            LogManager.info("Test Passed:" , result.getMethod().getMethodName());
+            LogsManager.info("Test Passed:" , result.getMethod().getMethodName());
         }
 
         public void onTestFailure(ITestResult result) {
-            LogManager.error("Test Failed:" , result.getMethod().getMethodName());
+            LogsManager.error("Test Failed:" , result.getMethod().getMethodName());
         }
 
         public void onTestSkipped(ITestResult result) {
-            LogManager.warn("Test Skipped:" , result.getMethod().getMethodName());
+            LogsManager.warn("Test Skipped:" , result.getMethod().getMethodName());
         }
         public void onExecutionStart() {
-            LogManager.info("Execution started");
+            LogsManager.info("Execution started");
             PropertyReader.loadProperties();
+            AllureManager.clearAllureResults();
         }
 
         public void onExecutionFinish() {
-            LogManager.info("Execution finished");
+            LogsManager.info("Execution finished");
+            AllureManager.setAllureEnvironment();
         }
 
 /*        private  int attemps = 0;

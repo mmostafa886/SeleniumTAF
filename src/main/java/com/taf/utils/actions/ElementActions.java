@@ -6,8 +6,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-import com.taf.utils.logs.LogManager;
+import com.taf.utils.logs.LogsManager;
 
 import java.io.File;
 
@@ -28,12 +27,12 @@ public class ElementActions {
                 WebElement element = d.findElement(locator);
                 scrollToElementJS(locator);
                 element.click();
+                LogsManager.info("Clicked on element with locator:", locator.toString());
                 return true;
             } catch (Exception e) {
                 return false;
             }
         });
-        LogManager.info("Clicked on element with locator:", locator.toString());
     }
 
     //type method
@@ -45,12 +44,12 @@ public class ElementActions {
                 scrollToElementJS(locator);
                 element.clear(); // Clear the field before typing
                 element.sendKeys(text);
+                LogsManager.info("Typed text '", text, "' into element with locator:", locator.toString());
                 return true;
             } catch (Exception e) {
                 return false;
             }
         });
-        LogManager.info("Typed text '", text, "' into element with locator: ", locator.toString());
     }
 
     //getText method
@@ -62,10 +61,10 @@ public class ElementActions {
                 WebElement element = d.findElement(locator);
                 scrollToElementJS(locator);
                 String msg = element.getText();
-                LogManager.info("Retrieved text from element with locator:", locator.toString(), " - Text:", msg);
+                LogsManager.info("Retrieved text from element with locator:", locator.toString(), " - Text:", msg);
                 return !msg.isEmpty() ? msg : null;
             } catch (Exception e) {
-                LogManager.info("Retrieved text from element with locator:", locator.toString(), " - Text:", null);
+                LogsManager.info("Retrieved text from element with locator:", locator.toString(), " - Text:", null);
                 return null;
             }
         });
@@ -80,10 +79,10 @@ public class ElementActions {
                 WebElement element = d.findElement(locator);
                 scrollToElementJS(locator);
                 element.sendKeys(absoluteFilePath);
-                LogManager.info("Uploaded file to element with locator:", locator.toString(), " - File Path:", filePath);
+                LogsManager.info("Uploaded file to element with locator:", locator.toString(), " - File Path:", filePath);
                 return true;
             } catch (Exception e) {
-                LogManager.error("Failed to upload file to element with locator:", locator.toString(), " - Error:", e.getMessage());
+                LogsManager.error("Failed to upload file to element with locator:", locator.toString(), " - Error:", e.getMessage());
                 return false;
             }
         });
@@ -96,7 +95,7 @@ public class ElementActions {
         ((JavascriptExecutor) driver).executeScript("""
                 arguments[0].scrollIntoView({behavior: "auto", block: "center",inline: "center"});""", element);
 
-        LogManager.info("Scrolled to element with locator:", locator.toString());
+        LogsManager.info("Scrolled to element with locator:", locator.toString());
     }
 
     //Find an element using a locator

@@ -4,11 +4,12 @@ import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import com.taf.utils.logs.LogManager;
+import com.taf.utils.logs.LogsManager;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.net.URI;
 
 public class FirefoxFactory extends AbstractDriver {
-
-    private boolean headlessMode = false;
 
     private FirefoxOptions options() {
         FirefoxOptions options = new FirefoxOptions();
@@ -18,7 +19,8 @@ public class FirefoxFactory extends AbstractDriver {
         options.addArguments("--disable-gpu"); // Example option to disable GPU hardware acceleration
         options.addArguments("--disable-notifications"); // Example option to disable notifications
         options.addArguments("--disable-popup-blocking"); // Example option to disable popup blocking
-        if(headlessMode) options.addArguments("--headless");// Run in headless mode if specified in the configuration
+        if (DriverConfigParser.headlessMode)
+            options.addArguments("--headless");// Run in headless mode if specified in the configuration
         options.setAcceptInsecureCerts(true); // Accept insecure certificates
         options.setPageLoadStrategy(PageLoadStrategy.EAGER); // Set page load strategy to normal
 
@@ -27,7 +29,18 @@ public class FirefoxFactory extends AbstractDriver {
 
     @Override
     public WebDriver createDriver() {
-        LogManager.info("\"Firefox\" browser is starting...");
-        return new FirefoxDriver(options());
+        LogsManager.info("\"Firefox\" browser is starting...");
+        if (DriverConfigParser.isRemote) {
+            try {
+                LogsManager.info("\"Firefox\" Remote session is starting...");
+                return new RemoteWebDriver(URI.create("http://localhost:4444/wd/hub").toURL(), options());
+            } catch (Exception e) {
+                LogsManager.error("Couldn't create remote \"Firefox\" driver:" + e.getMessage());
+                throw new RuntimeException("Couldn't create remote \"Firefox\" driver: " + e.getMessage());
+            }
+        } else {
+            LogsManager.info("\"Firefox\" Local session is starting...");
+            return new FirefoxDriver(options());
+        }
     }
 }

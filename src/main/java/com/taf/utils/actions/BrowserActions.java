@@ -1,6 +1,6 @@
 package com.taf.utils.actions;
 
-import com.taf.utils.logs.LogManager;
+import com.taf.utils.logs.LogsManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WindowType;
 
@@ -16,7 +16,7 @@ public class BrowserActions {
      */
     public void maximizeWindow() {
         driver.manage().window().maximize();
-        LogManager.info("Browser window maximized.");
+        LogsManager.info("Browser window maximized.");
     }
 
     /**
@@ -24,7 +24,7 @@ public class BrowserActions {
      */
     public String getCurrentUrl() {
         String currentUrl = driver.getCurrentUrl();
-        LogManager.info("Current URL is: ", currentUrl);
+        LogsManager.info("Current URL is:", currentUrl);
         return currentUrl;
     }
 
@@ -34,7 +34,7 @@ public class BrowserActions {
      */
     public void navigateTo(String url) {
         driver.get(url);
-        LogManager.info("Navigated to URL: ", url);
+        LogsManager.info("Navigated to URL:", url);
     }
 
     /**
@@ -42,7 +42,7 @@ public class BrowserActions {
      */
     public void refreshPage() {
         driver.navigate().refresh();
-        LogManager.info("Page refreshed.");
+        LogsManager.info("Page refreshed.");
     }
 
     /**
@@ -50,7 +50,7 @@ public class BrowserActions {
      */
     public void openNewWindow() {
         driver.switchTo().newWindow(WindowType.WINDOW);
-        LogManager.info("New browser window opened.");
+        LogsManager.info("New browser window opened.");
     }
 
 

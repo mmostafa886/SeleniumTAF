@@ -3,7 +3,7 @@ package com.taf.drivers;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ThreadGuard;
 import com.taf.utils.dataReader.PropertyReader;
-import com.taf.utils.logs.LogManager;
+import com.taf.utils.logs.LogsManager;
 
 /**
  * GUIWebDriver is a wrapper class that manages the lifecycle and access to a Selenium WebDriver instance
@@ -18,6 +18,11 @@ public class GUIWebDriver {
      * Example values: "chrome", "firefox", "edge".
      */
     private final String browser = PropertyReader.getProperty("browserType");
+
+    //getter for the browser type
+    public String getBrowser() {
+        return browser;
+    }
 
     /**
      * ThreadLocal container to hold the WebDriver instance for each thread separately.
@@ -41,7 +46,7 @@ public class GUIWebDriver {
      * This setup allows multiple threads to run tests concurrently without interfering with each other's WebDriver instances.
      */
     public GUIWebDriver() {
-        LogManager.info("Initializing GUIWebDriver with browser: ", browser);
+        LogsManager.info("Initializing GUIWebDriver with browser: ", browser);
         AbstractDriver abstractDriver = Browser.valueOf(browser.toUpperCase()).getDriverFactory();
         WebDriver driver = ThreadGuard.protect(abstractDriver.createDriver());
         driverThreadLocal.set(driver);
@@ -62,7 +67,7 @@ public class GUIWebDriver {
      */
     public void quitDriver() {
         if (driverThreadLocal.get() != null) {
-            LogManager.info("Quitting WebDriver for browser: ", browser);
+            LogsManager.info("Quitting WebDriver for browser: ", browser);
             driverThreadLocal.get().quit();
             driverThreadLocal.remove();
         }
