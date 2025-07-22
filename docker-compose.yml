@@ -1,0 +1,102 @@
+# Docker Compose file for setting up a Selenium Grid with multiple browser nodes and a test runner.
+
+services:
+  # Selenium Hub: The central component of the Selenium Grid.
+  selenium-hub:
+    image: selenium/hub:latest # Official Selenium Hub image
+    platform: linux/amd64 # Specify the platform to ensure compatibility
+    user: root # Run as root user
+    ports:
+      - "4442-4444:4442-4444" # Expose ports for hub communication
+    networks:
+      - grid # Connect to the 'grid' network
+    shm_size: 3g # Shared memory size for better performance
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4444/status" ] # Health check to ensure hub is running
+      interval: 10s # Check every 10 seconds
+      timeout: 5s # Timeout after 5 seconds
+      retries: 5 # Retry up to 5 times before marking as unhealthy
+
+  # Chrome Node: A Selenium node for running tests in Chrome.
+  selenium-node-chrome:
+    image: selenium/node-chrome:latest # Official Chrome node image
+    platform: linux/amd64 # Specify the platform to ensure compatibility
+    user: root # Run as root user
+    networks:
+      - grid # Connect to the 'grid' network
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub # Connect to the Selenium Hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442 # Port for publishing events
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443 # Port for subscribing to events
+    shm_size: 3g # Shared memory size for better performance
+    depends_on:
+      selenium-hub:
+        condition: service_healthy # Start only if the hub is healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5555/status" ] # Health check to ensure node is running
+      interval: 10s # Check every 10 seconds
+      timeout: 5s # Timeout after 5 seconds
+      retries: 5 # Retry up to 5 times before marking as unhealthy
+
+  # Firefox Node: A Selenium node for running tests in Firefox.
+  selenium-node-firefox:
+    image: selenium/node-firefox:latest # Official Firefox node image
+    platform: linux/amd64 # Specify the platform to ensure compatibility
+    user: root # Run as root user
+    networks:
+      - grid # Connect to the 'grid' network
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub # Connect to the Selenium Hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442 # Port for publishing events
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443 # Port for subscribing to events
+    shm_size: 3g # Shared memory size for better performance
+    depends_on:
+      selenium-hub:
+        condition: service_healthy # Start only if the hub is healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5555/status" ] # Health check to ensure node is running
+      interval: 10s # Check every 10 seconds
+      timeout: 5s # Timeout after 5 seconds
+      retries: 5 # Retry up to 5 times before marking as unhealthy
+
+  # Edge Node: A Selenium node for running tests in Microsoft Edge.
+  selenium-node-edge:
+    image: selenium/node-edge:latest # Official Edge node image
+    platform: linux/amd64 # Specify the platform to ensure compatibility
+    user: root # Run as root user
+    networks:
+      - grid # Connect to the 'grid' network
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub # Connect to the Selenium Hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442 # Port for publishing events
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443 # Port for subscribing to events
+    shm_size: 3g # Shared memory size for better performance
+    depends_on:
+      selenium-hub:
+        condition: service_healthy # Start only if the hub is healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5555/status" ] # Health check to ensure node is running
+      interval: 10s # Check every 10 seconds
+      timeout: 5s # Timeout after 5 seconds
+      retries: 5 # Retry up to 5 times before marking as unhealthy
+
+  # Test Runner: A service to run end-to-end tests.
+  test-runner:
+    build: . # Build the Docker image from the current directory
+    volumes:
+      - .:/e2e # Mount the current directory to /e2e in the container
+    networks:
+      - grid # Connect to the 'grid' network
+    depends_on:
+      selenium-hub:
+        condition: service_healthy # Start only if the hub is healthy
+      selenium-node-chrome:
+        condition: service_healthy # Start only if the Chrome node is healthy
+      selenium-node-firefox:
+        condition: service_healthy # Start only if the Firefox node is healthy
+      selenium-node-edge:
+        condition: service_healthy # Start only if the Edge node is healthy
+
+# Define a custom network for all services to communicate.
+networks:
+  grid:
