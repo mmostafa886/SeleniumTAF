@@ -7,6 +7,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import com.taf.utils.logs.LogsManager;
+import org.openqa.selenium.support.ui.Select;
 
 import java.io.File;
 
@@ -102,5 +103,24 @@ public class ElementActions {
     @Step("Find element with locator: {0}")
     public WebElement findElement(By locator) {
        return driver.findElement(locator);
+    }
+
+    //select from dropdown
+    @Step("Select value '{1}' from dropdown with locator: {0}")
+    public void selectFromDropdown(By locator, String value) {
+        waitManager.fluentWait().until(d ->
+                {
+                    try {
+                        WebElement element = d.findElement(locator);
+                        scrollToElementJS(locator);
+                        Select select = new Select(element);
+                        select.selectByVisibleText(value);
+                        LogsManager.info("Selected value '" + value + "' from dropdown: " + locator);
+                        return true;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }
+        );
     }
 }

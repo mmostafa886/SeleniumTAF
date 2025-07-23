@@ -1,6 +1,5 @@
 package com.taf.drivers;
 
-import com.taf.utils.dataReader.PropertyReader;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.edge.EdgeDriver;
@@ -34,8 +33,7 @@ public class EdgeFactory extends AbstractDriver {
         if (DriverConfigParser.isRemote) {
             try {
                 LogsManager.info("\"Edge\" Remote session is starting...");
-                return new RemoteWebDriver(URI.create("http://" + PropertyReader.getProperty("remoteHost")
-                        + ":" + PropertyReader.getProperty("remotePort") + "/wd/hub").toURL(), options());
+                return new RemoteWebDriver(URI.create("http://" + remoteHost + ":" + remotePort + "/wd/hub").toURL(), options());
             } catch (Exception e) {
                 LogsManager.error("Couldn't create remote \"Edge\" driver:" + e.getMessage());
                 throw new RuntimeException("Couldn't create remote \"Edge\" driver: " + e.getMessage());

@@ -1,8 +1,11 @@
 package com.taf.utils.logs;
 
+import com.taf.utils.reporting.AllureConstants;
 import org.apache.logging.log4j.Logger;
 
 public class LogsManager {
+
+    public static final String LOGS_PATH = AllureConstants.USER_DIR + "test-output/Logs/";
 
     private static Logger logger() {
       return org.apache.logging.log4j.LogManager.getLogger(Thread.currentThread().getStackTrace()[3].getClassName());

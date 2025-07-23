@@ -1,52 +1,92 @@
 package com.taf.customListeners;
 
-import com.taf.utils.reporting.AllureManager;
+import com.taf.drivers.WebDriverProvider;
+import com.taf.utils.media.ScreenRecordManager;
+import com.taf.utils.media.ScreenshotsManager;
+import com.taf.utils.FileUtils;
+import com.taf.utils.reporting.AllureAttachmentManager;
+import com.taf.utils.reporting.AllureConstants;
+import com.taf.utils.reporting.AllureEnvironmentManager;
+import com.taf.utils.reporting.AllureReportGenerator;
+import com.taf.validations.Validation;
+import org.openqa.selenium.WebDriver;
 import org.testng.*;
 import com.taf.utils.logs.LogsManager;
 import com.taf.utils.dataReader.PropertyReader;
 
+import java.io.File;
+
 public class TestNGListeners implements IInvokedMethodListener, ITestListener, IExecutionListener {
 
         public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
-            if (method.isTestMethod())
-                LogsManager.info("Test Execution Started for:", method.getTestMethod().getMethodName());
+            if (method.isTestMethod()) {
+                ScreenRecordManager.startRecording();
+                LogsManager.info("Test Case " + testResult.getName() + " started");
+            }
         }
 
         public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
+            WebDriver driver = null;
             if (method.isTestMethod())
-                LogsManager.info("Test Execution Started for:", method.getTestMethod().getMethodName());
+            {
+                ScreenRecordManager.stopRecording(testResult.getName());
+                Validation.assertAll();
+                if (testResult.getInstance() instanceof WebDriverProvider provider)
+                    driver = provider.getWebDriver(); //initialize driver from WebDriverProvider
+                switch (testResult.getStatus()){
+                    case ITestResult.SUCCESS -> ScreenshotsManager.takeFullPageScreenshot(driver,"passed-" + testResult.getName());
+                    case ITestResult.FAILURE -> ScreenshotsManager.takeFullPageScreenshot(driver,"failed-" + testResult.getName());
+                    case ITestResult.SKIP -> ScreenshotsManager.takeFullPageScreenshot(driver,"skipped-" + testResult.getName());
+                }
+                AllureAttachmentManager.attachLogs();
+                AllureAttachmentManager.attachRecords(testResult.getName());
+            }
         }
 
         public void onTestSuccess(ITestResult result) {
-            LogsManager.info("Test Passed:" , result.getMethod().getMethodName());
+            LogsManager.info("Test" , result.getMethod().getMethodName(), "Passed");
         }
 
         public void onTestFailure(ITestResult result) {
-            LogsManager.error("Test Failed:" , result.getMethod().getMethodName());
+            LogsManager.error("Test" , result.getMethod().getMethodName(), "Failed");
         }
 
         public void onTestSkipped(ITestResult result) {
-            LogsManager.warn("Test Skipped:" , result.getMethod().getMethodName());
+            LogsManager.warn("Test" , result.getMethod().getMethodName(), "Skipped");
         }
         public void onExecutionStart() {
-            LogsManager.info("Execution started");
+            LogsManager.info("Test Execution started");
             PropertyReader.loadProperties();
-            AllureManager.clearAllureResults();
+            LogsManager.info("Properties loaded");
+            cleanTestOutputDirectories();
+            LogsManager.info("Directories cleaned");
+            createTestOutputDirectories();
+            LogsManager.info("Directories created");
+            AllureEnvironmentManager.setEnvironmentVariables();
+            LogsManager.info("Allure environment set");
         }
 
         public void onExecutionFinish() {
-            LogsManager.info("Execution finished");
-            AllureManager.setAllureEnvironment();
+            AllureReportGenerator.generateReports(false);
+            AllureReportGenerator.copyHistory();
+            AllureReportGenerator.generateReports(true);
+            AllureReportGenerator.openReport(AllureReportGenerator.renameReport());
+            LogsManager.info("Test Execution Finished");
         }
 
-/*        private  int attemps = 0;
-        @Override
-        public boolean retry(ITestResult iTestResult) {
-            if (iTestResult.getStatus() == ITestResult.FAILURE && attemps==0) //1 attempt
-            {
-                attemps++;
-                return true;
-            }
-            return false;
-        }*/
+
+    // cleaning and creating dirs (logs, screenshots, recordings,allure-results)
+    private void cleanTestOutputDirectories() {
+        // Implement logic to clean test output directories
+        FileUtils.cleanDirectory(AllureConstants.RESULTS_FOLDER.toFile());
+        FileUtils.cleanDirectory(new File(ScreenshotsManager.SCREENSHOTS_PATH));
+        FileUtils.cleanDirectory(new File(ScreenRecordManager.RECORDINGS_PATH));
+        FileUtils.cleanDirectory(new File(LogsManager.LOGS_PATH));
+    }
+
+    // Implement logic to create test output directories
+    private void createTestOutputDirectories() {
+        FileUtils.createDirectory(ScreenshotsManager.SCREENSHOTS_PATH);
+        FileUtils.createDirectory(ScreenRecordManager.RECORDINGS_PATH);
+    }
 }

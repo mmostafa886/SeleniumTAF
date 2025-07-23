@@ -71,8 +71,8 @@ public class AlertActions {
      * Sends text to the alert if present.
      * @param text The text to send to the alert.
      */
-    @Step("Sending text to alert if present: {text}")
-    public void sendTextToAlert(String text) {
+    @Step("Set text to alert if present: {text}")
+    public void setAlertText(String text) {
         LogsManager.info("Attempting to send text to alert if present: ", text);
         waitManager.fluentWait().until(driver -> {
             try {
