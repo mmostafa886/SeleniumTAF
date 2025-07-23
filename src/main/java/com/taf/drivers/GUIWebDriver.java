@@ -17,7 +17,7 @@ public class GUIWebDriver {
      * This value is read from the configuration properties using the key "browserType".
      * Example values: "chrome", "firefox", "edge".
      */
-    private final String browser = PropertyReader.getProperty("browserType");
+    private final String browser = PropertyReader.getProperty("browser");
 
     //getter for the browser type
     public String getBrowser() {

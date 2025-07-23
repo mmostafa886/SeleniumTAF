@@ -40,7 +40,7 @@ public class AllureManager {
                 ImmutableMap.<String, String>builder()
                         .put("Environment", PropertyReader.getProperty("os.name"))
                         .put("JDK Version", System.getProperty("java.version"))
-                        .put("Browser", PropertyReader.getProperty("browserType").toUpperCase())
+                        .put("Browser", PropertyReader.getProperty("browser").toUpperCase())
                         .put("WebApp_URL", PropertyReader.getProperty("baseURL"))
                         .put("Headless", DriverConfigParser.getHeadlessMode())
                         .put("Remote Execution", DriverConfigParser.getRemoteExecution())

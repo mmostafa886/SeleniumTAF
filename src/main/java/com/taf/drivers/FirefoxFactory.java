@@ -1,5 +1,6 @@
 package com.taf.drivers;
 
+import com.taf.utils.dataReader.PropertyReader;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -19,8 +20,7 @@ public class FirefoxFactory extends AbstractDriver {
         options.addArguments("--disable-gpu"); // Example option to disable GPU hardware acceleration
         options.addArguments("--disable-notifications"); // Example option to disable notifications
         options.addArguments("--disable-popup-blocking"); // Example option to disable popup blocking
-        if (DriverConfigParser.headlessMode)
-            options.addArguments("--headless");// Run in headless mode if specified in the configuration
+        if (DriverConfigParser.isHeadlessMode()) options.addArguments("--headless");// Run in headless mode if specified in the configuration
         options.setAcceptInsecureCerts(true); // Accept insecure certificates
         options.setPageLoadStrategy(PageLoadStrategy.EAGER); // Set page load strategy to normal
 
@@ -33,7 +33,8 @@ public class FirefoxFactory extends AbstractDriver {
         if (DriverConfigParser.isRemote) {
             try {
                 LogsManager.info("\"Firefox\" Remote session is starting...");
-                return new RemoteWebDriver(URI.create("http://localhost:4444/wd/hub").toURL(), options());
+                return new RemoteWebDriver(URI.create("http://" + PropertyReader.getProperty("remoteHost")
+                        + ":" + PropertyReader.getProperty("remotePort") + "/wd/hub").toURL(), options());
             } catch (Exception e) {
                 LogsManager.error("Couldn't create remote \"Firefox\" driver:" + e.getMessage());
                 throw new RuntimeException("Couldn't create remote \"Firefox\" driver: " + e.getMessage());
