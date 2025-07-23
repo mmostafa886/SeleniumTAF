@@ -21,6 +21,12 @@ public class AllureBinaryManager {
     {
         static final String VERSION = resolveVersion(); //2.34.1
 
+        /**
+         * Resolves the latest version of Allure command line by scraping the GitHub releases page.
+         * This method connects to the GitHub releases page and extracts the version from the URL.
+         *
+         * @return The latest version of Allure command line as a String.
+         */
         private static String resolveVersion() {
             try {
                 String url = Jsoup.connect("https://github.com/allure-framework/allure2/releases/latest")
@@ -34,6 +40,11 @@ public class AllureBinaryManager {
         }
     }
 
+    /**
+     * Downloads and extracts the Allure command line binaries.
+     * The binaries are downloaded from the Maven repository and extracted to the specified directory.
+     * If the binaries already exist, it skips the download and extraction process.
+     */
     public static void downloadAndExtract() {
         try {
             String version = LazyHolder.VERSION;
@@ -66,6 +77,12 @@ public class AllureBinaryManager {
         }
     }
 
+    /**
+     * Returns the path to the Allure executable.
+     * The executable is located in the bin directory of the extracted Allure version.
+     *
+     * @return Path to the Allure executable.
+     */
     public static Path getExecutable() {
         String version = LazyHolder.VERSION;
         //C:\Users\hussi\.m2\repository\allure\allure-2.34.1\bin
@@ -76,6 +93,12 @@ public class AllureBinaryManager {
     }
 
     // download ZIP file for Allure
+    /**
+     * Downloads the Allure command line zip file for the specified version.
+     *
+     * @param version The version of Allure to download.
+     * @return The path to the downloaded zip file.
+     */
     private static Path downloadZip(String version)   {
         try {
             //https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.34.1/allure-commandline-2.34.1.zip
