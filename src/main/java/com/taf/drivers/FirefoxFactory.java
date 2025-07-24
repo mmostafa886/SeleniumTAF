@@ -9,6 +9,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URI;
 
+import static com.taf.drivers.DriverConfigParser.*;
+
 public class FirefoxFactory extends AbstractDriver {
 
     private FirefoxOptions options() {
@@ -29,7 +31,7 @@ public class FirefoxFactory extends AbstractDriver {
     @Override
     public WebDriver createDriver() {
         LogsManager.info("\"Firefox\" browser is starting...");
-        if (DriverConfigParser.isRemote) {
+        if (isRemote) {
             try {
                 LogsManager.info("\"Firefox\" Remote session is starting...");
                 return new RemoteWebDriver(URI.create("http://" + remoteHost + ":" + remotePort + "/wd/hub").toURL(), options());

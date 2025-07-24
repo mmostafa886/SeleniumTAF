@@ -8,7 +8,7 @@ import org.testng.asserts.SoftAssert;
 public class Validation extends BaseAssertion {
 
     private static SoftAssert softAssert = new SoftAssert();
-    private static  boolean used = false; // Flag to track if softAssert has been used.
+    private static boolean used = false; // Flag to track if softAssert has been used.
 
     public Validation(WebDriver driver) {
         super(driver);
@@ -16,8 +16,6 @@ public class Validation extends BaseAssertion {
 
     /**
      * Soft assertion to validate that the condition is true.
-     * @param condition
-     * @param message
      */
     @Override
     @Step("Validating the condition: {0} is true")
@@ -29,8 +27,6 @@ public class Validation extends BaseAssertion {
 
     /**
      * Soft assertion to validate that the condition is false.
-     * @param condition
-     * @param message
      */
     @Override
     @Step("Validating the condition: {0} is false")
@@ -42,9 +38,6 @@ public class Validation extends BaseAssertion {
 
     /**
      * Soft assertion to validate that the actual value equals the expected value.
-     * @param actual
-     * @param expected
-     * @param message
      */
     @Override
     @Step("Validating that actual value: {0} equals expected value: {1}")

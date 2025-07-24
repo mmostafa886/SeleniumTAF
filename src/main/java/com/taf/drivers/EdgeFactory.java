@@ -9,6 +9,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URI;
 
+import static com.taf.drivers.DriverConfigParser.*;
+
 public class EdgeFactory extends AbstractDriver {
 
     private EdgeOptions options() {
@@ -30,7 +32,7 @@ public class EdgeFactory extends AbstractDriver {
     @Override
     public WebDriver createDriver() {
         LogsManager.info("\"Edge\" browser is starting...");
-        if (DriverConfigParser.isRemote) {
+        if (isRemote) {
             try {
                 LogsManager.info("\"Edge\" Remote session is starting...");
                 return new RemoteWebDriver(URI.create("http://" + remoteHost + ":" + remotePort + "/wd/hub").toURL(), options());

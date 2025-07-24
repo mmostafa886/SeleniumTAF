@@ -9,12 +9,18 @@ import java.util.Collection;
 import java.util.Properties;
 
 public class PropertyReader {
-    //Load properties function to load all properties file into system properties
+
+    private static final String PROPERTY_FILE_PATH = "src/main/resources"; // Path to the directory containing properties files
+    /**
+     * Loads properties from files in the "src/main/resources" directory and merges them with system properties.
+     * Logs the loading process and any errors encountered.
+     * @return a Properties object containing all loaded properties.
+     */
     @Step("Load properties from files in directory: {directory}")
     public static Properties loadProperties() {
         try {
             Properties properties = new Properties();
-            Collection<File> propertiesFiles = FileUtils.listFiles(new File("src/main/resources"), new String[]{"properties"}, true);
+            Collection<File> propertiesFiles = FileUtils.listFiles(new File(PROPERTY_FILE_PATH), new String[]{"properties"}, true);
             propertiesFiles.forEach(file -> {
                 try {
                     properties.load(FileUtils.openInputStream(file));
@@ -27,11 +33,16 @@ public class PropertyReader {
             });
             return properties;
         } catch (Exception e) {
-            LogsManager.error("Failed to load properties from files in directory: " , "\"src/main/resources\"" , " with error: " , e.getMessage());
+            LogsManager.error("Failed to load properties from files in directory: \"" , PROPERTY_FILE_PATH , "\" with error: " , e.getMessage());
             return null;
         }
     }
 
+    /**
+     * Retrieves a property value from system properties.
+     * @param key is the key name of the property to retrieve.
+     * @return the value of the property or an empty string if not found.
+     */
     @Step("Get property with key: {key}")
     public static String getProperty(String key) {
         try {

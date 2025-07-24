@@ -18,6 +18,11 @@ public class WaitManager {
         this.driver = driver;
     }
 
+    /**
+     * Creates a FluentWait instance for the WebDriver.
+     * This wait will ignore specific exceptions and poll at regular intervals.
+     * @return FluentWait instance configured for the WebDriver
+     */
     public FluentWait<WebDriver> fluentWait() {
         return new FluentWait<>(driver)
                 .withTimeout(Duration.ofSeconds(10))
@@ -25,6 +30,11 @@ public class WaitManager {
                 .ignoreAll(getExceptions());
     }
 
+    /**
+     * Returns a list of exceptions to ignore during the wait.
+     * This includes common exceptions that may occur when elements are not immediately available.
+     * @return ArrayList of exception classes to ignore
+     */
     private ArrayList<Class<? extends Exception>> getExceptions() {
         ArrayList<Class<? extends Exception>> exceptions = new ArrayList<>();
         exceptions.add(NoSuchElementException.class);

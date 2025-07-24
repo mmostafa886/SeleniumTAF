@@ -16,7 +16,11 @@ public class ScreenshotsManager {
 
     public static final String SCREENSHOTS_PATH = "test-outputs/ScreenShots/";
 
-    //take full page screenshot
+    /**
+     * Take a full page screenshot and save it with a timestamp.
+     * @param driver the WebDriver instance
+     * @param screenshotName the name to use for the screenshot file
+     */
     @Step("Taking full page screenshot with name: {screenshotName}")
     public static void takeFullPageScreenshot(WebDriver driver, String screenshotName) {
         try {
@@ -36,7 +40,11 @@ public class ScreenshotsManager {
         }
     }
 
-    //take screenshot of a specific element
+    /**
+     * Take a screenshot of a specific element on the page.
+     * @param driver the WebDriver instance
+     * @param elementSelector the By selector for the element to capture
+     */
     @Step("Taking screenshot of element with selector: {elementSelector}")
     public static void takeElementScreenshot(WebDriver driver, By elementSelector) {
         try {

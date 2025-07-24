@@ -27,6 +27,10 @@ public class JsonReader {
         }
     }
 
+    /**
+     * Reads a specific property from JSON file and returns the value as a String.
+     * @return the value for JSON property as a String
+     */
     @Step("Get JSON data by property name: {jsonPropertyName}")
     public String getJsonData(String jsonPropertyName) {
         try {

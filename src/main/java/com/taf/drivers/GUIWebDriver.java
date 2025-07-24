@@ -1,5 +1,11 @@
 package com.taf.drivers;
 
+import com.taf.utils.actions.AlertActions;
+import com.taf.utils.actions.BrowserActions;
+import com.taf.utils.actions.ElementActions;
+import com.taf.utils.actions.FrameActions;
+import com.taf.validations.Validation;
+import com.taf.validations.Verification;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ThreadGuard;
 import com.taf.utils.dataReader.PropertyReader;
@@ -17,12 +23,8 @@ public class GUIWebDriver {
      * This value is read from the configuration properties using the key "browserType".
      * Example values: "chrome", "firefox", "edge".
      */
-    private final String browser = PropertyReader.getProperty("browser");
-
-    //getter for the browser type
-    public String getBrowser() {
-        return browser;
-    }
+    private final String browser = System.getProperty("browser") != null && !System.getProperty("browser").isEmpty()
+            ? System.getProperty("browser") : PropertyReader.getProperty("browser");
 
     /**
      * ThreadLocal container to hold the WebDriver instance for each thread separately.
@@ -47,9 +49,80 @@ public class GUIWebDriver {
      */
     public GUIWebDriver() {
         LogsManager.info("Initializing GUIWebDriver with browser: ", browser);
-        AbstractDriver abstractDriver = Browser.valueOf(browser.toUpperCase()).getDriverFactory();
+        AbstractDriver abstractDriver = Browser.getBrowserFromString(browser).getDriverFactory();
         WebDriver driver = ThreadGuard.protect(abstractDriver.createDriver());
         driverThreadLocal.set(driver);
+    }
+
+    /**     * Provides access to element-related actions using the current WebDriver instance.
+     * This method returns an instance of ElementActions, which contains methods for interacting with web elements
+     * such as clicking, typing, and retrieving element properties.
+     * @return an instance of ElementActions for the current WebDriver.
+     */
+    public ElementActions element() {
+        return new ElementActions(getDriver());
+    }
+
+    /**
+     * Provides access to browser-related actions using the current WebDriver instance.
+     * This method returns an instance of BrowserActions, which contains methods for performing browser operations
+     * such as navigating, refreshing, and managing cookies.
+     * @return an instance of BrowserActions for the current WebDriver.
+     */
+    public BrowserActions browser() {
+        return new BrowserActions(getDriver());
+    }
+
+    /**
+     * Provides access to frame-related actions using the current WebDriver instance.
+     * This method returns an instance of FrameActions, which contains methods for switching between frames
+     * and handling frame-specific operations.
+     * @return an instance of FrameActions for the current WebDriver.
+     */
+    public FrameActions frame() {
+        return new FrameActions(getDriver());
+    }
+
+    /**
+     * Provides access to alert-related actions using the current WebDriver instance.
+     * This method returns an instance of AlertActions, which contains methods for handling JavaScript alerts,
+     * confirmations, and prompts.
+     * @return an instance of AlertActions for the current WebDriver.
+     */
+    public AlertActions alert() {
+        return new AlertActions(getDriver());
+    }
+
+    /**
+     * Provides access to validation methods using the current WebDriver instance.
+     * This method returns an instance of Validation, which contains methods for performing soft assertions
+     * and validating conditions without throwing exceptions immediately.
+     * @return an instance of Validation for the current WebDriver.
+     */
+    public Validation validation() {
+        return new Validation(getDriver());
+    }
+
+    /**
+     * Provides access to verification methods using the current WebDriver instance.
+     * This method returns an instance of Verification, which contains methods for performing hard assertions
+     * and verifying conditions that will throw exceptions if the conditions are not met.
+     * @return an instance of Verification for the current WebDriver.
+     */
+    public Verification verification() {
+        return new Verification(getDriver());
+    }
+
+    /**
+     * Retrieves the WebDriver instance associated with the current thread.
+     * <p>
+     * This method returns the WebDriver stored in the ThreadLocal variable, allowing thread-safe access
+     * to the browser driver for the current thread.
+     *
+     * @return the WebDriver instance for the current thread, or null if none has been initialized.
+     */
+    public WebDriver getDriver() {
+        return driverThreadLocal.get();
     }
 
     /**
@@ -71,17 +144,5 @@ public class GUIWebDriver {
             driverThreadLocal.get().quit();
             driverThreadLocal.remove();
         }
-    }
-
-    /**
-     * Retrieves the WebDriver instance associated with the current thread.
-     * <p>
-     * This method returns the WebDriver stored in the ThreadLocal variable, allowing thread-safe access
-     * to the browser driver for the current thread.
-     *
-     * @return the WebDriver instance for the current thread, or null if none has been initialized.
-     */
-    public WebDriver getDriver() {
-        return driverThreadLocal.get();
     }
 }

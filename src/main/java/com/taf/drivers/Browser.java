@@ -33,7 +33,13 @@ public enum Browser {
 
     public abstract AbstractDriver getDriverFactory();
 
-    public static Browser fromString(String browserName) {
+    /**
+     * Returns a Browser enum value based on the provided string.
+     * If the string does not match any known browser, it returns UNKNOWN.
+     * @param browserName The name of the browser as a string.
+     * @return The corresponding Browser enum value or UNKNOWN if not found.
+     */
+    public static Browser getBrowserFromString(String browserName) {
         if (browserName == null) {
             LogsManager.error("Browser name is null. Please specify a valid browser.");
             return UNKNOWN;
@@ -41,11 +47,16 @@ public enum Browser {
         try {
             return Browser.valueOf(browserName.toUpperCase());
         } catch (IllegalArgumentException e) {
-            LogsManager.error("Unsupported browser: {", browserName,"}");
+            LogsManager.error("Unsupported browser: {"+browserName+"}");
             return UNKNOWN;
         }
     }
 
+
+    /**
+     * Returns an array of supported browsers excluding UNKNOWN.
+     * @return An array of Browser enum values that are supported.
+     */
     private static Browser[] getSupportedBrowsers() {
         return Arrays.stream(Browser.values())
                 .filter(b -> b != Browser.UNKNOWN)
