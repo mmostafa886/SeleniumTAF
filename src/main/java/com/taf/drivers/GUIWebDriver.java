@@ -4,12 +4,12 @@ import com.taf.utils.actions.AlertActions;
 import com.taf.utils.actions.BrowserActions;
 import com.taf.utils.actions.ElementActions;
 import com.taf.utils.actions.FrameActions;
+import com.taf.utils.logs.LogsManager;
 import com.taf.validations.Validation;
 import com.taf.validations.Verification;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ThreadGuard;
 import com.taf.utils.dataReader.PropertyReader;
-import com.taf.utils.logs.LogsManager;
 
 /**
  * GUIWebDriver is a wrapper class that manages the lifecycle and access to a Selenium WebDriver instance
@@ -20,7 +20,7 @@ public class GUIWebDriver {
 
     /**
      * The browser type to be used for WebDriver initialization.
-     * This value is read from the configuration properties using the key "browserType".
+     * This value is read from the configuration properties using the key "browser".
      * Example values: "chrome", "firefox", "edge".
      */
     private final String browser = System.getProperty("browser") != null && !System.getProperty("browser").isEmpty()

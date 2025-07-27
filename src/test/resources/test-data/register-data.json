@@ -1,0 +1,20 @@
+{
+  "name": "TestAutomation_",
+  "email": "Automation_Email_",
+  "titleMale": "Mr",
+  "titleFemale": "Ms",
+  "password": "TestPassword",
+  "day": "1",
+  "month": "January",
+  "year": "2000",
+  "firstName": "TestFirstName",
+  "lastName": "TestLastName",
+  "company": "TestCompany",
+  "address1": "TestAddress1",
+  "address2": "TestAddress2",
+  "country": "Canada",
+  "state": "Ontario",
+  "city": "TestCity",
+  "zipCode": "12345",
+  "phone": "1234567890"
+}

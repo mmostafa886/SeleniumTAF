@@ -41,7 +41,7 @@ public class AllureReportGenerator {
 
     //open Allure report in browser
     public static void openReport(String reportFileName) {
-        if (!getProperty("executionType").toLowerCase().contains("local")) return;
+        if (!getProperty("remoteExecution").toLowerCase().contains("false")) return;
 
         Path reportPath = AllureConstants.REPORT_PATH.resolve(reportFileName);
         switch (OSUtils.getCurrentOS()) {

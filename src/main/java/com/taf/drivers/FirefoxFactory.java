@@ -1,10 +1,10 @@
 package com.taf.drivers;
 
+import com.taf.utils.logs.LogsManager;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import com.taf.utils.logs.LogsManager;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URI;

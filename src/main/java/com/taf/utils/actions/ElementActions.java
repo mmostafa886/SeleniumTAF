@@ -1,12 +1,12 @@
 package com.taf.utils.actions;
 
 import com.taf.utils.WaitManager;
+import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import com.taf.utils.logs.LogsManager;
 import org.openqa.selenium.support.ui.Select;
 
 import java.io.File;
@@ -122,5 +122,20 @@ public class ElementActions {
                     }
                 }
         );
+    }
+
+    @Step("Get the number of Elements with locator: {0}")
+    public int getNumberOfElements(By locator) {
+        waitManager.fluentWait().until(d -> {
+            try {
+                int count = d.findElements(locator).size();
+                LogsManager.info("Number of elements with locator:", locator.toString(), " - Count:", String.valueOf(count));
+                return count > 0 ? count : 0;
+            } catch (Exception e) {
+                LogsManager.error("Failed to get number of elements with locator:", locator.toString(), " - Error:", e.getMessage());
+                return 0;
+            }
+        });
+        return driver.findElements(locator).size();
     }
 }

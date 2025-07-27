@@ -18,7 +18,7 @@ public class AllureEnvironmentManager {
                         .put("Environment", PropertyReader.getProperty("os.name"))
                         .put("JDK Version", System.getProperty("java.version"))
                         .put("Browser", PropertyReader.getProperty("browser").toUpperCase())
-                        .put("WebApp_URL", PropertyReader.getProperty("baseURL"))
+                        .put("WebApp_URL", PropertyReader.getProperty("baseUrlWeb"))
                         .put("Headless", DriverConfigParser.getHeadlessMode())
                         .put("Remote Execution", DriverConfigParser.getRemoteExecution())
                         .build(), AllureConstants.RESULTS_FOLDER + File.separator);

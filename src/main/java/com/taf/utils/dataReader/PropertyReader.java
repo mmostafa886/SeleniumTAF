@@ -1,7 +1,7 @@
 package com.taf.utils.dataReader;
 
-import org.apache.commons.io.FileUtils;
 import com.taf.utils.logs.LogsManager;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.InputStream;
@@ -37,7 +37,8 @@ public class PropertyReader {
                 try (InputStream inputStream = FileUtils.openInputStream(file)) {
                     // Load properties from the file into the `fileProperties` object.
                     fileProperties.load(inputStream);
-                    LogsManager.info("Loaded properties from file: " + file.getAbsolutePath());
+                    //To be used/enabled for logging purposes if there are issues with loading properties files
+                   // LogsManager.info("Loaded properties from file: " + file.getAbsolutePath());
                 } catch (Exception e) {
                     // Log an error if the file cannot be loaded.
                     LogsManager.error("Failed to load properties from file: " + file.getAbsolutePath() +

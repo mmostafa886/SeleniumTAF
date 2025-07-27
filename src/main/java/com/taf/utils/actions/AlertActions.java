@@ -3,12 +3,15 @@ package com.taf.utils.actions;
 import com.taf.utils.WaitManager;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class AlertActions {
 
     private final WebDriver driver;
     private final WaitManager waitManager;
+
+    private final By consentButton = By.xpath("//button[.='Consent']");
 
     public AlertActions(WebDriver driver) {
         this.driver = driver;
@@ -51,6 +54,7 @@ public class AlertActions {
 
     /**
      * Retrieves the text from the alert if present.
+     *
      * @return The alert text or null if no alert is present.
      */
     @Step("Retrieving alert text if present")
@@ -69,6 +73,7 @@ public class AlertActions {
 
     /**
      * Sends text to the alert if present.
+     *
      * @param text The text to send to the alert.
      */
     @Step("Set text to alert if present: {text}")
@@ -84,4 +89,19 @@ public class AlertActions {
             }
         });
     }
+
+    @Step("Dismiss consent popup if present")
+    public void dismissConsentPopupIfPresent() {
+        waitManager.fluentWait(3).until(d -> {
+            try {
+                new ElementActions(driver).click(consentButton);
+                LogsManager.info("Consent popup dismissed successfully.");
+                return true; // Consent popup is dismissed.
+            } catch (Exception e) {
+                LogsManager.warn("Consent popup not found or not dismissed. Continue ");
+                return true;
+            }
+        });
+    }
+
 }

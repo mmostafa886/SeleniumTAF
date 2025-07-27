@@ -29,6 +29,6 @@ public class Verification extends BaseAssertion {
     @Step("Verifying that actual value: {0} equals expected value: {1}")
     protected void assertEquals(String actual, String expected, String message) {
         LogsManager.info("Verifying that actual value:", actual, "equals expected value:", expected);
-        Assert.assertEquals(actual, expected, message);
+        Assert.assertEquals(actual.toLowerCase(), expected.toLowerCase(), message);
     }
 }

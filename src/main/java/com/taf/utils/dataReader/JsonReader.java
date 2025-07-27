@@ -1,10 +1,10 @@
 package com.taf.utils.dataReader;
 
 import com.jayway.jsonpath.JsonPath;
+import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import com.taf.utils.logs.LogsManager;
 
 import java.io.FileReader;
 
@@ -13,7 +13,7 @@ public class JsonReader {
     String jsonReader;
     String jsonFileName;
 
-    private final String Test_DATA_PATH = "src/main/resources/test-data/";
+    private final String Test_DATA_PATH = "src/test/resources/test-data/";
 
     public JsonReader(String jsonFileName) {
         this.jsonFileName = jsonFileName;

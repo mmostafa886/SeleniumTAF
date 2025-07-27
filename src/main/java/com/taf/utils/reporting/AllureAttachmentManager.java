@@ -1,7 +1,7 @@
 package com.taf.utils.reporting;
 
-import com.taf.utils.media.ScreenRecordManager;
 import com.taf.utils.logs.LogsManager;
+import com.taf.utils.media.ScreenRecordManager;
 import io.qameta.allure.Allure;
 import io.qameta.allure.Step;
 import org.apache.logging.log4j.LogManager;

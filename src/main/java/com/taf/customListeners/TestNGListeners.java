@@ -1,6 +1,7 @@
 package com.taf.customListeners;
 
 import com.taf.drivers.WebDriverProvider;
+import com.taf.utils.logs.LogsManager;
 import com.taf.utils.media.ScreenRecordManager;
 import com.taf.utils.media.ScreenshotsManager;
 import com.taf.utils.FileUtils;
@@ -11,7 +12,6 @@ import com.taf.utils.reporting.AllureReportGenerator;
 import com.taf.validations.Validation;
 import org.openqa.selenium.WebDriver;
 import org.testng.*;
-import com.taf.utils.logs.LogsManager;
 import com.taf.utils.dataReader.PropertyReader;
 
 import java.io.File;
