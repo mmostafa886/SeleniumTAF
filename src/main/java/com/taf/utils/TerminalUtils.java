@@ -14,6 +14,7 @@ public class TerminalUtils {
         try {
             Process process = Runtime.getRuntime().exec(commandParts); //allure generate -o reports --single-file --clean
             int exitCode = process.waitFor();
+            LogsManager.info("Command executed successfully", String.join(" ", commandParts));
             if (exitCode != 0) {
                 LogsManager.error("Command failed with exit code: " + exitCode);
             }

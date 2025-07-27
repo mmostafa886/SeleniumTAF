@@ -25,12 +25,12 @@ public abstract class BaseAssertion {
 
     protected abstract void assertEquals(String actual, String expected, String message);
 
-    protected void Equals(String actual, String expected, String message) {
+    public void Equals(String actual, String expected, String message) {
         assertEquals(actual, expected, message);
     }
 
     @Step("Asserting the element with Locator: {0} is visible")
-    protected void isElementVisible(By locator) {
+    public void isElementVisible(By locator) {
         boolean visibilityFlag =waitManager.fluentWait().until(d ->{
             try {
                 d.findElement(locator).isDisplayed();
@@ -49,10 +49,16 @@ public abstract class BaseAssertion {
      * Verify Page URL
      */
     @Step("Verifying that the current URL contains: {0}")
-    protected void verifyPageURL(String expectedURL) {
+    public void verifyPageURL(String expectedURL) {
         String currentURL = driver.getCurrentUrl();
         LogsManager.info("Verifying that the current URL:", currentURL, "contains:", expectedURL);
         assertEquals(currentURL, expectedURL,
                 "Expected URL: " + expectedURL + " but was: " + currentURL);
+    }
+
+    @Step("Verifying that the current page title is: {0}")
+    public void assertPageTitle(String expectedTitle) {
+        String actualTitle = driver.getTitle();
+        assertEquals(actualTitle, expectedTitle, "Title does not match. Expected: " + expectedTitle + ", Actual: " + actualTitle);
     }
 }
