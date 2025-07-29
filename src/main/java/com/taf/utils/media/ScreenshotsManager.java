@@ -14,14 +14,14 @@ import java.io.File;
 
 public class ScreenshotsManager {
 
-    public static final String SCREENSHOTS_PATH = "test-outputs/ScreenShots/";
+    public static final String SCREENSHOTS_PATH = "test-output/ScreenShots/";
 
     /**
      * Take a full page screenshot and save it with a timestamp.
      * @param driver the WebDriver instance
      * @param screenshotName the name to use for the screenshot file
      */
-    @Step("Taking full page screenshot with name: {screenshotName}")
+    //@Step("Taking full page screenshot with name: {screenshotName}")
     public static void takeFullPageScreenshot(WebDriver driver, String screenshotName) {
         try {
             // Capture screenshot using TakesScreenshot

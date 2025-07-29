@@ -40,7 +40,7 @@ services:
 
   # Firefox Node: A Selenium node for running tests in Firefox.
   selenium-node-firefox:
-    image: selenium/node-firefox:latest # Official Firefox node image
+    image: selenium/node-firefox:dev # Official Firefox node image
     platform: linux/amd64 # Specify the platform to ensure compatibility
     user: root # Run as root user
     networks:
@@ -82,9 +82,14 @@ services:
 
   # Test Runner: A service to run end-to-end tests.
   test-runner:
+    image: maven:3.9.11-eclipse-temurin-21
+    working_dir: /e2e # Set the working directory inside the container
     build: . # Build the Docker image from the current directory
+    environment:
+      MAVEN_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1" # Reduce memory usage
     volumes:
       - .:/e2e # Mount the current directory to /e2e in the container
+      - m2-repo:/root/.m2  # Persistent Maven cache
     networks:
       - grid # Connect to the 'grid' network
     depends_on:
@@ -97,6 +102,11 @@ services:
       selenium-node-edge:
         condition: service_healthy # Start only if the Edge node is healthy
 
+    command: >
+      sh -c "mvn dependency:go-offline"
+
+volumes:
+  m2-repo:  # Named volume for Maven cache
 # Define a custom network for all services to communicate.
 networks:
   grid:

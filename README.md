@@ -46,3 +46,18 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
         - `mvn clean test -Dbrowser=firefox` 
         - `mvn clean test -Dheadless=false`</font>
       - <font size=2>**Properties Files**: any properties file under the `src/main/resources/` directory can be used but mainly the `webApp.properties` file is used to provide such properties.</font>
+
+## Notes
+- For Dockerized execution, ensure that the Docker is installed & running on the used machine, use the `ExecuteAndGenerateReport.sh` script which executes the tests & do other steps as well (Like opening the report automatically after the execution ends).
+    - The `docker-compose.yml` file is used to define the services, networks, and volumes for the Dockerized environment (including Selenium Hub & nodes and Test Runner container as well).
+    - For a completed dockerized execution (even script execution is performed on a container & not on a host machine):
+        - The `remoteHost` has to be set to `slenium-hub` which is the `Selenium Hub` container name and the `remotePort` to `4444` which are defined in the `docker-compose.yml` file.
+        - The `test-runner` container is used to run the tests (A caching is defined for the machine not to download/get the maven dependencies with each execution).
+    - Currently, the tests can be successfully executed on `Chrome` & `Edge` browsers only while the `Firefox` browser is facing some issues with dockerized execution (it works fine for standalone execution).
+    - To use the host for executing the tests (While the Hub & Nodes are running on the Docker):
+        - Set the `remoteHost` to `localhost` and the `remotePort` to `4444`.
+        - In this case the `test-runner` container is not used at all and can be completely removed from the `docker-compose` file.
+## TO-DOs:
+- The `FileUtils.cleanDirectory(AllureConstants.RESULTS_FOLDER.toFile());` line in the `TestNGListener` class has been commented (as it caused missing the Allure report history) <u>**[Need to be fixed]**</u>
+- Generate Allure report on a dockerized container , not on the host machine.
+- Modify the script to open the Allure report automatically after the execution ends whether `Local or Remote` executions.
