@@ -15,13 +15,15 @@ public class FirefoxFactory extends AbstractDriver {
 
     private FirefoxOptions options() {
         FirefoxOptions options = new FirefoxOptions();
-        options.addArguments("--start-maximized"); // Example option to start Chrome maximized
-        options.addArguments("--disable-infobars"); // Example option to disable infobars
+        options.addPreference("dom.webnotifications.enabled", false); // disables notifications
+        options.addPreference("dom.disable_open_during_load", false); // disables popups
+        //options.addArguments("--start-maximized"); // Example option to start Chrome maximized
+/*        options.addArguments("--disable-infobars"); // Example option to disable infobars
         options.addArguments("--disable-extensions");
         options.addArguments("--disable-gpu"); // Example option to disable GPU hardware acceleration
         options.addArguments("--disable-notifications"); // Example option to disable notifications
-        options.addArguments("--disable-popup-blocking"); // Example option to disable popup blocking
-        if (DriverConfigParser.isHeadlessMode()) options.addArguments("--headless");// Run in headless mode if specified in the configuration
+        options.addArguments("--disable-popup-blocking"); // Example option to disable popup blocking*/
+        //if (DriverConfigParser.isHeadlessMode()) options.addArguments("--headless");// Run in headless mode if specified in the configuration
         options.setAcceptInsecureCerts(true); // Accept insecure certificates
         options.setPageLoadStrategy(PageLoadStrategy.EAGER); // Set page load strategy to normal
 

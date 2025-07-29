@@ -21,9 +21,6 @@ public class ChromeFactory extends AbstractDriver {
         options.addArguments("--remote-allow-origins=*"); // Example option to disable extensions
        // options.addArguments("--disable-gpu"); // Example option to disable GPU hardware acceleration
         options.addArguments("--disable-notifications"); // Example option to disable notifications
-        options.addArguments("--disable-popup-blocking");// Example option to disable popup blocking
-        options.addArguments("--disable-save-password-bubble");// Example option to disable the save password bubble
-        options.addArguments("--disable-consent-screen"); // Example option to disable the consent screen
         options.addExtensions(new File(extensionPath)); // Load any specified Chrome extension
         if (isHeadlessMode()) options.addArguments("--headless");// Run in headless mode if specified in the configuration
         options.setAcceptInsecureCerts(true); // Accept insecure certificates

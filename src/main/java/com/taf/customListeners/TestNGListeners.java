@@ -6,7 +6,6 @@ import com.taf.utils.media.ScreenRecordManager;
 import com.taf.utils.media.ScreenshotsManager;
 import com.taf.utils.FileUtils;
 import com.taf.utils.reporting.AllureAttachmentManager;
-import com.taf.utils.reporting.AllureConstants;
 import com.taf.utils.reporting.AllureEnvironmentManager;
 import com.taf.utils.reporting.AllureReportGenerator;
 import com.taf.validations.Validation;
@@ -78,7 +77,7 @@ public class TestNGListeners implements IInvokedMethodListener, ITestListener, I
     // cleaning and creating dirs (logs, screenshots, recordings,allure-results)
     private void cleanTestOutputDirectories() {
         // Implement logic to clean test output directories
-        FileUtils.cleanDirectory(AllureConstants.RESULTS_FOLDER.toFile());
+       // FileUtils.cleanDirectory(AllureConstants.RESULTS_FOLDER.toFile());
         FileUtils.cleanDirectory(new File(ScreenshotsManager.SCREENSHOTS_PATH));
         FileUtils.cleanDirectory(new File(ScreenRecordManager.RECORDINGS_PATH));
         FileUtils.cleanDirectory(new File(LogsManager.LOGS_PATH));

@@ -2,7 +2,6 @@ package com.taf.utils.dataReader;
 
 import com.jayway.jsonpath.JsonPath;
 import com.taf.utils.logs.LogsManager;
-import io.qameta.allure.Step;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -31,7 +30,7 @@ public class JsonReader {
      * Reads a specific property from JSON file and returns the value as a String.
      * @return the value for JSON property as a String
      */
-    @Step("Get JSON data by property name: {jsonPropertyName}")
+    //@Step("Get JSON data by property name: {jsonPropertyName}")
     public String getJsonData(String jsonPropertyName) {
         try {
             LogsManager.info("Reading json data with property_path:", jsonPropertyName);
