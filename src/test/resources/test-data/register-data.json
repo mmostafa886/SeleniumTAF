@@ -16,5 +16,9 @@
   "state": "Ontario",
   "city": "TestCity",
   "zipCode": "12345",
-  "phone": "1234567890"
+  "phone": "1234567890",
+  "messages" :
+  {
+    "error": "Email Address already exist!"
+  }
 }

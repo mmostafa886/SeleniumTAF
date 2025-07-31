@@ -31,7 +31,6 @@ public class ScreenshotsManager {
             File screenshotFile = new File(SCREENSHOTS_PATH + screenshotName + "-" + TimeManager.getTimeStamp() + ".png");
             FileUtils.copyFile(screenshotSrc, screenshotFile);
 
-
             AllureAttachmentManager.attachScreenshot(screenshotName,screenshotFile.getAbsolutePath());
 
             LogsManager.info("Capturing Screenshot Succeeded");

@@ -9,12 +9,12 @@ import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
 public class NavBarComponent {
-    GUIWebDriver driver;
+    private final GUIWebDriver driver;
     private WaitManager waitManager;
 
     public NavBarComponent(GUIWebDriver driver) {
         this.driver = driver;
-        this.waitManager = new WaitManager(driver.getDriver());
+        this.waitManager = new WaitManager(driver.get());
     }
 
     /**
@@ -38,8 +38,10 @@ public class NavBarComponent {
      */
     @Step("Navigate to Home page")
     public NavBarComponent navigate() {
+        LogsManager.info("Navigate to Home page");
         driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb"));
         driver.alert().dismissConsentPopupIfPresent();
+        driver.alert().dismissFooterCommercialIfPresent();
         return this;
     }
 
@@ -91,38 +93,19 @@ public class NavBarComponent {
         return new TestCasesPage(driver);
     }
 
-    @Step("Dismiss consent popup if present")
-    public void dismissConsentPopupIfPresent() {
-        waitManager.fluentWait().until(d -> {
-            try {
-                int numberOfConsentScreens = driver.element().getNumberOfElements(consentButton);
-                LogsManager.info("Number of consent screens found: " + numberOfConsentScreens);
-                if (numberOfConsentScreens > 0) {
-                    LogsManager.info("Consent popup is displayed, clicking on consent button.");
-                    driver.element().click(consentButton);
-                } else {
-                    LogsManager.info("Consent popup is not displayed, no action needed.");
-                }
-                LogsManager.error("Consent popup dismissed successfully.");
-                return true; // Consent popup is dismissed.
-            } catch (Exception e) {
-                return false; // Consent popup not found or not dismissed.
-            }
-        });
-    }
-
-
     /**
      * Verifications & Validations for the navigation bar
      */
     @Step("Verify Home page is displayed")
     public NavBarComponent verifyHomePageIsDisplayed() {
+        LogsManager.info("Verify Home page is displayed");
         driver.verification().isElementVisible(homePageLabel);
         return this;
     }
 
     @Step("Verify User is logged in")
-    public NavBarComponent verifyUserIsLoggedIn(String expectedUserName) {
+    public NavBarComponent verifyUserLabel(String expectedUserName) {
+        LogsManager.info("Verify User is logged in");
         String actualUserName = driver.element().getText(userLabel);
         LogsManager.info("Actual user name:", actualUserName);
         driver.verification().Equals(expectedUserName, actualUserName,

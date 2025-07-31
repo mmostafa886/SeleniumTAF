@@ -14,6 +14,10 @@ public class Validation extends BaseAssertion {
         super(driver);
     }
 
+    public Validation() {
+        super();
+    }
+
     /**
      * Soft assertion to validate that the condition is true.
      */

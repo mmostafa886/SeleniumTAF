@@ -4,6 +4,7 @@ import com.taf.utils.WaitManager;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
 public class AlertActions {
@@ -12,6 +13,7 @@ public class AlertActions {
     private final WaitManager waitManager;
 
     private final By consentButton = By.xpath("//button[.='Consent']");
+    private final By footerCommercial = By.cssSelector("down");
 
     public AlertActions(WebDriver driver) {
         this.driver = driver;
@@ -99,6 +101,23 @@ public class AlertActions {
                 return true; // Consent popup is dismissed.
             } catch (Exception e) {
                 LogsManager.warn("Consent popup not found or not dismissed. Continue ");
+                return true;
+            }
+        });
+    }
+
+    @Step("Dismiss footer commercial if present")
+    public void dismissFooterCommercialIfPresent() {
+        waitManager.fluentWait(3).until(d -> {
+            try {
+               // new ElementActions(driver).click(footerCommercial);
+                ((JavascriptExecutor) driver).executeScript(
+                        "document.querySelectorAll('ins.adsbygoogle').forEach(el => el.remove());"
+                );
+                LogsManager.info("Footer commercial dismissed successfully.");
+                return true; // Footer commercial is dismissed.
+            } catch (Exception e) {
+                LogsManager.warn("Footer commercial not found or not dismissed. Continue ");
                 return true;
             }
         });

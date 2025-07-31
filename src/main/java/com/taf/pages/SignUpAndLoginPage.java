@@ -1,16 +1,19 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
+import com.taf.pages.components.NavBarComponent;
 import com.taf.utils.dataReader.PropertyReader;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
 public class SignUpAndLoginPage {
 
+    public NavBarComponent navigationBar;
     private GUIWebDriver driver;
     private final String signUpLoginUrl = "/login";
     public SignUpAndLoginPage(GUIWebDriver driver) {
         this.driver = driver;
+        this.navigationBar = new NavBarComponent(driver);
     }
 
     //Locators
@@ -29,6 +32,7 @@ public class SignUpAndLoginPage {
     public SignUpAndLoginPage navigate() {
         driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + signUpLoginUrl);
         driver.alert().dismissConsentPopupIfPresent();
+        driver.alert().dismissFooterCommercialIfPresent();
         return this;
     }
 
@@ -71,9 +75,9 @@ public class SignUpAndLoginPage {
     }
 
     @Step("Click on Signup button")
-    public SignupPage clickSignUpButton() {
+    public SignUpAndLoginPage clickSignUpButton() {
         driver.element().click(signUpButton);
-        return new SignupPage(driver);
+        return new SignUpAndLoginPage(driver);
     }
 
     //Validations

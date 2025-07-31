@@ -6,7 +6,7 @@ import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
 public class SignupPage {
-    private GUIWebDriver driver;
+    private final GUIWebDriver driver;
 
     public SignupPage(GUIWebDriver driver) {
         this.driver = driver;

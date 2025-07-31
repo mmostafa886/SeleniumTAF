@@ -17,7 +17,6 @@ import com.taf.utils.dataReader.PropertyReader;
  * that each thread has its own isolated WebDriver instance.
  */
 public class GUIWebDriver {
-
     /**
      * The browser type to be used for WebDriver initialization.
      * This value is read from the configuration properties using the key "browser".
@@ -35,16 +34,12 @@ public class GUIWebDriver {
 
     /**
      * Constructor for GUIWebDriver.
-     * <p>
      * This constructor performs the following steps:
-     * <ul>
      *     <li>Logs the initialization event along with the browser type.</li>
      *     <li>Retrieves the appropriate AbstractDriver implementation based on the browser type.</li>
      *     <li>Creates a new WebDriver instance using the AbstractDriver factory method.</li>
      *     <li>Wraps the WebDriver instance with ThreadGuard to detect illegal cross-thread usage.</li>
      *     <li>Stores the protected WebDriver instance in the ThreadLocal variable for thread-safe access.</li>
-     * </ul>
-     * <p>
      * This setup allows multiple threads to run tests concurrently without interfering with each other's WebDriver instances.
      */
     public GUIWebDriver() {
@@ -60,7 +55,7 @@ public class GUIWebDriver {
      * @return an instance of ElementActions for the current WebDriver.
      */
     public ElementActions element() {
-        return new ElementActions(getDriver());
+        return new ElementActions(get());
     }
 
     /**
@@ -70,7 +65,7 @@ public class GUIWebDriver {
      * @return an instance of BrowserActions for the current WebDriver.
      */
     public BrowserActions browser() {
-        return new BrowserActions(getDriver());
+        return new BrowserActions(get());
     }
 
     /**
@@ -80,7 +75,7 @@ public class GUIWebDriver {
      * @return an instance of FrameActions for the current WebDriver.
      */
     public FrameActions frame() {
-        return new FrameActions(getDriver());
+        return new FrameActions(get());
     }
 
     /**
@@ -90,7 +85,7 @@ public class GUIWebDriver {
      * @return an instance of AlertActions for the current WebDriver.
      */
     public AlertActions alert() {
-        return new AlertActions(getDriver());
+        return new AlertActions(get());
     }
 
     /**
@@ -100,7 +95,7 @@ public class GUIWebDriver {
      * @return an instance of Validation for the current WebDriver.
      */
     public Validation validation() {
-        return new Validation(getDriver());
+        return new Validation(get());
     }
 
     /**
@@ -110,35 +105,29 @@ public class GUIWebDriver {
      * @return an instance of Verification for the current WebDriver.
      */
     public Verification verification() {
-        return new Verification(getDriver());
+        return new Verification(get());
     }
 
     /**
      * Retrieves the WebDriver instance associated with the current thread.
-     * <p>
      * This method returns the WebDriver stored in the ThreadLocal variable, allowing thread-safe access
      * to the browser driver for the current thread.
-     *
      * @return the WebDriver instance for the current thread, or null if none has been initialized.
      */
-    public WebDriver getDriver() {
+    public WebDriver get() {
         return driverThreadLocal.get();
     }
 
     /**
      * Quits the WebDriver instance associated with the current thread.
-     * <p>
      * This method performs the following:
-     * <ul>
      *     <li>Checks if the current thread has a WebDriver instance.</li>
      *     <li>If present, logs the quitting event with the browser type.</li>
      *     <li>Calls the quit() method on the WebDriver to close the browser and release resources.</li>
      *     <li>Removes the WebDriver instance from the ThreadLocal storage to prevent memory leaks.</li>
-     * </ul>
-     * <p>
      * It is important to call this method after test execution to properly clean up WebDriver instances.
      */
-    public void quitDriver() {
+    public  void quitDriver() {
         if (driverThreadLocal.get() != null) {
             LogsManager.info("Quitting WebDriver for browser: ", browser);
             driverThreadLocal.get().quit();

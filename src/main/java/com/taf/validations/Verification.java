@@ -7,6 +7,10 @@ import org.testng.Assert;
 
 public class Verification extends BaseAssertion {
 
+    public Verification() {
+        super();
+    }
+
     public Verification(WebDriver driver) {
         super(driver);
     }
