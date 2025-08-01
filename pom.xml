@@ -24,6 +24,7 @@
         <ivideo.recorder.version>2.0</ivideo.recorder.version>
         <jsoup.version>1.21.1</jsoup.version>
         <poi.version>5.4.1</poi.version>
+        <restassured.version>5.5.5</restassured.version>
     </properties>
 
     <build>
@@ -169,6 +170,13 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${poi.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.rest-assured/rest-assured -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${restassured.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

@@ -67,9 +67,37 @@ public class FileUtils {
     {
         try {
             org.apache.commons.io.FileUtils.deleteQuietly(file);
+            LogsManager.info("Directory cleaned:", file.getAbsolutePath());
         }
         catch (Exception e) {
-            LogsManager.error("Failed to clean directory: " + file.getAbsolutePath(), e.getMessage());
+            LogsManager.error("Failed to clean directory:", file.getAbsolutePath(), e.getMessage());
+        }
+    }
+
+    /** * Deletes a file forcefully, ensuring it is removed even if it is in use.
+     * Logs an error if the deletion fails.
+     * @param file the file to delete
+     */
+    public static void forceDelete(File file) {
+        try {
+            org.apache.commons.io.FileUtils.forceDelete(file);
+            LogsManager.info("File deleted: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            LogsManager.error("Failed to delete file: " + file.getAbsolutePath(), e.getMessage());
+        }
+    }
+
+    /** Clears the contents of a file by writing an empty string to it.
+     * Logs an error if the file cannot be cleared.
+     * @param fileName the name of the file to clear
+     */
+    public static void clearFileContents(String fileName)
+    {
+        try {
+            File logFile = new File(fileName);
+            org.apache.commons.io.FileUtils.writeStringToFile(logFile, "", "UTF-8");  // Clear file
+        } catch (Exception e) {
+            LogsManager.error("Error clearing logs", e.getMessage());
         }
     }
 

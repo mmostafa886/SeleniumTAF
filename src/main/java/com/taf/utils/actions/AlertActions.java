@@ -4,6 +4,7 @@ import com.taf.utils.WaitManager;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
 public class AlertActions {
@@ -12,6 +13,7 @@ public class AlertActions {
     private final WaitManager waitManager;
 
     private final By consentButton = By.xpath("//button[.='Consent']");
+    private final By footerCommercial = By.cssSelector("down");
 
     public AlertActions(WebDriver driver) {
         this.driver = driver;
@@ -54,7 +56,6 @@ public class AlertActions {
 
     /**
      * Retrieves the text from the alert if present.
-     *
      * @return The alert text or null if no alert is present.
      */
     @Step("Retrieving alert text if present")
@@ -73,7 +74,6 @@ public class AlertActions {
 
     /**
      * Sends text to the alert if present.
-     *
      * @param text The text to send to the alert.
      */
     @Step("Set text to alert if present: {text}")
@@ -90,6 +90,9 @@ public class AlertActions {
         });
     }
 
+    /** Dismiss consent popup if present
+     * If it is not present, continue execution without doing anything.
+     * */
     @Step("Dismiss consent popup if present")
     public void dismissConsentPopupIfPresent() {
         waitManager.fluentWait(3).until(d -> {
@@ -99,6 +102,25 @@ public class AlertActions {
                 return true; // Consent popup is dismissed.
             } catch (Exception e) {
                 LogsManager.warn("Consent popup not found or not dismissed. Continue ");
+                return true;
+            }
+        });
+    }
+
+    /** Dismiss commercials if present using JS.
+     * If not present, continue execution without doing anything.
+     * */
+    @Step("Dismiss commercials if present on the page")
+    public void dismissCommercialsIfPresent() {
+        waitManager.fluentWait(3).until(d -> {
+            try {
+                ((JavascriptExecutor) driver).executeScript(
+                        "document.querySelectorAll('ins.adsbygoogle').forEach(el => el.remove());"
+                );
+                LogsManager.info("Footer commercial dismissed successfully.");
+                return true; // Footer commercial is dismissed.
+            } catch (Exception e) {
+                LogsManager.warn("Footer commercial not found or not dismissed. Continue ");
                 return true;
             }
         });

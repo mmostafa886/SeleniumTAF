@@ -15,6 +15,7 @@ public class JsonReader {
     private final String Test_DATA_PATH = "src/test/resources/test-data/";
 
     public JsonReader(String jsonFileName) {
+        LogsManager.info("Initializing JsonReader with file:", Test_DATA_PATH, jsonFileName,".json");
         this.jsonFileName = jsonFileName;
         try {
             JSONObject data = (JSONObject) new JSONParser().parse(new FileReader(Test_DATA_PATH + jsonFileName+".json"));

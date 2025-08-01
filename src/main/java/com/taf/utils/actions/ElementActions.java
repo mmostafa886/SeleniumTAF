@@ -3,10 +3,8 @@ package com.taf.utils.actions;
 import com.taf.utils.WaitManager;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 
 import java.io.File;
@@ -23,12 +21,21 @@ public class ElementActions {
     //click method
     @Step("Click on element with locator: {0}")
     public void click(By locator) {
+        LogsManager.info("Attempting to click on element with locator:", locator.toString());
         waitManager.fluentWait().until(d -> {
             try {
                 WebElement element = d.findElement(locator);
                 scrollToElementJS(locator);
+                // Wait until the element is stable (not moving)
+                Point initialLocation = element.getLocation();
+                LogsManager.info("initialLocation: " + initialLocation);
+                Point finalLocation = element.getLocation();
+                LogsManager.info("finalLocation: " + finalLocation);
+                if (!initialLocation.equals(finalLocation)) {
+                    return false; // still moving, wait longer
+                }
                 element.click();
-                LogsManager.info("Clicked on element with locator:", locator.toString());
+                LogsManager.info("Clicked on element: " + locator);
                 return true;
             } catch (Exception e) {
                 return false;
@@ -38,7 +45,7 @@ public class ElementActions {
 
     //type method
     @Step("Type text '{1}' into element with locator: {0}")
-    public void type(By locator, String text) {
+    public ElementActions type(By locator, String text) {
         waitManager.fluentWait().until(d -> {
             try {
                 WebElement element = d.findElement(locator);
@@ -51,6 +58,26 @@ public class ElementActions {
                 return false;
             }
         });
+        return this;
+    }
+
+    //hovering
+    @Step("Hover over element with locator: {0}")
+    public ElementActions hover(By locator) {
+        waitManager.fluentWait().until(d ->
+                {
+                    try {
+                        WebElement element = d.findElement(locator);
+                        scrollToElementJS(locator);
+                        new Actions(d).moveToElement(element).perform();
+                        LogsManager.info("Hovered over element: " + locator);
+                        return true;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }
+        );
+        return this;
     }
 
     //getText method
@@ -93,10 +120,29 @@ public class ElementActions {
     @Step("Scroll to element with locator: {0}")
     public void scrollToElementJS(By locator) {
         WebElement element = findElement(locator);
-        ((JavascriptExecutor) driver).executeScript("""
-                arguments[0].scrollIntoView({behavior: "auto", block: "center",inline: "center"});""", element);
+        Point intialLocation = element.getLocation();
+        int initialX = intialLocation.getX();
+        int initialY = intialLocation.getY();
+        waitManager.fluentWait().until(d -> {
+            ((JavascriptExecutor) driver).executeScript("""
+                            arguments[0].scrollIntoView({behavior: "smooth", block: "center",inline: "center"});""", element);
+            try {
+                // scroll if the element is not completely in view
+                if (element.isDisplayed() && element.isEnabled()) {
+                    LogsManager.info("Element is already in view:", locator.toString());
+                }
+                else {
+                    LogsManager.info("Element is not in view after scrolling.", "Attempting to scroll again using actions");
+                    new Actions(d).scrollToElement(element).perform(); // Attempt to scroll again using Actions
+                }
+                return true; // Element is already in view
+            } catch (Exception e) {
+                LogsManager.error("Failed to scroll to element with locator:", locator.toString());
+                return false;
+            }
 
-        LogsManager.info("Scrolled to element with locator:", locator.toString());
+        });
+
     }
 
     //Find an element using a locator

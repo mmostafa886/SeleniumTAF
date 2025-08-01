@@ -1,9 +1,8 @@
 package com.taf.utils.reporting;
 
-import com.taf.utils.media.ScreenRecordManager;
 import com.taf.utils.logs.LogsManager;
+import com.taf.utils.media.ScreenRecordManager;
 import io.qameta.allure.Allure;
-import io.qameta.allure.Step;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -13,10 +12,8 @@ import java.nio.file.Path;
 
 import static com.taf.utils.dataReader.PropertyReader.getProperty;
 
-
 public class AllureAttachmentManager {
     // attachScreenshot, attachLogs, attachRecords methods would go here
-    @Step("Attaching screenshot: {name} to the Report")
     public static void attachScreenshot(String name, String path) {
         try {
             Path screenshot = Path.of(path);
@@ -30,12 +27,11 @@ public class AllureAttachmentManager {
         }
     }
 
-   @Step("Attaching logs to the Report")
     public static void attachLogs() {
         try {
-            LogManager.shutdown();
+            LogManager.shutdown();  // First ensures all logs are flushed
             File logFile = new File(LogsManager.LOGS_PATH +"logs.log");
-            ((LoggerContext) LogManager.getContext(false)).reconfigure();
+            ((LoggerContext) LogManager.getContext(false)).reconfigure();  // Then reconfigures
             if (logFile.exists()) {
                 Allure.attachment("logs.log", Files.readString(logFile.toPath()));
             }
@@ -44,7 +40,6 @@ public class AllureAttachmentManager {
         }
     }
 
-    @Step("Attaching records for test method: {testMethodName} to the Report")
     public static void attachRecords(String testMethodName) {
         if (getProperty("recordTests").equalsIgnoreCase("true")) {
             try {

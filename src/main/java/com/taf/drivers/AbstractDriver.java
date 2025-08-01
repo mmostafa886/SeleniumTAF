@@ -3,6 +3,8 @@ package com.taf.drivers;
 import com.taf.utils.dataReader.PropertyReader;
 import org.openqa.selenium.WebDriver;
 
+import java.io.File;
+
 
 /**
  * AbstractDriver is an abstract base class that provides common functionality
@@ -38,5 +40,5 @@ public abstract class AbstractDriver {
      */
     public abstract WebDriver createDriver();
 
-    protected final String extensionPath ="src/main/resources/extensions/HaramBlur.crx";
+    protected File haramBlurExtension = new File("src/main/resources/extensions/HaramBlur.crx");
 }

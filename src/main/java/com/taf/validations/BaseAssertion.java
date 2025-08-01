@@ -9,9 +9,13 @@ import org.openqa.selenium.WebDriver;
 
 public abstract class BaseAssertion {
 
-    protected final WebDriver driver;
-    protected final WaitManager waitManager;
-    protected final ElementActions elementActions;
+    protected WebDriver driver;
+    protected WaitManager waitManager;
+    protected ElementActions elementActions;
+
+    protected BaseAssertion() {
+
+    }
 
     protected BaseAssertion(WebDriver driver) {
         this.driver = driver;
@@ -31,7 +35,7 @@ public abstract class BaseAssertion {
 
     @Step("Asserting the element with Locator: {0} is visible")
     public void isElementVisible(By locator) {
-        boolean visibilityFlag =waitManager.fluentWait().until(d ->{
+        boolean visibilityFlag = waitManager.fluentWait().until(d -> {
             try {
                 d.findElement(locator).isDisplayed();
                 LogsManager.info("Element with Locator:", locator.toString(), "is visible.");

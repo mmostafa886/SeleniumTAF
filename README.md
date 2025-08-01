@@ -57,6 +57,16 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
     - To use the host for executing the tests (While the Hub & Nodes are running on the Docker):
         - Set the `remoteHost` to `localhost` and the `remotePort` to `4444`.
         - In this case the `test-runner` container is not used at all and can be completely removed from the `docker-compose` file.
+- The default wait time is provided in the `waits.properties` instead of hard-coded in the `WaitManager` class.
+- The `TestNGListener` was modified to:
+  - Clean the log file before executing each Test (without deleting the folder/file itself).
+  - Attach the log file of each Test separately to the Allure report.
+  - Attaching the screenshots of each Test separately to the Allure report.
+- Modify the `AlertAction` class to:
+  - To handle the GDPR consent displayed on some WebSites browsed from inside the EU & is not displayed when browsed from other countries.
+  - Remove the commercials present on the Websites.
+- Add RestAssured dependency to the `pom.xml` file to handle the APIs requests.
+  - Add `apis` package & `Builder` class to handle the APIs requests.
 ## TO-DOs:
 - The `FileUtils.cleanDirectory(AllureConstants.RESULTS_FOLDER.toFile());` line in the `TestNGListener` class has been commented (as it caused missing the Allure report history) <u>**[Need to be fixed]**</u>
 - Generate Allure report on a dockerized container , not on the host machine.
