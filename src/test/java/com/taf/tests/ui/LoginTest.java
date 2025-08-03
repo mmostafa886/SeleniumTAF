@@ -2,6 +2,7 @@ package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
 import com.taf.drivers.GUIWebDriver;
+import com.taf.drivers.UITest;
 import com.taf.pages.components.NavBarComponent;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.tests.BaseTest;
@@ -19,9 +20,10 @@ import org.testng.annotations.Test;
 @Story("User Login")
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
+@UITest
 public class LoginTest extends BaseTest {
 
-    String timestamp = TimeManager.getSimpleTimeStamp();
+    String timestamp = TimeManager.getCompactTimeStamp();
 
     @Description("Verify user can login with valid credentials")
     @Test(description = "Valid Login Test")

@@ -46,7 +46,7 @@ public class ProductsPage {
     }
 
     private By viewProduct(String productName) {
-        return By.xpath("//p[.=' " + productName + " '] //following::div[@class='choose'][1]");
+        return By.xpath("//p[.='" + productName + "'] //following::div[@class='choose'][1]");
     }
 
 
@@ -54,8 +54,8 @@ public class ProductsPage {
     @Step("Navigate to Products Page")
     public ProductsPage navigate() {
         driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + productPage);
+        driver.alert().dismissCommercialsIfPresent();
         driver.alert().dismissConsentPopupIfPresent();
-        driver.alert().dismissFooterCommercialIfPresent();
         return this;
     }
 

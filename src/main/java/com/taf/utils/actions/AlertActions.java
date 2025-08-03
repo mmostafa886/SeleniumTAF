@@ -107,7 +107,7 @@ public class AlertActions {
     }
 
     @Step("Dismiss footer commercial if present")
-    public void dismissFooterCommercialIfPresent() {
+    public void dismissCommercialsIfPresent() {
         waitManager.fluentWait(3).until(d -> {
             try {
                // new ElementActions(driver).click(footerCommercial);

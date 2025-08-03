@@ -2,6 +2,7 @@ package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
 import com.taf.drivers.GUIWebDriver;
+import com.taf.drivers.UITest;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.pages.SignupPage;
 import com.taf.pages.components.NavBarComponent;
@@ -20,14 +21,16 @@ import org.testng.annotations.Test;
 @Story("User Registration")
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
+@UITest
 public class RegisterTest extends BaseTest {
 
-     String registerTimeStamp= TimeManager.getSimpleTimeStamp();
+     String registerTimeStamp;
 
     @Description("Verify user can sign up with valid data")
     @Test (description = "Valid Sign Up Test")
     public void signUpTest() {
         LogsManager.info("Starting sign up test...");
+        registerTimeStamp = TimeManager.getCompactTimeStamp();
         new SignUpAndLoginPage(driver).navigate()
                 .enterSignUpEmail(testData.getJsonData("email") + registerTimeStamp + "@gmail.com")
                 .enterSignUpName(testData.getJsonData("name") + registerTimeStamp)
@@ -64,6 +67,7 @@ public class RegisterTest extends BaseTest {
     public void verifyErrorMessageWhenAccountCreatedBefore()
     {
         LogsManager.info("Starting invalid sign up test...");
+        registerTimeStamp = TimeManager.getCompactTimeStamp();
         //precondition > create a user account
         new UserManagementAPI().createRegisterUserAccount(
                         testData.getJsonData("name"),
@@ -108,8 +112,8 @@ public class RegisterTest extends BaseTest {
     @BeforeMethod
     public void setUp() {
         driver = new GUIWebDriver();
-        //testData = new JsonReader("register-data");
         new NavBarComponent(driver).navigate();
+        driver.browser().closeExtensionTab();
     }
 
     @AfterMethod

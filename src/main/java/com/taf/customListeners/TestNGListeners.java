@@ -1,6 +1,8 @@
 package com.taf.customListeners;
 
+import com.taf.drivers.UITest;
 import com.taf.drivers.WebDriverProvider;
+import com.taf.utils.RetryAnalyzer;
 import com.taf.utils.logs.LogsManager;
 import com.taf.utils.media.ScreenRecordManager;
 import com.taf.utils.media.ScreenshotsManager;
@@ -13,10 +15,25 @@ import com.taf.validations.Validation;
 import org.openqa.selenium.WebDriver;
 import org.testng.*;
 import com.taf.utils.dataReader.PropertyReader;
+import org.testng.annotations.ITestAnnotation;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
-public class TestNGListeners implements IInvokedMethodListener, ITestListener, IExecutionListener, ISuiteListener {
+public class TestNGListeners implements
+        IInvokedMethodListener, ITestListener, IExecutionListener, ISuiteListener, IAnnotationTransformer {
+
+    @Override
+    public void transform(
+            ITestAnnotation annotation, Class testClass, Constructor testConstructor, Method testMethod) {
+        // Automatically set RetryAnalyzer for all @Test methods
+        annotation.setRetryAnalyzer(RetryAnalyzer.class);
+    }
+
+    public void onStart(ISuite suite) {
+        suite.getXmlSuite().setName("Automation Exercise");
+    }
 
     public void onExecutionStart() {
         LogsManager.info("Test Execution started");
@@ -45,7 +62,10 @@ public class TestNGListeners implements IInvokedMethodListener, ITestListener, I
         if (method.isTestMethod()) {
             FileUtils.clearFileContents(LogsManager.LOGS_PATH + "logs.log");
             LogsManager.info("Logs cleared for test:", testMethodName +"/"+testDescription);
-            ScreenRecordManager.startRecording();
+            if (testResult.getInstance() instanceof UITest)
+            {
+                ScreenRecordManager.startRecording();
+            }
             LogsManager.info("Test Case:", testMethodName +"/"+testDescription, "starting ....");
         }
     }
@@ -55,16 +75,20 @@ public class TestNGListeners implements IInvokedMethodListener, ITestListener, I
         String testDescription = testResult.getMethod().getDescription();
         WebDriver driver = null;
         if (method.isTestMethod()) {
-            ScreenRecordManager.stopRecording(testResult.getName());
-            Validation.assertAll();
-            if (testResult.getInstance() instanceof WebDriverProvider provider)
-                driver = provider.getWebDriver(); //initialize driver from WebDriverProvider
-            switch (testResult.getStatus()) {
-                case ITestResult.SUCCESS -> ScreenshotsManager.takeFullPageScreenshot(driver, "passed-" + testResult.getName());
-                case ITestResult.FAILURE -> ScreenshotsManager.takeFullPageScreenshot(driver, "failed-" + testResult.getName());
-                case ITestResult.SKIP -> ScreenshotsManager.takeFullPageScreenshot(driver, "skipped-" + testResult.getName());
+            if (testResult.getInstance() instanceof UITest)
+            {
+                ScreenRecordManager.stopRecording(testResult.getName());
+                if (testResult.getInstance() instanceof WebDriverProvider provider)
+                    driver = provider.getWebDriver(); //initialize driver from WebDriverProvider
+                switch (testResult.getStatus()){
+                    case ITestResult.SUCCESS -> ScreenshotsManager.takeFullPageScreenshot(driver,"passed-" + testResult.getName());
+                    case ITestResult.FAILURE -> ScreenshotsManager.takeFullPageScreenshot(driver,"failed-" + testResult.getName());
+                    case ITestResult.SKIP -> ScreenshotsManager.takeFullPageScreenshot(driver,"skipped-" + testResult.getName());
+                }
+                AllureAttachmentManager.attachRecords(testResult.getName());
             }
-            AllureAttachmentManager.attachRecords(testResult.getName()); //attach records to allure report
+
+            Validation.assertAll(testResult);
             LogsManager.info("Test Case:", testMethodName +"/"+testDescription, "finished.");
             //attach logs to allure report
             try {
@@ -79,11 +103,26 @@ public class TestNGListeners implements IInvokedMethodListener, ITestListener, I
     }
 
     public void onTestSuccess(ITestResult result) {
-        LogsManager.info("Test", result.getMethod().getMethodName(), "Passed");
+        IRetryAnalyzer retry = result.getMethod().getRetryAnalyzer(result);
 
+        if (retry != null && retry instanceof RetryAnalyzer) {
+            int retryCount = ((RetryAnalyzer) retry).getRetryCount();
+            if (retryCount > 0) {
+                LogsManager.info("Test passed after " + retryCount + " retries: " + result.getName());
+            }
+        }
+
+        LogsManager.info("Test", result.getMethod().getMethodName(), "Passed");
     }
 
     public void onTestFailure(ITestResult result) {
+        IRetryAnalyzer retry = result.getMethod().getRetryAnalyzer(result);
+        if (retry != null && retry instanceof RetryAnalyzer) {
+            int retryCount = ((RetryAnalyzer) retry).getRetryCount();
+            if (retryCount > 0) {
+                LogsManager.warn("Test failed, retry #" + retryCount + " for test: " + result.getName());
+            }
+        }
         LogsManager.error("Test", result.getMethod().getMethodName(), "Failed");
     }
 
@@ -98,6 +137,7 @@ public class TestNGListeners implements IInvokedMethodListener, ITestListener, I
         FileUtils.cleanDirectory(AllureConstants.RESULTS_FOLDER.toFile());
         FileUtils.cleanDirectory(new File(ScreenshotsManager.SCREENSHOTS_PATH));
         FileUtils.cleanDirectory(new File(ScreenRecordManager.RECORDINGS_PATH));
+        FileUtils.cleanDirectory(new File("src/test/resources/downloads/"));
        // FileUtils.forceDelete(new File(LogsManager.LOGS_PATH + "logs.log"));
     }
 
@@ -106,5 +146,6 @@ public class TestNGListeners implements IInvokedMethodListener, ITestListener, I
         FileUtils.createDirectory(LogsManager.LOGS_PATH);
         FileUtils.createDirectory(ScreenshotsManager.SCREENSHOTS_PATH);
         FileUtils.createDirectory(ScreenRecordManager.RECORDINGS_PATH);
+        FileUtils.createDirectory("src/test/resources/downloads/");
     }
 }

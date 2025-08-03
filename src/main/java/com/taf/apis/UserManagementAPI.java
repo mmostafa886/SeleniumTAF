@@ -58,6 +58,7 @@ public class UserManagementAPI {
     @Step("Create a new user account with minimal details")
     public UserManagementAPI createRegisterUserAccount(String name, String email, String pass, String firstName, String lastName)
     {
+        LogsManager.info("Creating Minimal-details user account through API...");
         Map <String, String> formParams = new HashMap<>();
         formParams.put("name", name);
         formParams.put("email", email);
@@ -84,6 +85,7 @@ public class UserManagementAPI {
 
     @Step("Delete user account by email")
     public UserManagementAPI deleteUserAccount(String email,String password) {
+        LogsManager.info("Deleting user account through API...");
         Map<String, String> formParams = new HashMap<>();
         formParams.put("email", email);
         formParams.put("password", password);

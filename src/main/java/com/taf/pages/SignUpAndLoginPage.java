@@ -31,8 +31,8 @@ public class SignUpAndLoginPage {
     @Step("Navigate to SignUp/Login page")
     public SignUpAndLoginPage navigate() {
         driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + signUpLoginUrl);
+        driver.alert().dismissCommercialsIfPresent();
         driver.alert().dismissConsentPopupIfPresent();
-        driver.alert().dismissFooterCommercialIfPresent();
         return this;
     }
 

@@ -1,5 +1,6 @@
 package com.taf.validations;
 
+import com.taf.utils.FileUtils;
 import com.taf.utils.WaitManager;
 import com.taf.utils.actions.ElementActions;
 import com.taf.utils.logs.LogsManager;
@@ -29,8 +30,9 @@ public abstract class BaseAssertion {
 
     protected abstract void assertEquals(String actual, String expected, String message);
 
-    public void Equals(String actual, String expected, String message) {
+    public BaseAssertion Equals(String actual, String expected, String message) {
         assertEquals(actual, expected, message);
+        return this;
     }
 
     @Step("Asserting the element with Locator: {0} is visible")
@@ -52,17 +54,25 @@ public abstract class BaseAssertion {
     /**
      * Verify Page URL
      */
-    @Step("Verifying that the current URL contains: {0}")
-    public void verifyPageURL(String expectedURL) {
+    @Step("Asserting that the current URL contains: {0}")
+    public void assertPageURL(String expectedURL) {
         String currentURL = driver.getCurrentUrl();
         LogsManager.info("Verifying that the current URL:", currentURL, "contains:", expectedURL);
         assertEquals(currentURL, expectedURL,
                 "Expected URL: " + expectedURL + " but was: " + currentURL);
     }
 
-    @Step("Verifying that the current page title is: {0}")
+    @Step("Asserting that the current page title is: {0}")
     public void assertPageTitle(String expectedTitle) {
         String actualTitle = driver.getTitle();
         assertEquals(actualTitle, expectedTitle, "Title does not match. Expected: " + expectedTitle + ", Actual: " + actualTitle);
+    }
+
+    @Step("Asserting that the file {0} exists")
+    public void assertFileExists(String fileName, String message) {
+        waitManager.fluentWait().until(
+                d -> FileUtils.isFileExists(fileName)
+        );
+        assertTrue(FileUtils.isFileExists(fileName), message);
     }
 }

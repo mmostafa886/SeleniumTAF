@@ -2,6 +2,7 @@ package com.taf.tests.ui;
 
 
 import com.taf.drivers.GUIWebDriver;
+import com.taf.drivers.UITest;
 import com.taf.pages.ProductsPage;
 import com.taf.pages.components.NavBarComponent;
 import com.taf.tests.BaseTest;
@@ -17,11 +18,12 @@ import org.testng.annotations.Test;
 @Story("Products Management")
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
+@UITest
 public class ProductsTest extends BaseTest {
 
-    @Test(description = "Search for a product with login")
+    @Test(description = "Search for a product without login and validate its details")
     @Description("Search for a product and validate its details")
-    public void searchForProductWithLogin() {
+    public void searchForProductWithoutLogin() {
         new ProductsPage(driver)
                 .navigate()
                 .searchProduct(testData.getJsonData("searchedProduct.name"))

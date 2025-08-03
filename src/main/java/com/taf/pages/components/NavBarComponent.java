@@ -40,8 +40,8 @@ public class NavBarComponent {
     public NavBarComponent navigate() {
         LogsManager.info("Navigate to Home page");
         driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb"));
+        driver.alert().dismissCommercialsIfPresent();
         driver.alert().dismissConsentPopupIfPresent();
-        driver.alert().dismissFooterCommercialIfPresent();
         return this;
     }
 

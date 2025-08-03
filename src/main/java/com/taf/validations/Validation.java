@@ -3,6 +3,7 @@ package com.taf.validations;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
 import org.openqa.selenium.WebDriver;
+import org.testng.ITestResult;
 import org.testng.asserts.SoftAssert;
 
 public class Validation extends BaseAssertion {
@@ -55,7 +56,7 @@ public class Validation extends BaseAssertion {
      * Soft_Assert all validations collected during the test execution.
      */
     @Step("Assert all validations")
-    public static void assertAll() {
+    public static void assertAll(ITestResult result) {
         if (!used) {
             LogsManager.info("No validations were performed, skipping assertAll.");
             return; // If no validations were performed, skip assertAll.
@@ -65,6 +66,8 @@ public class Validation extends BaseAssertion {
             softAssert.assertAll();
         } catch (Exception e) {
             LogsManager.error("Assertion Failed -", e.getMessage());
+            result.setStatus(ITestResult.FAILURE);
+            result.setThrowable(e);
         } finally {
             LogsManager.info("Resetting softAssert for the next test");
             softAssert = new SoftAssert(); // Reset softAssert for the next test
