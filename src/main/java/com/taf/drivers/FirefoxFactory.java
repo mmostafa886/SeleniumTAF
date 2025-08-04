@@ -1,13 +1,17 @@
 package com.taf.drivers;
 
+import com.taf.utils.logs.LogsManager;
 import org.openqa.selenium.PageLoadStrategy;
+import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import com.taf.utils.logs.LogsManager;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.taf.drivers.DriverConfigParser.*;
 
@@ -15,13 +19,24 @@ public class FirefoxFactory extends AbstractDriver {
 
     private FirefoxOptions options() {
         FirefoxOptions options = new FirefoxOptions();
+        options.addPreference("dom.webnotifications.enabled", false); // disables notifications
+        options.addPreference("dom.disable_open_during_load", false); // disables popups
         options.addArguments("--start-maximized"); // Example option to start Chrome maximized
-        options.addArguments("--disable-infobars"); // Example option to disable infobars
+/*        options.addArguments("--disable-infobars"); // Example option to disable infobars
         options.addArguments("--disable-extensions");
         options.addArguments("--disable-gpu"); // Example option to disable GPU hardware acceleration
         options.addArguments("--disable-notifications"); // Example option to disable notifications
-        options.addArguments("--disable-popup-blocking"); // Example option to disable popup blocking
+        options.addArguments("--disable-popup-blocking"); // Example option to disable popup blocking*/
         if (DriverConfigParser.isHeadlessMode()) options.addArguments("--headless");// Run in headless mode if specified in the configuration
+        Map<String, Object> prefs = new HashMap<>();
+        String userDir = System.getProperty("user.dir");
+        String downloadPath = userDir + "\\src\\test\\resources\\downloads";
+        prefs.put("profile.default_content_settings.popups", 0);
+        prefs.put("download.prompt_for_download", false);
+        prefs.put("download.default_directory",downloadPath);
+        options.setUnhandledPromptBehaviour(UnexpectedAlertBehaviour.IGNORE);
+        options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
+        options.setCapability(CapabilityType.UNHANDLED_PROMPT_BEHAVIOUR, UnexpectedAlertBehaviour.IGNORE);
         options.setAcceptInsecureCerts(true); // Accept insecure certificates
         options.setPageLoadStrategy(PageLoadStrategy.EAGER); // Set page load strategy to normal
 

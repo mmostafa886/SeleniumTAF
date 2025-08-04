@@ -101,4 +101,16 @@ public class FileUtils {
         }
     }
 
+
+    /**
+     * Checks if a file exists in the specified directory.
+     * @param fileName the name of the file to check
+     * @return true if the file exists, false otherwise
+     */
+    public static boolean isFileExists( String fileName) {
+        String filePath = USER_DIR + "/src/test/resources/downloads/" ;
+        File file = new File(filePath+ fileName);
+        return file.exists();
+    }
+
 }

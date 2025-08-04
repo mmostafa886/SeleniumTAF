@@ -36,9 +36,12 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
     - <font size=2>**Parameters**</font>
       - <font size=2>**browser:** A string parameter for selecting browser type (chrome, firefox, edge, etc.), can be provided in the command line or in the properties file.</font>
       - <font size=2>**headless:** A boolean parameter for headless mode (true: Headless/false:Headed), can be provided in the command line or in the properties file.</font>
-      - <font size=2>**remoteExecution:** A boolean parameter for remote execution (true: Remote/false:Local), can be provided only in properties file.</font>
-      - <font size=2>**remoteHost:** A string parameter for remote host (Selenium Grid Host), can be provided only in properties file.
-      - <font size=2>**remotePort:** A string parameter for remote port (Selenium Grid Host), can be provided only in properties file.</font>
+      - <font size=2>**remoteExecution:** A boolean parameter for remote execution (true: Remote/false:Local), should be provided only in properties file.</font>
+      - <font size=2>**remoteHost:** A string parameter for remote host (Selenium Grid Host), should be provided only in properties file.
+      - <font size=2>**remotePort:** A string parameter for remote port (Selenium Grid Host), should be provided only in properties file.</font>
+      - <font size=2>**downloadFolder:** A string parameter for download folder (Downloads folder), should be provided only in properties file.</font>
+      - <font size=2>**retryCount:** An integer parameter for retry count (number of retries), can be provided in the command line or in the properties file.</font>
+      - <font size=2>**DEFAULT_WAIT:** An integer parameter for default wait time (default wait time), can be provided in the command line or in the properties file.</font>
     - <font size=2>**Passing Parameters**</font>
       - <font size=2>**Execution Command**-> examples: 
         - `mvn clean test -Dtest=[TestClassName] -Dbrowser=chrome -Dheadless=true`
@@ -48,6 +51,7 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
       - <font size=2>**Properties Files**: any properties file under the `src/main/resources/` directory can be used but mainly the `webApp.properties` file is used to provide such properties.</font>
 
 ## Notes
+### Dockerized/Remote Execution:
 - For Dockerized execution, ensure that the Docker is installed & running on the used machine, use the `ExecuteAndGenerateReport.sh` script which executes the tests & do other steps as well (Like opening the report automatically after the execution ends).
     - The `docker-compose.yml` file is used to define the services, networks, and volumes for the Dockerized environment (including Selenium Hub & nodes and Test Runner container as well).
     - For a completed dockerized execution (even script execution is performed on a container & not on a host machine):
@@ -57,17 +61,23 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
     - To use the host for executing the tests (While the Hub & Nodes are running on the Docker):
         - Set the `remoteHost` to `localhost` and the `remotePort` to `4444`.
         - In this case the `test-runner` container is not used at all and can be completely removed from the `docker-compose` file.
+### WaitManager:
 - The default wait time is provided in the `waits.properties` instead of hard-coded in the `WaitManager` class.
+### TestNGListener:
 - The `TestNGListener` was modified to:
   - Clean the log file before executing each Test (without deleting the folder/file itself).
   - Attach the log file of each Test separately to the Allure report.
   - Attaching the screenshots of each Test separately to the Allure report.
+### AlertAction:
 - Modify the `AlertAction` class to:
   - To handle the GDPR consent displayed on some WebSites browsed from inside the EU & is not displayed when browsed from other countries.
   - Remove the commercials present on the Websites.
+### Handling API Requests:
 - Add RestAssured dependency to the `pom.xml` file to handle the APIs requests.
   - Add `apis` package & `Builder` class to handle the APIs requests.
+### Retry on Failure:
+- Add `RetryAnalyzer` class to retry the failed tests.
+- The retry Analyzer is used inside the `TestNGListener` class to retry the failed tests.
 ## TO-DOs:
-- The `FileUtils.cleanDirectory(AllureConstants.RESULTS_FOLDER.toFile());` line in the `TestNGListener` class has been commented (as it caused missing the Allure report history) <u>**[Need to be fixed]**</u>
 - Generate Allure report on a dockerized container , not on the host machine.
 - Modify the script to open the Allure report automatically after the execution ends whether `Local or Remote` executions.

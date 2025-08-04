@@ -56,6 +56,7 @@ public class AlertActions {
 
     /**
      * Retrieves the text from the alert if present.
+     *
      * @return The alert text or null if no alert is present.
      */
     @Step("Retrieving alert text if present")
@@ -74,6 +75,7 @@ public class AlertActions {
 
     /**
      * Sends text to the alert if present.
+     *
      * @param text The text to send to the alert.
      */
     @Step("Set text to alert if present: {text}")
@@ -90,9 +92,6 @@ public class AlertActions {
         });
     }
 
-    /** Dismiss consent popup if present
-     * If it is not present, continue execution without doing anything.
-     * */
     @Step("Dismiss consent popup if present")
     public void dismissConsentPopupIfPresent() {
         waitManager.fluentWait(3).until(d -> {
@@ -107,13 +106,11 @@ public class AlertActions {
         });
     }
 
-    /** Dismiss commercials if present using JS.
-     * If not present, continue execution without doing anything.
-     * */
-    @Step("Dismiss commercials if present on the page")
+    @Step("Dismiss footer commercial if present")
     public void dismissCommercialsIfPresent() {
         waitManager.fluentWait(3).until(d -> {
             try {
+                // new ElementActions(driver).click(footerCommercial);
                 ((JavascriptExecutor) driver).executeScript(
                         "document.querySelectorAll('ins.adsbygoogle').forEach(el => el.remove());"
                 );

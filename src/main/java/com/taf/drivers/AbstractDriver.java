@@ -31,6 +31,8 @@ public abstract class AbstractDriver {
      */
     protected static final String remotePort = PropertyReader.getProperty("remotePort");
 
+    protected File haramBlurExtension = new File("src/main/resources/extensions/HaramBlur.crx");
+
     /**
      * Abstract method to create a WebDriver instance.
      * Subclasses must implement this method to provide specific logic for
@@ -40,5 +42,4 @@ public abstract class AbstractDriver {
      */
     public abstract WebDriver createDriver();
 
-    protected File haramBlurExtension = new File("src/main/resources/extensions/HaramBlur.crx");
 }
