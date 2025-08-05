@@ -70,7 +70,6 @@ public class PropertyReader {
         // Determine the value and its source.
         String value;
         String source;
-
         if (sysValue != null) {
             // Use the system property value if it exists.
             value = sysValue;
@@ -80,7 +79,6 @@ public class PropertyReader {
             value = fileValue;
             source = "properties file";
         }
-
         // Log the property value and its source.
         LogsManager.info("Property: " + key.toUpperCase() + " = {" + value + "} loaded from " + source);
         return value;

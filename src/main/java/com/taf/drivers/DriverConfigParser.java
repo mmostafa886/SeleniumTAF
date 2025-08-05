@@ -18,13 +18,14 @@ public class DriverConfigParser {
      */
     public static boolean isHeadlessMode() {
         boolean headless = headlessMode || isRemote;
-        if (headless) {
-            LogsManager.info("Headless mode is {True} all the time for remote execution.");
-        } else {
-            LogsManager.info("Headless mode is {False} as remote execution is set to false & headless mode is also false.");
-        }
+
+        String logMessage = isRemote ? "Remote_Execution is {True}, Headless mode is {True} all the time for remote execution."
+                : headlessMode ? "Headless mode is {True}."
+                : "Headless mode is {False} (both remote execution & headless mode are false).";
+        LogsManager.info(logMessage);
         return headless;
     }
+
     /**
      * Used for the logging the headless mode status to the generated Allure report.
      * Returns the current headless mode status as a string.
@@ -38,6 +39,7 @@ public class DriverConfigParser {
     public static final boolean isRemote
             = PropertyValueParser.getBooleanValueFromString("remoteExecution");
 
+
     /**
      * Checks if remote execution is enabled.
      * @return boolean indicating if remote execution is enabled.
@@ -46,4 +48,3 @@ public class DriverConfigParser {
         return isRemote ? "Enabled" : "Disabled";
     }
 }
-
