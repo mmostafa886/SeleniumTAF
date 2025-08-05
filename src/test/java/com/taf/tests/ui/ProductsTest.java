@@ -6,8 +6,11 @@ import com.taf.drivers.UITest;
 import com.taf.pages.ProductsPage;
 import com.taf.pages.components.NavBarComponent;
 import com.taf.tests.BaseTest;
+import com.taf.utils.Groups;
 import com.taf.utils.dataReader.JsonReader;
 import io.qameta.allure.*;
+import io.qameta.allure.testng.Tag;
+import io.qameta.allure.testng.Tags;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -19,10 +22,12 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
+@Tags({@Tag(Groups.PRODUCTS), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
 public class ProductsTest extends BaseTest {
 
-    @Test(description = "Search for a product without login and validate its details")
     @Description("Search for a product and validate its details")
+    @Test(description = "Search for a product without login and validate its details"
+    , groups = {Groups.PRODUCTS, Groups.REGRESSION, Groups.SMOKE})
     public void searchForProductWithoutLogin() {
         new ProductsPage(driver)
                 .navigate()
@@ -34,8 +39,9 @@ public class ProductsTest extends BaseTest {
 
     }
 
-    @Test(description = "Search for a product without login")
     @Description("Add a product to the cart without logging in")
+    @Test(description = "Search for a product without login"
+    , groups = {Groups.PRODUCTS, Groups.REGRESSION, Groups.SMOKE})
     public void addProductToCartWithoutLogin() {
 
         new ProductsPage(driver)
@@ -47,18 +53,19 @@ public class ProductsTest extends BaseTest {
     }
 
     //Configurations
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     protected void preCondition() {
         testData = new JsonReader("products-data");
     }
-    @BeforeMethod
+
+    @BeforeMethod(alwaysRun = true)
     public void setUp() {
         driver = new GUIWebDriver();
         new NavBarComponent(driver).navigate();
         driver.browser().closeExtensionTab();
     }
 
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
         driver.quitDriver();
     }

@@ -7,10 +7,13 @@ import com.taf.pages.SignUpAndLoginPage;
 import com.taf.pages.SignupPage;
 import com.taf.pages.components.NavBarComponent;
 import com.taf.tests.BaseTest;
+import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.*;
+import io.qameta.allure.testng.Tag;
+import io.qameta.allure.testng.Tags;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -22,12 +25,13 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
+@Tags({@Tag(Groups.REGISTRATION), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
 public class RegisterTest extends BaseTest {
 
      String registerTimeStamp;
 
     @Description("Verify user can sign up with valid data")
-    @Test (description = "Valid Sign Up Test")
+    @Test (description = "Valid Sign Up Test", groups = {Groups.REGISTRATION, Groups.REGRESSION, Groups.SMOKE})
     public void signUpTest() {
         LogsManager.info("Starting sign up test...");
         registerTimeStamp = TimeManager.getCompactTimeStamp();
@@ -63,7 +67,8 @@ public class RegisterTest extends BaseTest {
     }
 
     @Description("Verify user cannot sign up with invalid data")
-    @Test(description = "Signup with Existing Account Test")
+    @Test(description = "Signup with Existing Account Test"
+            , groups = {Groups.REGISTRATION, Groups.REGRESSION, Groups.SMOKE})
     public void verifyErrorMessageWhenAccountCreatedBefore()
     {
         LogsManager.info("Starting invalid sign up test...");
@@ -103,20 +108,20 @@ public class RegisterTest extends BaseTest {
     }
 
 
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     protected void preCondition() {
         testData = new JsonReader("register-data");
     }
 
     //Configuration Methods.
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void setUp() {
         driver = new GUIWebDriver();
         new NavBarComponent(driver).navigate();
         driver.browser().closeExtensionTab();
     }
 
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
         driver.quitDriver();
     }

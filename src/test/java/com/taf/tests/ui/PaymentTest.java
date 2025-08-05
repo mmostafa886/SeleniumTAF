@@ -9,9 +9,12 @@ import com.taf.pages.ProductsPage;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.pages.components.NavBarComponent;
 import com.taf.tests.BaseTest;
+import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
 import io.qameta.allure.*;
+import io.qameta.allure.testng.Tag;
+import io.qameta.allure.testng.Tags;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -21,12 +24,13 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
+@Tags({@Tag(Groups.PAYMENT), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
 public class PaymentTest extends BaseTest {
 
     String timestamp = TimeManager.getCompactTimeStamp();
 
     @Description("Register a user account through API")
-    @Test(description = "User Registration through API")
+    @Test(description = "User Registration through API", groups = {Groups.PAYMENT, Groups.REGRESSION, Groups.SMOKE})
     public void registerNewAccount() {
         new UserManagementAPI().createRegisterUserAccount(
                         testData.getJsonData("name"),
@@ -51,7 +55,8 @@ public class PaymentTest extends BaseTest {
     }
 
     @Description("Login to the registered account")
-    @Test(dependsOnMethods = "registerNewAccount", description = "Login")
+    @Test(dependsOnMethods = "registerNewAccount", description = "Login"
+    , groups = {Groups.PAYMENT, Groups.REGRESSION, Groups.SMOKE})
     public void loginToAccount() {
         new SignUpAndLoginPage(driver).navigate()
                 .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
@@ -62,7 +67,8 @@ public class PaymentTest extends BaseTest {
     }
 
    @Description("Add product to cart")
-    @Test(dependsOnMethods = {"loginToAccount", "registerNewAccount"}, description = "Add product to cart")
+    @Test(dependsOnMethods = {"loginToAccount", "registerNewAccount"}, description = "Add product to cart"
+    , groups = {Groups.PAYMENT, Groups.REGRESSION, Groups.SMOKE})
     public void addProductToCart() {
         new ProductsPage(driver)
                 .navigate()
@@ -78,7 +84,8 @@ public class PaymentTest extends BaseTest {
     }
 
     @Description("Checkout the item(s) from the cart")
-    @Test(dependsOnMethods = {"addProductToCart", "loginToAccount", "registerNewAccount"}, description = "Checkout")
+    @Test(dependsOnMethods = {"addProductToCart", "loginToAccount", "registerNewAccount"}, description = "Checkout"
+    , groups = {Groups.PAYMENT, Groups.REGRESSION, Groups.SMOKE})
     public void checkout() {
         new CartPage(driver)
                 .clickOnProceedToCheckout()
@@ -111,7 +118,8 @@ public class PaymentTest extends BaseTest {
     }
 
     @Description("Payment")
-    @Test(dependsOnMethods = {"checkout", "addProductToCart", "loginToAccount", "registerNewAccount"}, description = "Payment")
+    @Test(dependsOnMethods = {"checkout", "addProductToCart", "loginToAccount", "registerNewAccount"}
+            , description = "Payment", groups = {Groups.PAYMENT, Groups.REGRESSION, Groups.SMOKE})
     public void paymentTest() {
         new CheckoutPage(driver)
                 .clickOnPlaceOrder()
@@ -126,7 +134,8 @@ public class PaymentTest extends BaseTest {
     }
 
    @Description("Delete account through API as post condition")
-    @Test(dependsOnMethods = {"paymentTest","checkout","loginToAccount","registerNewAccount"}, description = "Delete account as post condition")
+    @Test(dependsOnMethods = {"paymentTest","checkout","loginToAccount","registerNewAccount"}
+            , description = "Delete account as post condition", groups = {Groups.PAYMENT, Groups.REGRESSION, Groups.SMOKE})
     public void deleteAccountAsPostCondition() {
         new UserManagementAPI()
                 .deleteUserAccount( testData.getJsonData("email") + timestamp + "@gmail.com",
@@ -134,8 +143,10 @@ public class PaymentTest extends BaseTest {
                         ))
                 .verifyUserDeletedSuccessfully();
     }
+
+
     //Configurations
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     protected void setUp() {
         testData = new JsonReader("checkout-data");
         driver = new GUIWebDriver();
@@ -144,7 +155,7 @@ public class PaymentTest extends BaseTest {
     }
 
 
-    @AfterClass
+    @AfterClass(alwaysRun = true)
     public void tearDown() {
         driver.quitDriver();
     }

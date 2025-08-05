@@ -6,10 +6,13 @@ import com.taf.drivers.UITest;
 import com.taf.pages.components.NavBarComponent;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.tests.BaseTest;
+import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.*;
+import io.qameta.allure.testng.Tag;
+import io.qameta.allure.testng.Tags;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -21,12 +24,13 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
+@Tags({@Tag(Groups.LOGIN), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
 public class LoginTest extends BaseTest {
 
     String timestamp = TimeManager.getCompactTimeStamp();
 
     @Description("Verify user can login with valid credentials")
-    @Test(description = "Valid Login Test")
+    @Test(description = "Valid Login Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
     public void validLoginTC()
     {
         LogsManager.info("Valid-Login Test Started ...");
@@ -54,7 +58,7 @@ public class LoginTest extends BaseTest {
     }
 
     @Description("Verify user cannot login with invalid email")
-    @Test(description = "Invalid Login (Invalid Email) Test")
+    @Test(description = "Invalid Login (Invalid Email) Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
     public void inValidLoginUsingInvalidEmailTC()
     {
         LogsManager.info("Invalid-Login (Invalid Email) Test Started ...");
@@ -80,7 +84,7 @@ public class LoginTest extends BaseTest {
     }
 
     @Description("Verify user cannot login with invalid password")
-    @Test(description = "Invalid Login (Invalid Email) Test")
+    @Test(description = "Invalid Login (Invalid Email) Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
     public void inValidLoginUsingInvalidPasswordTC()
     {
         LogsManager.info("Invalid-Login (Invalid Password) Test Started ...");
@@ -104,19 +108,22 @@ public class LoginTest extends BaseTest {
                 .verifyUserDeletedSuccessfully();
         LogsManager.info("Invalid-Login Test (Invalid Password) Finished ...");
     }
+
+
     //Configurations
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     protected void preCondition() {
         testData = new JsonReader("login-data");
     }
-    @BeforeMethod
+
+    @BeforeMethod(alwaysRun = true)
     public void setUp() {
         driver = new GUIWebDriver();
         new NavBarComponent(driver).navigate();
         driver.browser().closeExtensionTab();
     }
 
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
         driver.quitDriver();
     }

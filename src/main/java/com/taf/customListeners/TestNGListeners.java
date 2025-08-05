@@ -138,12 +138,10 @@ public class TestNGListeners implements
         FileUtils.cleanDirectory(new File(ScreenshotsManager.SCREENSHOTS_PATH));
         FileUtils.cleanDirectory(new File(ScreenRecordManager.RECORDINGS_PATH));
         FileUtils.cleanDirectory(new File("src/test/resources/downloads/"));
-       // FileUtils.forceDelete(new File(LogsManager.LOGS_PATH + "logs.log"));
     }
 
     // Implement logic to create test output directories
     private void createTestOutputDirectories() {
-        FileUtils.createDirectory(LogsManager.LOGS_PATH);
         FileUtils.createDirectory(ScreenshotsManager.SCREENSHOTS_PATH);
         FileUtils.createDirectory(ScreenRecordManager.RECORDINGS_PATH);
         FileUtils.createDirectory("src/test/resources/downloads/");
