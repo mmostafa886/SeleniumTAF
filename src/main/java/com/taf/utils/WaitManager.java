@@ -41,7 +41,7 @@ public class WaitManager {
     public FluentWait<WebDriver> fluentWait(int timeOutSeconds) {
         return new FluentWait<>(driver)
                 .withTimeout(Duration.ofSeconds(timeOutSeconds))
-                .pollingEvery(Duration.ofMillis(100))
+                .pollingEvery(Duration.ofMillis(300))
                 .ignoreAll(getExceptions());
     }
 

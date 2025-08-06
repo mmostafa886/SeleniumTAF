@@ -88,3 +88,84 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - Generate Allure report on a dockerized container , not on the host machine.
 - Modify the script to open the Allure report automatically after the execution ends whether `Local or Remote` executions (Currently handled for local execution & shell script file `ExecuteAndGenerateReport.sh` is used to open the report automatically after the execution ends).
 - Configure the TAF to log the (Allure Executors) info to the generated `Allure Report`.
+
+## Project Structure
+```
+├── .gitignore
+├── ExecuteAndGenerateReport.sh
+├── README.md
+├── docker-compose.yml
+├── pom.xml
+└── src
+├── main
+├── java
+│   └── com
+│   │   └── taf
+│   │       ├── apis
+│   │           └── Builder.java
+│   │       ├── customListeners
+│   │           └── TestNGListeners.java
+│   │       ├── drivers
+│   │           ├── AbstractDriver.java
+│   │           ├── Browser.java
+│   │           ├── ChromeFactory.java
+│   │           ├── DriverConfigParser.java
+│   │           ├── EdgeFactory.java
+│   │           ├── FirefoxFactory.java
+│   │           ├── GUIWebDriver.java
+│   │           ├── UITest.java
+│   │           └── WebDriverProvider.java
+│   │       ├── utils
+│   │           ├── FileUtils.java
+│   │           ├── Groups.java
+│   │           ├── OSUtils.java
+│   │           ├── RetryAnalyzer.java
+│   │           ├── TerminalUtils.java
+│   │           ├── TimeManager.java
+│   │           ├── WaitManager.java
+│   │           ├── actions
+│   │           │   ├── AlertActions.java
+│   │           │   ├── BrowserActions.java
+│   │           │   ├── ElementActions.java
+│   │           │   └── FrameActions.java
+│   │           ├── dataReader
+│   │           │   ├── ExcelReader.java
+│   │           │   ├── JsonReader.java
+│   │           │   ├── PropertyReader.java
+│   │           │   └── PropertyValueParser.java
+│   │           ├── logs
+│   │           │   └── LogsManager.java
+│   │           ├── media
+│   │           │   ├── ScreenRecordManager.java
+│   │           │   └── ScreenshotsManager.java
+│   │           └── reporting
+│   │           │   ├── AllureAttachmentManager.java
+│   │           │   ├── AllureBinaryManager.java
+│   │           │   ├── AllureConstants.java
+│   │           │   ├── AllureEnvironmentManager.java
+│   │           │   └── AllureReportGenerator.java
+│   │       └── validations
+│   │           ├── BaseAssertion.java
+│   │           ├── Validation.java
+│   │           └── Verification.java
+└── resources
+│   ├── META-INF
+│       └── services
+│       │   └── org.testng.ITestNGListener
+│   ├── allure.properties
+│   ├── db.properties
+│   ├── environment.properties
+│   ├── extensions
+│       └── HaramBlur.crx
+│   ├── log4j2.properties
+│   ├── seleniumGrid.properties
+│   ├── video.properties
+│   ├── waits.properties
+│   └── webApp.properties
+└── test
+└── resources
+└── test-data
+├── data.properties
+├── test-data.json
+└── webApp.properties
+```

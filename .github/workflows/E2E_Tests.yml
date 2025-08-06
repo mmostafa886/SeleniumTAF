@@ -1,0 +1,70 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - AutomationExercise
+    schedule:
+      - cron: '00 21 * * *'
+    workflow_dispatch:
+
+jobs:
+  Chrome_Test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Setup Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+            maven-version:3.9.11
+
+      - name: Execute Tests
+        run: mvn clean test -Dbrowser=chrome -Dheadless=true
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chrome_Test_Results
+          path: "test-output/reports/*.html"
+
+    Edge_Test:
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+        packages: write
+
+      steps:
+        - name: Checkout Code
+        - uses: actions/checkout@v4
+
+        - name: Setup Java JDK
+          uses: actions/setup-java@v4
+          with:
+            java-version: '21'
+            distribution: 'zulu'
+
+        - name: Setup Maven
+          uses: stCarolas/setup-maven@v5
+          with:
+            maven-version:3.9.11
+
+        - name: Execute Tests
+          run: mvn clean test -Dbrowser=edge -Dheadless=true
+
+        - name: Upload Test Results
+          uses: actions/upload-artifact@v4
+          with:
+            name: Edgee_Test_Results
+            path: "test-output/reports/*.html"
