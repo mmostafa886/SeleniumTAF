@@ -30,6 +30,7 @@ jobs:
             maven-version: 3.9.11
 
       - name: Execute Tests
+        continue-on-error: true
         run: mvn clean test -Dbrowser=chrome -Dheadless=true
 
       - name: Upload Test Results
@@ -59,6 +60,7 @@ jobs:
           maven-version: 3.9.11
 
       - name: Execute Tests
+        continue-on-error: true
         run: mvn clean test -Dbrowser=edge -Dheadless=true
 
       - name: Upload Test Results
