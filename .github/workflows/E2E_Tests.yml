@@ -27,7 +27,7 @@ jobs:
       - name: Setup Maven
         uses: stCarolas/setup-maven@v5
         with:
-            maven-version:3.9.11
+            maven-version:3.9.9
 
       - name: Execute Tests
         run: mvn clean test -Dbrowser=chrome -Dheadless=true
@@ -56,7 +56,7 @@ jobs:
         - name: Setup Maven
           uses: stCarolas/setup-maven@v5
           with:
-            maven-version:3.9.11
+            maven-version:3.9.9
 
         - name: Execute Tests
           run: mvn clean test -Dbrowser=edge -Dheadless=true
