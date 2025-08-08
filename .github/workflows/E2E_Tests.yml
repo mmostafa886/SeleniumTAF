@@ -8,8 +8,8 @@ on:
       - cron: '00 21 * * *'
     workflow_dispatch:
 
-  env:
-    TARGET: "%regex[.*Tests.*],com.automationexercices.tests.**.**,com.automationexercices.tests.**"
+env:
+  TARGET: "%regex[.*Tests.*],com.automationexercices.tests.**.**,com.automationexercices.tests.**"
 
 jobs:
   Chrome_Test:
