@@ -1,0 +1,76 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - AutomationExercise #Branch Name, The workflow is triggered once there is a push to the branch.
+  pull:
+    branches:
+      - AutomationExercise #Branch Name, The workflow is triggered once there is a pull request (PR) to that branch.
+    schedule:
+      - cron: '00 21 * * *'
+    workflow_dispatch:
+
+env:
+  TARGET: "%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
+
+jobs:
+  Chrome_Test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Setup Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.11
+
+      - name: Execute Tests
+        continue-on-error: true
+        run: mvn clean test -Dtest="${TARGET}" -Dbrowser=chrome -Dheadless=true
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chrome_Test_Results
+          path: "test-output/reports/*.html"
+
+  Edge_Test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Setup Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.11
+
+      - name: Execute Tests
+        continue-on-error: true
+        run: mvn clean test -Dtest="${TARGET}" -Dbrowser=edge -Dheadless=true
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: Edgee_Test_Results
+          path: "test-output/reports/*.html"

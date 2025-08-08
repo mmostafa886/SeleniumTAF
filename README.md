@@ -84,7 +84,107 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - This attribute can be used later for executing specific set of tests (by executing the command `mvn clean test -Dgroups=[groupName]`).
 - Example command `mvn clean test -Dgroups=cart` will execute all the tests that are grouped with `cart` group in the whole script.
 - The groups were added as constants in the `Groups` class under the `utils` package.
+- The test inside a specific test package can be triggered by executing the command `mvn clean test -Dtest="com.taf.tests.ui.*Test"`.
+- To execute all the tests (especially inside a CI/CD pipeline), execute a command with regex, Ex. `mvn clean test -Dtest="regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"`
+## CI/CD
+### GitHub_Actions
+- A `GitHub Actions Workflow` file `E2E_Tests.yml` was created under the directory `.github/workflows`.
+- This file contains 2 jobs & both of these jobs execute all the tests but one for `Chrome` & the other for `Edge`.
+### Jenkins
+- There must be "test executors" for jenkins as having selenium, browsers, etc is not the default behavior for the machine hosting Jenkins.
+- The setup followed was to work on the Dockerized environment mentioned earlier `(remoteExecution=true)` but not using the `ExecuteAndGenerateReport.sh` file.
+- The execution containers `{Selenium_Hub, Test Runner & Browsers}` containers need to be up & running before starting the test.
+    - Also, the Jenkins container should use the same network used for the execution environment
+    - According to the "docker-compose.yml" file, the Jenkins container must be started using the command below
+      ````
+      docker run -d --name jenkins-server \
+      -p 8080:8080 -p 50000:50000 \
+      --restart=on-failure \
+      --network seleniumtaf_grid \
+      jenkins/jenkins:latest-jdk21
+
 ## TO-DOs:
 - Generate Allure report on a dockerized container , not on the host machine.
 - Modify the script to open the Allure report automatically after the execution ends whether `Local or Remote` executions (Currently handled for local execution & shell script file `ExecuteAndGenerateReport.sh` is used to open the report automatically after the execution ends).
 - Configure the TAF to log the (Allure Executors) info to the generated `Allure Report`.
+
+## Project Structure
+```
+├── .gitignore
+├── ExecuteAndGenerateReport.sh
+├── README.md
+├── docker-compose.yml
+├── pom.xml
+└── src
+├── main
+├── java
+│   └── com
+│   │   └── taf
+│   │       ├── apis
+│   │           └── Builder.java
+│   │       ├── customListeners
+│   │           └── TestNGListeners.java
+│   │       ├── drivers
+│   │           ├── AbstractDriver.java
+│   │           ├── Browser.java
+│   │           ├── ChromeFactory.java
+│   │           ├── DriverConfigParser.java
+│   │           ├── EdgeFactory.java
+│   │           ├── FirefoxFactory.java
+│   │           ├── GUIWebDriver.java
+│   │           ├── UITest.java
+│   │           └── WebDriverProvider.java
+│   │       ├── utils
+│   │           ├── FileUtils.java
+│   │           ├── Groups.java
+│   │           ├── OSUtils.java
+│   │           ├── RetryAnalyzer.java
+│   │           ├── TerminalUtils.java
+│   │           ├── TimeManager.java
+│   │           ├── WaitManager.java
+│   │           ├── actions
+│   │           │   ├── AlertActions.java
+│   │           │   ├── BrowserActions.java
+│   │           │   ├── ElementActions.java
+│   │           │   └── FrameActions.java
+│   │           ├── dataReader
+│   │           │   ├── ExcelReader.java
+│   │           │   ├── JsonReader.java
+│   │           │   ├── PropertyReader.java
+│   │           │   └── PropertyValueParser.java
+│   │           ├── logs
+│   │           │   └── LogsManager.java
+│   │           ├── media
+│   │           │   ├── ScreenRecordManager.java
+│   │           │   └── ScreenshotsManager.java
+│   │           └── reporting
+│   │           │   ├── AllureAttachmentManager.java
+│   │           │   ├── AllureBinaryManager.java
+│   │           │   ├── AllureConstants.java
+│   │           │   ├── AllureEnvironmentManager.java
+│   │           │   └── AllureReportGenerator.java
+│   │       └── validations
+│   │           ├── BaseAssertion.java
+│   │           ├── Validation.java
+│   │           └── Verification.java
+└── resources
+│   ├── META-INF
+│       └── services
+│       │   └── org.testng.ITestNGListener
+│   ├── allure.properties
+│   ├── db.properties
+│   ├── environment.properties
+│   ├── extensions
+│       └── HaramBlur.crx
+│   ├── log4j2.properties
+│   ├── seleniumGrid.properties
+│   ├── video.properties
+│   ├── waits.properties
+│   └── webApp.properties
+└── test
+└── resources
+└── test-data
+├── data.properties
+├── test-data.json
+└── webApp.properties
+```

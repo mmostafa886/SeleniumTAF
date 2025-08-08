@@ -108,5 +108,7 @@ services:
 volumes:
   m2-repo:  # Named volume for Maven cache
 # Define a custom network for all services to communicate.
+
 networks:
   grid:
+    driver: bridge

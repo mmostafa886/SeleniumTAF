@@ -13,7 +13,6 @@ public class AlertActions {
     private final WaitManager waitManager;
 
     private final By consentButton = By.xpath("//button[.='Consent']");
-    private final By footerCommercial = By.cssSelector("down");
 
     public AlertActions(WebDriver driver) {
         this.driver = driver;
@@ -94,16 +93,12 @@ public class AlertActions {
 
     @Step("Dismiss consent popup if present")
     public void dismissConsentPopupIfPresent() {
-        waitManager.fluentWait(3).until(d -> {
-            try {
-                new ElementActions(driver).click(consentButton);
-                LogsManager.info("Consent popup dismissed successfully.");
-                return true; // Consent popup is dismissed.
-            } catch (Exception e) {
-                LogsManager.warn("Consent popup not found or not dismissed. Continue ");
-                return true;
-            }
-        });
+        try {
+            new ElementActions(driver).clickWithCustomWait(consentButton);
+            LogsManager.info("Consent popup dismissed successfully.");
+        } catch (Exception e) {
+            LogsManager.warn("Consent popup not found or not dismissed. Continue ");
+        }
     }
 
     @Step("Dismiss footer commercial if present")
