@@ -94,7 +94,7 @@ public class AlertActions {
     @Step("Dismiss consent popup if present")
     public void dismissConsentPopupIfPresent() {
             try {
-                new ElementActions(driver).click(consentButton);
+                new ElementActions(driver).clickWithCustomWait(consentButton);
                 LogsManager.info("Consent popup dismissed successfully.");
             } catch (Exception e) {
                 LogsManager.warn("Consent popup not found or not dismissed. Continue ");

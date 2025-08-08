@@ -22,26 +22,34 @@ public class ElementActions {
     @Step("Click on element with locator: {0}")
     public void click(By locator) {
         LogsManager.info("Attempting to click on element with locator:", locator.toString());
-        waitManager.fluentWait().until(d -> {
-            try {
-                WebElement element = d.findElement(locator);
-                scrollToElementJS(locator);
-                // Wait until the element is stable (not moving)
-                Point initialLocation = element.getLocation();
-                LogsManager.info("initialLocation: " + initialLocation);
-                Point finalLocation = element.getLocation();
-                LogsManager.info("finalLocation: " + finalLocation);
-                if (!initialLocation.equals(finalLocation)) {
-                    return false; // still moving, wait longer
-                }
-                element.click();
-                LogsManager.info("Clicked on element: " + locator);
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        });
+        waitManager.fluentWait().until(driver -> clickOperation(locator));
     }
+
+    @Step("Click on element with locator: {0}")
+    public void clickWithCustomWait(By locator) {
+        LogsManager.info("Attempting to click on element with locator:", locator.toString());
+        waitManager.fluentWait(5).until(driver -> clickOperation(locator));
+    }
+
+     public boolean clickOperation(By locator) {
+             try {
+                 WebElement element = driver.findElement(locator);
+                 scrollToElementJS(locator);
+                 // Wait until the element is stable (not moving)
+                 Point initialLocation = element.getLocation();
+                 LogsManager.info("initialLocation: " + initialLocation);
+                 Point finalLocation = element.getLocation();
+                 LogsManager.info("finalLocation: " + finalLocation);
+                 if (!initialLocation.equals(finalLocation)) {
+                     return false; // still moving, wait longer
+                 }
+                 element.click();
+                 LogsManager.info("Clicked on element: " + locator);
+                 return true;
+             } catch (Exception e) {
+                 return false;
+             }
+     }
 
     //type method
     @Step("Type text '{1}' into element with locator: {0}")

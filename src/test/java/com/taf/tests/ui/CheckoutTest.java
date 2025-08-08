@@ -26,11 +26,12 @@ import org.testng.annotations.Test;
 @Tags({@Tag(Groups.CHECKOUT), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
 public class CheckoutTest extends BaseTest {
 
-    String timestamp = TimeManager.getCompactTimeStamp();
+    String timestamp;
 
     @Description("Register a new account")
     @Test(description = "Account Registration", groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
     public void registerNewAccount() {
+        timestamp = TimeManager.getCompactTimeStamp();
         new UserManagementAPI().createRegisterUserAccount(
                         testData.getJsonData("name"),
                         testData.getJsonData("email") + timestamp  + "@gmail.com",

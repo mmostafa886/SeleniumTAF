@@ -26,10 +26,7 @@ public class WaitManager {
      * The timeout is set to 10 seconds by default and polling every 100 milliseconds.
      */
     public FluentWait<WebDriver> fluentWait() {
-        return new FluentWait<>(driver)
-                .withTimeout(Duration.ofSeconds(Long.parseLong(PropertyReader.getProperty("DEFAULT_WAIT"))))
-                .pollingEvery(Duration.ofMillis(300))
-                .ignoreAll(getExceptions());
+        return fluentWait(Long.parseLong(PropertyReader.getProperty("DEFAULT_WAIT")));
     }
 
     /**
@@ -38,7 +35,7 @@ public class WaitManager {
      * @return FluentWait instance configured for the WebDriver
      * @param timeOutSeconds The timeout in seconds for the wait
      */
-    public FluentWait<WebDriver> fluentWait(int timeOutSeconds) {
+    public FluentWait<WebDriver> fluentWait(long timeOutSeconds) {
         return new FluentWait<>(driver)
                 .withTimeout(Duration.ofSeconds(timeOutSeconds))
                 .pollingEvery(Duration.ofMillis(300))

@@ -85,6 +85,23 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - Example command `mvn clean test -Dgroups=cart` will execute all the tests that are grouped with `cart` group in the whole script.
 - The groups were added as constants in the `Groups` class under the `utils` package.
 - The test inside a specific test package can be triggered by executing the command `mvn clean test -Dtest="com.taf.tests.ui.*Test"`.
+## CI/CD
+### GitHub_Actions
+- A `GitHub Actions Workflow` file `E2E_Tests.yml` was created under the directory `.github/workflows`.
+- This file contains 2 jobs & both of these jobs execute all the tests but one for `Chrome` & the other for `Edge`.
+### Jenkins
+- There must be "test executors" for jenkins as having selenium, browsers, etc is not the default behavior for the machine hosting Jenkins.
+- The setup followed was to work on the Dockerized environment mentioned earlier but not using the `ExecuteAndGenerateReport.sh` file.
+- The execution containers `{Selenium_Hub, Test Runner & Browsers}` containers need to be up & running before starting the test.
+  - Also, the Jenkins container should use the same network used for the execution environment 
+  - According to the "docker-compose.yml" file, the Jenkins container must be started using the command below 
+    ````
+    docker run -d --name jenkins-server \
+    -p 8080:8080 -p 50000:50000 \
+    --restart=on-failure \
+    --network seleniumtaf_grid \
+    jenkins/jenkins:latest-jdk21
+
 ## TO-DOs:
 - Generate Allure report on a dockerized container , not on the host machine.
 - Modify the script to open the Allure report automatically after the execution ends whether `Local or Remote` executions (Currently handled for local execution & shell script file `ExecuteAndGenerateReport.sh` is used to open the report automatically after the execution ends).
