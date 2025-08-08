@@ -91,7 +91,7 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - This file contains 2 jobs & both of these jobs execute all the tests but one for `Chrome` & the other for `Edge`.
 ### Jenkins
 - There must be "test executors" for jenkins as having selenium, browsers, etc is not the default behavior for the machine hosting Jenkins.
-- The setup followed was to work on the Dockerized environment mentioned earlier but not using the `ExecuteAndGenerateReport.sh` file.
+- The setup followed was to work on the Dockerized environment mentioned earlier `(remoteExecution=true)` but not using the `ExecuteAndGenerateReport.sh` file.
 - The execution containers `{Selenium_Hub, Test Runner & Browsers}` containers need to be up & running before starting the test.
   - Also, the Jenkins container should use the same network used for the execution environment 
   - According to the "docker-compose.yml" file, the Jenkins container must be started using the command below 
