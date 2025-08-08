@@ -84,6 +84,7 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - This attribute can be used later for executing specific set of tests (by executing the command `mvn clean test -Dgroups=[groupName]`).
 - Example command `mvn clean test -Dgroups=cart` will execute all the tests that are grouped with `cart` group in the whole script.
 - The groups were added as constants in the `Groups` class under the `utils` package.
+- The test inside a specific test package can be triggered by executing the command `mvn clean test -Dtest="com.taf.tests.ui.*Test"`.
 ## TO-DOs:
 - Generate Allure report on a dockerized container , not on the host machine.
 - Modify the script to open the Allure report automatically after the execution ends whether `Local or Remote` executions (Currently handled for local execution & shell script file `ExecuteAndGenerateReport.sh` is used to open the report automatically after the execution ends).
