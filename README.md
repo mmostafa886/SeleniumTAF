@@ -85,6 +85,7 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - Example command `mvn clean test -Dgroups=cart` will execute all the tests that are grouped with `cart` group in the whole script.
 - The groups were added as constants in the `Groups` class under the `utils` package.
 - The test inside a specific test package can be triggered by executing the command `mvn clean test -Dtest="com.taf.tests.ui.*Test"`.
+- To execute all the tests (especially inside a CI/CD pipeline), execute a command with regex, Ex. `mvn clean test -Dtest="regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"`
 ## CI/CD
 ### GitHub_Actions
 - A `GitHub Actions Workflow` file `E2E_Tests.yml` was created under the directory `.github/workflows`.

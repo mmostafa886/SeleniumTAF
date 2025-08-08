@@ -9,7 +9,7 @@ on:
     workflow_dispatch:
 
 env:
-  TARGET: "%regex[.*Tests.*],com.automationexercices.tests.**.**,com.automationexercices.tests.**"
+  TARGET: "%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
 
 jobs:
   Chrome_Test:
