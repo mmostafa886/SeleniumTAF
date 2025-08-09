@@ -1,0 +1,86 @@
+version: 2.1
+
+orbs:
+  java: circleci/java@2.2.0
+  browser-tools: circleci/browser-tools@1.4.6
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/openjdk:21.0.5
+
+    steps:
+      - checkout
+
+      - browser-tools/install-browser-tools
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            - v1-dependencies-
+
+      - run:
+          name: Install Maven
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y maven
+
+      - run:
+          name: Build project and download dependencies
+          command: mvn dependency:go-offline
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+
+      - run:
+          name: Run Tests
+          command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
+          environment:
+            MAVEN_OPTS: -Xmx3200m
+            DISPLAY: ":99"
+
+      - store_test_results:
+          path: target/surefire-reports
+
+      - store_artifacts:
+          path: target/surefire-reports
+          destination: test-reports
+          when: always
+          # Optional retention
+          retention: 30d  # Keep for 30 days
+
+workflows:
+  version: 2
+
+  # Scheduled nightly build
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"  # Midnight UTC
+          filters:
+            branches:
+              only:
+                - AutomationExercise
+    jobs:
+      - build-and-test
+
+  # Trigger on push
+  on_push:
+    jobs:
+      - build-and-test:
+          filters:
+            branches:
+              only:
+                - AutomationExercise
+
+  # Manual trigger workflow
+  manual_trigger:
+    when: manual
+    jobs:
+      - build-and-test:
+          filters:
+            branches:
+              only:
+                - AutomationExercise

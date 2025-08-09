@@ -1,11 +1,12 @@
 name: E2E Tests
 
 on:
-  push:
-    branches:
-      - AutomationExercise
-    schedule:
-      - cron: '00 21 * * *'
+  # disabled temporary not to trigger the workflow everytime there is a push
+#  :
+#    branches:
+#      - AutomationExercise
+#    schedule:
+#      - cron: '00 21 * * *'
     workflow_dispatch:
 
 env:
