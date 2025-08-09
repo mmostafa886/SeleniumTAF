@@ -54,37 +54,26 @@ jobs:
           when: always
           retention: 30d  # Keep for 30 days
 
-# Pipeline parameters must be declared at the top level
-parameters:
-  trigger_type:
-    type: string
-    default: "push"
-
 workflows:
   version: 2
 
-  # Regular push-triggered workflow
   on_push:
     jobs:
       - build-and-test:
           filters:
             branches:
-              only:
-                - AutomationExercise
+              only: AutomationExercise
 
-  # Scheduled nightly build
   nightly:
     triggers:
       - schedule:
           cron: "0 0 * * *"
           filters:
             branches:
-              only:
-                - AutomationExercise
+              only: AutomationExercise
     jobs:
       - build-and-test
 
-  # Manual trigger workflow
   manual_trigger:
     when:
       and:
@@ -93,5 +82,4 @@ workflows:
       - build-and-test:
           filters:
             branches:
-              only:
-                - AutomationExercise
+              only: AutomationExercise
