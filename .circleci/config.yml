@@ -21,17 +21,19 @@ jobs:
             sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
             rm google-chrome-stable_current_amd64.deb
             google-chrome --version
-
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "pom.xml" }}
-            - v1-dependencies-
+            
 
       - run:
           name: Install Maven
           command: |
             sudo apt-get update
             sudo apt-get install -y maven
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            - v1-dependencies-
+
 
       - run:
           name: Build project and download dependencies
