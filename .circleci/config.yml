@@ -59,7 +59,6 @@ jobs:
 workflows:
   version: 2
 
-#Triggered when there is a push
   on_push:
     jobs:
       - build-and-test:
@@ -67,18 +66,16 @@ workflows:
             branches:
               only: AutomationExercise
 
-#triggered Nightly, will be commented
-#  nightly:
-#    triggers:
-#      - schedule:
-#          cron: "0 0 * * *"
-#          filters:
-#            branches:
-#              only: AutomationExercise
-#    jobs:
-#      - build-and-test
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only: AutomationExercise
+    jobs:
+      - build-and-test
 
-#Manual triggering
   manual_trigger:
     when:
       and:
