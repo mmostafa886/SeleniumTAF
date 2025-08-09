@@ -13,15 +13,15 @@ jobs:
       - checkout
 
       # Fixed browser tools installation
-#      - run:
-#          name: Install Chrome and Chromedriver
-#          command: |
-#            sudo apt-get update
-#            sudo apt-get install -y wget
-#            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-#            sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-#            rm google-chrome-stable_current_amd64.deb
-#            google-chrome --version
+      - run:
+          name: Install Chrome and Chromedriver
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y wget
+            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+            rm google-chrome-stable_current_amd64.deb
+            google-chrome --version
 
       - restore_cache:
           keys:
@@ -56,33 +56,22 @@ jobs:
 
 workflows:
   version: 2
+  main_workflow:
+    # Handle both push and manual triggers
+    when:
+      or:
+        - not: { equal: [ << pipeline.parameters.run_manual >>, true ] }  # Push trigger
+        - equal: [ << pipeline.parameters.run_manual >>, true ]          # Manual trigger
 
-  # Scheduled nightly build
-  nightly:
+    # Scheduled trigger configuration
     triggers:
       - schedule:
-          cron: "0 0 * * *"  # Midnight UTC
-          filters:
-            branches:
-              only:
-                - AutomationExercise
-    jobs:
-      - build-and-test
-
-  # Trigger on push
-  on_push:
-    jobs:
-      - build-and-test:
+          cron: "0 0 * * *"
           filters:
             branches:
               only:
                 - AutomationExercise
 
-  # Manual trigger workflow
-  manual_trigger:
-    when:
-      and:
-        - equal: [ manual, true ]
     jobs:
       - build-and-test:
           filters:
