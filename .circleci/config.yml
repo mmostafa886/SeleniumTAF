@@ -1,13 +1,11 @@
 version: 2.1
 
-#orbs
 orbs:
   maven: circleci/maven@2.1.1
   browser-tools: circleci/browser-tools@2.2.1
 
 jobs:
   build-and-test:
-    #docker image to be used
     docker:
       - image: cimg/openjdk:21.0.5
 
