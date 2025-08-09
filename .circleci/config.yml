@@ -8,11 +8,10 @@ jobs:
   build-and-test:
     docker:
       - image: cimg/openjdk:21.0.5
-
     steps:
       - checkout
 
-      # Fixed browser tools installation
+      # Install Chrome & Chromedriver
       - run:
           name: Install Chrome and Chromedriver
           command: |
@@ -27,7 +26,6 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "pom.xml" }}
             - v1-dependencies-
-
 
       - run:
           name: Build project and download dependencies
@@ -52,9 +50,8 @@ jobs:
           path: target/surefire-reports
           destination: test-reports
           when: always
-          retention: 30d  # Keep for 30 days
+          retention: 30d
 
-# Pipeline parameters must be declared at the top level
 parameters:
   trigger_type:
     type: string
@@ -63,8 +60,10 @@ parameters:
 workflows:
   version: 2
 
-  # Regular push-triggered workflow
+  # 1️⃣ Push-to-branch workflow
   on_push:
+    when:
+      equal: [ << pipeline.parameters.trigger_type >>, "push" ]
     jobs:
       - build-and-test:
           filters:
@@ -72,7 +71,7 @@ workflows:
               only:
                 - AutomationExercise
 
-  # Scheduled nightly build
+  # 2️⃣ Nightly workflow
   nightly:
     triggers:
       - schedule:
@@ -84,14 +83,9 @@ workflows:
     jobs:
       - build-and-test
 
-  # Manual trigger workflow
+  # 3️⃣ Manual workflow
   manual_trigger:
     when:
-      and:
-        - equal: [ << pipeline.parameters.trigger_type >>, "manual" ]
+      equal: [ << pipeline.parameters.trigger_type >>, "manual" ]
     jobs:
-      - build-and-test:
-          filters:
-            branches:
-              only:
-                - AutomationExercise
+      - build-and-test
