@@ -77,7 +77,8 @@ workflows:
 
   # Manual trigger workflow
   manual_trigger:
-    when: manual
+    triggers:
+      - manual
     jobs:
       - build-and-test:
           filters:
