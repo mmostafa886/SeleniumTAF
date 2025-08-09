@@ -56,14 +56,18 @@ jobs:
 
 workflows:
   version: 2
-  main_workflow:
-    # Handle both push and manual triggers
-    when:
-      or:
-        - not: { equal: [ << pipeline.parameters.run_manual >>, true ] }  # Push trigger
-        - equal: [ << pipeline.parameters.run_manual >>, true ]          # Manual trigger
 
-    # Scheduled trigger configuration
+  # Regular push-triggered workflow
+  on_push:
+    jobs:
+      - build-and-test:
+          filters:
+            branches:
+              only:
+                - AutomationExercise
+
+  # Scheduled nightly build
+  nightly:
     triggers:
       - schedule:
           cron: "0 0 * * *"
@@ -71,10 +75,17 @@ workflows:
             branches:
               only:
                 - AutomationExercise
+    jobs:
+      - build-and-test
 
+  # Manual trigger workflow using parameters
+  manual_trigger:
     jobs:
       - build-and-test:
           filters:
             branches:
               only:
                 - AutomationExercise
+    when:
+      and:
+        - equal: [ << pipeline.parameters.trigger_type >>, "manual" ]
