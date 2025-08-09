@@ -1,11 +1,13 @@
 version: 2.1
 
+#orbs
 orbs:
   maven: circleci/maven@2.1.1
   browser-tools: circleci/browser-tools@2.2.1
 
 jobs:
   build-and-test:
+    #docker image to be used
     docker:
       - image: cimg/openjdk:21.0.5
 
@@ -57,6 +59,7 @@ jobs:
 workflows:
   version: 2
 
+#Triggered when there is a push
   on_push:
     jobs:
       - build-and-test:
@@ -64,16 +67,18 @@ workflows:
             branches:
               only: AutomationExercise
 
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"
-          filters:
-            branches:
-              only: AutomationExercise
-    jobs:
-      - build-and-test
+#triggered Nightly, will be commented
+#  nightly:
+#    triggers:
+#      - schedule:
+#          cron: "0 0 * * *"
+#          filters:
+#            branches:
+#              only: AutomationExercise
+#    jobs:
+#      - build-and-test
 
+#Manual triggering
   manual_trigger:
     when:
       and:
