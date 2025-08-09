@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  #java: circleci/java@2.2.0
   browser-tools: circleci/browser-tools@2.2.1
 
 jobs:
@@ -11,9 +10,9 @@ jobs:
 
     steps:
       - checkout
-        
-        # Fixed browser tools installation
-          - run:
+
+      # Fixed browser tools installation
+      - run:
           name: Install Chrome and Chromedriver
           command: |
             sudo apt-get update
@@ -57,7 +56,6 @@ jobs:
           path: target/surefire-reports
           destination: test-reports
           when: always
-          # Optional retention
           retention: 30d  # Keep for 30 days
 
 workflows:
