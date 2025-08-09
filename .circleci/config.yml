@@ -54,6 +54,12 @@ jobs:
           when: always
           retention: 30d  # Keep for 30 days
 
+# Pipeline parameters must be declared at the top level
+parameters:
+  trigger_type:
+    type: string
+    default: "push"
+
 workflows:
   version: 2
 
@@ -78,14 +84,14 @@ workflows:
     jobs:
       - build-and-test
 
-  # Manual trigger workflow using parameters
+  # Manual trigger workflow
   manual_trigger:
+    when:
+      and:
+        - equal: [ << pipeline.parameters.trigger_type >>, "manual" ]
     jobs:
       - build-and-test:
           filters:
             branches:
               only:
                 - AutomationExercise
-    when:
-      and:
-        - equal: [ << pipeline.parameters.trigger_type >>, "manual" ]
