@@ -44,7 +44,9 @@ jobs:
             DISPLAY: ":99"
 
       - store_test_results:
-          path: test-output/reports
+          path: test-output/target/surefire-reports
+          when: always
+          retention: 30d
 
       - store_artifacts:
           path: test-output/reports
