@@ -99,27 +99,65 @@ jobs:
               Write-Host "Edge installed at: $edgePath"
 
         - run:
-            name: Install EdgeDriver
+            name: Install EdgeDriver (Fixed)
             shell: powershell.exe
             command: |
+              # Create directory with full permissions
+              $driverDir = "C:\SeleniumWebDrivers\EdgeDriver"
+              Remove-Item -Path $driverDir -Recurse -Force -ErrorAction SilentlyContinue
+              New-Item -ItemType Directory -Path $driverDir -Force
+              icacls $driverDir /grant "Everyone:(OI)(CI)F"
+
+              # Get exact Edge version
               $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-              $edgeVersion = (Get-Item $edgePath).VersionInfo.FileVersion
-              $fullVersion = $edgeVersion.Split('.')[0..2] -join '.'
+              $edgeVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($edgePath).FileVersion
+              $majorVersion = $edgeVersion.Split('.')[0]
 
-              # Try exact version first, then major version
-              $driverUrls = @(
-                "https://msedgedriver.azureedge.net/$fullVersion/edgedriver_win64.zip",
-                "https://msedgedriver.azureedge.net/$($edgeVersion.Split('.')[0])/edgedriver_win64.zip"
-              )
+              Write-Host "Downloading EdgeDriver for version $majorVersion"
 
-              foreach ($url in $driverUrls) {
+              # Download with retry logic
+              $retryCount = 0
+              $maxRetries = 3
+              $success = $false
+
+              do {
                 try {
-                  Invoke-WebRequest $url -OutFile "$env:TEMP\edgedriver.zip"
-                  break
+                  $driverUrl = "https://msedgedriver.azureedge.net/$majorVersion/edgedriver_win64.zip"
+                  Invoke-WebRequest $driverUrl -OutFile "$env:TEMP\edgedriver.zip"
+                  $success = $true
                 } catch {
-                  Write-Host "Failed to download $url, trying next option..."
+                  $retryCount++
+                  if ($retryCount -ge $maxRetries) {
+                    Write-Error "Failed to download EdgeDriver after $maxRetries attempts"
+                    exit 1
+                  }
+                  Start-Sleep -Seconds 5
                 }
+              } while (-not $success -and $retryCount -lt $maxRetries)
+
+              # Extract and verify
+              Expand-Archive -Path "$env:TEMP\edgedriver.zip" -DestinationPath $driverDir -Force
+              Remove-Item -Path "$env:TEMP\edgedriver.zip" -Force
+
+              # Set permissions on executable
+              $driverPath = "$driverDir\msedgedriver.exe"
+              icacls $driverPath /grant "Everyone:F"
+
+              # Verify installation
+              if (-not (Test-Path $driverPath)) {
+                Write-Error "EdgeDriver verification failed - file not found"
+                Get-ChildItem $driverDir -Recurse | Format-Table FullName
+                exit 1
               }
+
+              # Add debug output
+              Write-Host "EdgeDriver successfully installed:"
+              Get-Item $driverPath | Format-List *
+              & $driverPath --version
+
+              # Add to system PATH
+              $env:Path += ";$driverDir"
+              [System.Environment]::SetEnvironmentVariable("Path", $env:Path, "Machine")
 
         - run:
             name: Verify WebDriver Permissions
