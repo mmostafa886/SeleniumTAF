@@ -8,16 +8,6 @@ orbs:
   browser-tools: circleci/browser-tools@2.2.1
   win: circleci/windows@5.0 # The Windows orb gives you everything you need to start using the Windows executor.
 
-# The custom executor now directly references the orb's executor
-# and then defines any custom settings.
-executors:
-  windows-edge:
-    win/default:
-      shell: powershell.exe
-      size: medium
-      environment:
-        EDGE_DRIVER_PATH: "C:/SeleniumWebDrivers/EdgeDriver/msedgedriver.exe"
-
 jobs:
 #  chrome-test:
 #    docker:
