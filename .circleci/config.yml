@@ -73,8 +73,10 @@ jobs:
 #          retention: 30d
 
   edge-test:
-    docker:
-      - image: cimg/node:20.4.0-browsers
+    # Use the Windows executor, which is required for running Microsoft Edge
+    executor:
+      name: win/default
+      size: medium
     steps:
       # Use the browser-tools orb to install Edge and its driver
       - browser-tools/install_edge
@@ -88,9 +90,6 @@ jobs:
       # Checkout the code from the Branch contains the config.yml
       # https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository
       - checkout
-
-
-
 
       # Restore previously cached dependencies
       - restore_cache:
