@@ -38,7 +38,7 @@ public class EdgeFactory extends AbstractDriver {
         options.setCapability(CapabilityType.ENABLE_DOWNLOADS, true);
         options.setAcceptInsecureCerts(true); // Accept insecure certificates
         options.addExtensions(haramBlurExtension);
-        if (isHeadlessMode()) options.addArguments("--headless");// Run in headless mode if specified in the configuration
+        if (isHeadlessMode()) options.addArguments("--headless=new");// Run in headless mode if specified in the configuration
         if (isRemote) {
             options.addArguments("--disable-gpu"); // Example option to disable GPU hardware acceleration
             options.addArguments("--disable-extensions");
