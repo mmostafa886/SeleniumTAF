@@ -77,8 +77,8 @@ jobs:
       - image: cimg/node:20.4.0-browsers
     steps:
       # Use the browser-tools orb to install Edge and its driver
-      - browser-tools/install-edge
-      - browser-tools/install-edge-driver
+      - browser-tools/install_edge
+      - browser-tools/install_edge-web-driver
       - run:
         name: Verify Edge Installation
         shell: powershell.exe
