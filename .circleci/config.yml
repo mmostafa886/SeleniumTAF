@@ -74,7 +74,7 @@ jobs:
 
   edge-test:
     docker:
-      - image: cimg/openjdk:21.0.5
+      - image: cimg/node:20.4.0-browsers
     steps:
       # Checkout the code from the Branch contains the config.yml
       # https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository
