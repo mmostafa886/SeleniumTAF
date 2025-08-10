@@ -8,77 +8,74 @@ orbs:
   browser-tools: circleci/browser-tools@2.2.1
 
 jobs:
-#  chrome-test:
-#    docker:
-#      - image: cimg/openjdk:21.0.5
-#    steps:
-#      # Checkout the code from the Branch contains the config.yml
-#      # https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository
-#      - checkout
-#
-#      # Install Chrome & Chromedriver
-#      - run:
-#          name: Install Chrome and Chromedriver
-#          command: |
-#            sudo apt-get update
-#            sudo apt-get install -y wget
-#            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-#            sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-#            rm google-chrome-stable_current_amd64.deb
-#            google-chrome --version
-#
-#
-#      # Restore previously cached dependencies
-#      - restore_cache:
-#          keys:
-#            - v1-dependencies-{{ checksum "pom.xml" }}
-#            - v1-dependencies-
-#
-#      #Build the project and download dependencies
-#      - run:
-#          name: Build project and download dependencies
-#          command: mvn dependency:go-offline
-#
-#      # creates a new cache of your project's dependencies to accelerate future builds.
-#      - save_cache:
-#          paths:
-#            - ~/.m2
-#          key: v1-dependencies-{{ checksum "pom.xml" }}
-#
-#      # Run tests (customize the execution command to run the tests on chrome)
-#      - run:
-#          name: Run Tests
-#          command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
-#          environment:
-#            MAVEN_OPTS: -Xmx3200m
-#            DISPLAY: ":99"
-#
-#      #This file is not created in a standard way & causes issues when it comes to uploading test results.
-#      # so it needs to be deleted before the "store-test-results step".
-#      - run:
-#          name: Clean test results
-#          command: rm -f test-output/target/surefire-reports/testng-results.xml
-#
-#      # Store the xml test results to the Tests directory of the pipeline
-#      - store_test_results:
-#          name: Clean test results
-#          path: test-output/target/surefire-reports
-#
-#      # Store the test reports to the TestReports directory of the pipeline (in the Artifacts tab of the pipeline)
-#      # In this project, this will be the Allure html report
-#      - store_artifacts:
-#          path: test-output/reports
-#          destination: test-reports
-#          when: always
-#          retention: 30d
+  chrome-test:
+    docker:
+      - image: cimg/openjdk:21.0.5
+    steps:
+      # Checkout the code from the Branch contains the config.yml
+      # https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository
+      - checkout
+
+      # Install Chrome & Chromedriver
+      - browser-tools/install_chrome
+      - browser-tools/install_chromedriver
+      - run:
+          command: |
+            google-chrome --version
+            chromedriver --version
+
+
+      # Restore previously cached dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            - v1-dependencies-
+
+      #Build the project and download dependencies
+      - run:
+          name: Build project and download dependencies
+          command: mvn dependency:go-offline
+
+      # creates a new cache of your project's dependencies to accelerate future builds.
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+
+      # Run tests (customize the execution command to run the tests on chrome)
+      - run:
+          name: Run Tests
+          command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest=LoginTest
+          environment:
+            MAVEN_OPTS: -Xmx3200m
+            DISPLAY: ":99"
+
+      #This file is not created in a standard way & causes issues when it comes to uploading test results.
+      # so it needs to be deleted before the "store-test-results step".
+      - run:
+          name: Clean test results
+          command: rm -f test-output/target/surefire-reports/testng-results.xml
+
+      # Store the xml test results to the Tests directory of the pipeline
+      - store_test_results:
+          name: Clean test results
+          path: test-output/target/surefire-reports
+
+      # Store the test reports to the TestReports directory of the pipeline (in the Artifacts tab of the pipeline)
+      # In this project, this will be the Allure html report
+      - store_artifacts:
+          path: test-output/reports
+          destination: test-reports
+          when: always
+          retention: 30d
 
   edge-test:
     docker:
-      - image: cimg/node:20.4.0-browsers
+      - image: cimg/base
     steps:
       # Use the browser-tools orb to install Edge and its driver
       - browser-tools/install_edge
-      - browser-tools/install_edge-web-driver
+      - browser-tools/install_edge_driver
 
       # Checkout the code from the Branch contains the config.yml
       # https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository
