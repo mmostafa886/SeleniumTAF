@@ -60,7 +60,7 @@ parameters:
 workflows:
   version: 2
 
-  # 1️⃣ Push-to-branch workflow
+  #Push-to-branch workflow
   on_push:
     when:
       equal: [ << pipeline.parameters.trigger_type >>, "push" ]
@@ -71,7 +71,7 @@ workflows:
               only:
                 - AutomationExercise
 
-  # 2️⃣ Nightly workflow
+  #Nightly workflow
   nightly:
     triggers:
       - schedule:
@@ -83,7 +83,7 @@ workflows:
     jobs:
       - build-and-test
 
-  # 3️⃣ Manual workflow
+  # Manual workflow
   manual_trigger:
     when:
       equal: [ << pipeline.parameters.trigger_type >>, "manual" ]
