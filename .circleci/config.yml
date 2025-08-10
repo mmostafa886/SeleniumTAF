@@ -114,24 +114,23 @@ jobs:
           when: always
           retention: 30d
 
-parameters:
-  trigger_type:
-    type: string
-    default: "push"
 
 workflows:
   version: 2
 
   #Push-to-branch workflow
   on_push:
-    when:
-      equal: [ << pipeline.parameters.trigger_type >>, "push" ]
     jobs:
-      - build-and-test:
+      - chrome-test:
           filters:
             branches:
               only:
                 - AutomationExercise
+      - edge-test:
+            filters:
+              branches:
+                only:
+                  - AutomationExercise
 
   #Nightly workflow
   nightly:
@@ -143,11 +142,5 @@ workflows:
               only:
                 - AutomationExercise
     jobs:
-      - build-and-test
-
-  # Manual workflow
-  manual_trigger:
-    when:
-      equal: [ << pipeline.parameters.trigger_type >>, "manual" ]
-    jobs:
-      - build-and-test
+      - chrome-test
+      - edge-test
