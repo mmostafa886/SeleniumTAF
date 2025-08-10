@@ -8,18 +8,15 @@ orbs:
   browser-tools: circleci/browser-tools@2.2.1
   win: circleci/windows@5.0 # The Windows orb gives you everything you need to start using the Windows executor.
 
-# Executors are a key part of your configuration.
-# They define the environment in which your jobs will run.
+# The custom executor now directly references the orb's executor
+# and then defines any custom settings.
 executors:
   windows-edge:
-    executor: win/default
-    shell: powershell.exe
-    size: medium
-    environment:
-      # The browser-tools orb will automatically set this path, so it's not needed here
-      # However, if you have a specific setup, you can keep it
-      # EDGE_DRIVER_PATH: "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
-      MAVEN_OPTS: -Xmx3200m
+    win/default:
+      shell: powershell.exe
+      size: medium
+      environment:
+        EDGE_DRIVER_PATH: "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
 
 jobs:
 #  chrome-test:
