@@ -76,19 +76,20 @@ jobs:
     docker:
       - image: cimg/node:20.4.0-browsers
     steps:
-      # Checkout the code from the Branch contains the config.yml
-      # https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository
-      - checkout
-
       # Use the browser-tools orb to install Edge and its driver
       - browser-tools/install-edge
       - browser-tools/install-edge-driver
       - run:
-          name: Verify Edge Installation
-          shell: powershell.exe
-          command: |
-            msedge --version
-            msedgedriver --version
+        name: Verify Edge Installation
+        shell: powershell.exe
+        command: |
+          - msedge --version
+          - msedgedriver --version
+      # Checkout the code from the Branch contains the config.yml
+      # https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository
+      - checkout
+
+
 
 
       # Restore previously cached dependencies
