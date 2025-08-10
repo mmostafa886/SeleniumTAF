@@ -157,11 +157,6 @@ workflows:
               branches:
                 only:
                   - AutomationExercise
-      - edge-test2:
-          filters:
-            branches:
-              only:
-                - AutomationExercise
 
   #Nightly workflow
   nightly:
