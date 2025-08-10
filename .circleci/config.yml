@@ -110,7 +110,7 @@ jobs:
       # Run tests (customize the execution command to run the tests on edge)
       - run:
           name: Run Tests
-          command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest=LoginTest
+          command: mvn clean test -Dbrowser=edge -Dheadless=true -Dtest=LoginTest
           environment:
             MAVEN_OPTS: -Xmx3200m
             DISPLAY: ":99"
