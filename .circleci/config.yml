@@ -102,13 +102,13 @@ jobs:
             [System.Environment]::SetEnvironmentVariable("PATH", $env:PATH, [System.EnvironmentVariableTarget]::Machine)
             Write-Host "WebDriver installed to C:\SeleniumWebDrivers\EdgeDriver"
 
-#      # Install Java and Maven
-#      - run:
-#          name: Install Java and Maven
-#          command: |
-#            choco install adoptopenjdk21 maven -y --no-progress
-#            java -version
-#            mvn --version
+      # Install Java and Maven
+      - run:
+          name: Install Java and Maven
+          command: |
+            choco install adoptopenjdk21 maven -y --no-progress
+            java -version
+            mvn --version
 
       - restore_cache:
           keys:
