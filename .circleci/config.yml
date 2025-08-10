@@ -53,53 +53,52 @@ jobs:
 #          retention: 30d
 
   edge-test:
-    executor: windows-edge
+docker:
+  - image: cimg/openjdk:11.0.21-browsers
+    working_directory: ~/project
+    environment:
+      MAVEN_OPTS: -Xmx3200m
     steps:
       - checkout
+      - run:
+          name: Install Edge Browser and WebDriver
+          command: |
+            curl https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor > microsoft.gpg
+            sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
+            sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge-dev.list'
+            sudo rm microsoft.gpg
+            sudo apt update
+            sudo apt install -y microsoft-edge-dev
+            # Find the latest stable EdgeDriver version from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
+            # Replace 127.0.2555.3 with the actual latest stable version
+            wget https://msedgedriver.azureedge.net/127.0.2555.3/edgedriver_linux64.zip -P ~/
+            unzip ~/edgedriver_linux64.zip -d ~/
+            rm ~/edgedriver_linux64.zip
+            sudo mv -f ~/msedgedriver /usr/local/share/
+            sudo chmod 777 /usr/local/share/msedgedriver
+            sudo ln -s /usr/local/share/msedgedriver /usr/local/bin/msedgedriver
 
-      # Use the browser-tools orb to install Edge and the Edge driver
-      - browser-tools/install-browser-tools:
-          browser: msedge
-          install-chromedriver: false
-          install-geckodriver: false
-          install-msedgedriver: true
-
-      # Restore previously cached dependencies
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "pom.xml" }}
             - v1-dependencies-
+            -
+      - run: mvn dependency:go-offline
 
-      # Build the project and download dependencies
-      - run:
-          name: Build project and download dependencies
-          command: mvn dependency:go-offline
-
-      # Creates a new cache of your project's dependencies
       - save_cache:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      # Run tests with the provided configuration
-      - run:
-          name: Run Edge Tests
-          command: |
-            mvn clean test -Dbrowser=edge -Dheadless=true -Dtest=LoginTest
 
-      # Clean the testng-results.xml file
       - run:
-          name: Clean test results
+          name: Run Selenium tests using TestNG with Edge
           command: |
-            if (Test-Path "test-output\target\surefire-reports\testng-results.xml") {
-                Remove-Item "test-output\target\surefire-reports\testng-results.xml"
-            }
+            mvn clean test
 
-      # Store the xml test results
       - store_test_results:
           path: test-output/target/surefire-reports
 
-      # Store the Allure html report
       - store_artifacts:
           path: test-output/reports
           destination: test-reports
