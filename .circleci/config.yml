@@ -42,7 +42,7 @@ jobs:
 #          when: always
 #          retention: 30d
 
-  edge-test:
+edge-test:
   build:
     executor:
       name: windows/default
