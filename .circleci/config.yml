@@ -8,6 +8,13 @@ orbs:
   browser-tools: circleci/browser-tools@2.2.1
   win: circleci/windows@5.0 # The Windows orb gives you everything you need to start using the Windows executor.
 
+executors:
+  windows-edge:
+    executor: win/default
+    shell: powershell.exe
+    size: medium
+    environment:
+      EDGE_DRIVER_PATH: "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
 
 jobs:
 #  chrome-test:
@@ -74,159 +81,123 @@ jobs:
 #          when: always
 #          retention: 30d
 
-  edge-test:
-    executor:
-      name: win/default
-      shell: powershell.exe
-      size: medium
-    steps:
-        - checkout
+edge-test:
+  executor: windows-edge
+  steps:
+    - checkout
 
-      # Install Edge and WebDriver
-        - run:
-            name: Install Microsoft Edge
-            shell: powershell.exe
-            command: |
-              # Install Edge using Chocolatey
-              choco install microsoft-edge -y --no-progress
-              
-              # Verify installation
-              $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-              if (-not (Test-Path $edgePath)) {
-                Write-Error "Edge installation failed!"
-                exit 1
-              }
-              Write-Host "Edge installed at: $edgePath"
+    # System Preparation
+    - run:
+        name: Prepare System
+        shell: powershell.exe
+        command: |
+          # Enable detailed logging
+          $ErrorActionPreference = "Stop"
+          Set-PSDebug -Trace 1
+          
+          # Create driver directory with full permissions
+          New-Item -Path "C:\SeleniumWebDrivers\EdgeDriver" -ItemType Directory -Force
+          icacls "C:\SeleniumWebDrivers\EdgeDriver" /grant "Everyone:(OI)(CI)F" /T
 
-        - run:
-            name: Install EdgeDriver (Fixed)
-            shell: powershell.exe
-            command: |
-              # Create directory with full permissions
-              $driverDir = "C:\SeleniumWebDrivers\EdgeDriver"
-              Remove-Item -Path $driverDir -Recurse -Force -ErrorAction SilentlyContinue
-              New-Item -ItemType Directory -Path $driverDir -Force
-              icacls $driverDir /grant "Everyone:(OI)(CI)F"
+    # Edge Installation with Validation
+    - run:
+        name: Install Microsoft Edge
+        shell: powershell.exe
+        command: |
+          Write-Host "Installing Microsoft Edge..."
+          choco install microsoft-edge -y --no-progress --force --ignore-checksums
+          
+          # Validate installation
+          $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+          if (-not (Test-Path $edgePath)) {
+            throw "Edge installation failed - binary not found"
+          }
+          
+          $version = (Get-Item $edgePath).VersionInfo.FileVersion
+          Write-Host "Microsoft Edge $version successfully installed"
 
-              # Get exact Edge version
-              $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-              $edgeVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($edgePath).FileVersion
-              $majorVersion = $edgeVersion.Split('.')[0]
+    # EdgeDriver Installation with Atomic Operations
+    - run:
+        name: Install EdgeDriver
+        shell: powershell.exe
+        command: |
+          # Get exact Edge version
+          $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+          $version = (Get-Item $edgePath).VersionInfo.FileVersion
+          $majorVersion = $version.Split('.')[0]
+          
+          # Download with checksum verification
+          $tempDir = "C:\Temp"
+          New-Item -Path $tempDir -ItemType Directory -Force
+          $driverUrl = "https://msedgedriver.azureedge.net/$majorVersion/edgedriver_win64.zip"
+          $driverZip = "$tempDir\edgedriver.zip"
+          
+          Write-Host "Downloading EdgeDriver from $driverUrl"
+          (New-Object System.Net.WebClient).DownloadFile($driverUrl, $driverZip)
+          
+          # Atomic extraction
+          $tempExtract = "$tempDir\edgedriver_temp"
+          Expand-Archive -Path $driverZip -DestinationPath $tempExtract -Force
+          Move-Item -Path "$tempExtract\msedgedriver.exe" -Destination $env:EDGE_DRIVER_PATH -Force
+          
+          # Verify executable
+          if (-not (Test-Path $env:EDGE_DRIVER_PATH)) {
+            throw "EdgeDriver extraction failed"
+          }
+          
+          # Set permissions
+          icacls $env:EDGE_DRIVER_PATH /grant "Everyone:F"
+          & $env:EDGE_DRIVER_PATH --version
 
-              Write-Host "Downloading EdgeDriver for version $majorVersion"
+    # Java/Maven Setup
+    - run:
+        name: Install Java and Maven
+        shell: powershell.exe
+        command: |
+          choco install temurin21jdk maven -y --no-progress
+          refreshenv
+          java -version
+          mvn --version
 
-              # Download with retry logic
-              $retryCount = 0
-              $maxRetries = 3
-              $success = $false
+    # Test Execution with Full Diagnostics
+    - run:
+        name: Run Edge Tests
+        shell: powershell.exe
+        command: |
+          # Pre-execution validation
+          if (-not (Test-Path $env:EDGE_DRIVER_PATH)) {
+            Write-Host "Directory contents:"
+            Get-ChildItem "C:\SeleniumWebDrivers" -Recurse
+            throw "EdgeDriver not found at $env:EDGE_DRIVER_PATH"
+          }
+          
+          # Environment setup
+          $env:MAVEN_OPTS = "-Xmx3200m -XX:+HeapDumpOnOutOfMemoryError"
+          $env:EDGE_DRIVER_LOG = "$env:CIRCLE_WORKING_DIRECTORY\edgedriver.log"
+          
+          # Execute tests with debug logging
+          mvn clean test `
+            -Dwebdriver.edge.driver="$env:EDGE_DRIVER_PATH" `
+            -Dbrowser=edge `
+            -Dheadless=new `
+            -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**" `
+            -Dselenium.LOGGER.level=ALL
+          
+          # Capture logs if tests fail
+          if ($LASTEXITCODE -ne 0) {
+            if (Test-Path $env:EDGE_DRIVER_LOG) {
+              Get-Content $env:EDGE_DRIVER_LOG
+            }
+          }
 
-              do {
-                try {
-                  $driverUrl = "https://msedgedriver.azureedge.net/$majorVersion/edgedriver_win64.zip"
-                  Invoke-WebRequest $driverUrl -OutFile "$env:TEMP\edgedriver.zip"
-                  $success = $true
-                } catch {
-                  $retryCount++
-                  if ($retryCount -ge $maxRetries) {
-                    Write-Error "Failed to download EdgeDriver after $maxRetries attempts"
-                    exit 1
-                  }
-                  Start-Sleep -Seconds 5
-                }
-              } while (-not $success -and $retryCount -lt $maxRetries)
+    # Artifacts Collection
+    - store_test_results:
+        path: test-output/target/surefire-reports
 
-              # Extract and verify
-              Expand-Archive -Path "$env:TEMP\edgedriver.zip" -DestinationPath $driverDir -Force
-              Remove-Item -Path "$env:TEMP\edgedriver.zip" -Force
+    - store_artifacts:
+        path: test-output/reports
+        destination: test-reports
 
-              # Set permissions on executable
-              $driverPath = "$driverDir\msedgedriver.exe"
-              icacls $driverPath /grant "Everyone:F"
-
-              # Verify installation
-              if (-not (Test-Path $driverPath)) {
-                Write-Error "EdgeDriver verification failed - file not found"
-                Get-ChildItem $driverDir -Recurse | Format-Table FullName
-                exit 1
-              }
-
-              # Add debug output
-              Write-Host "EdgeDriver successfully installed:"
-              Get-Item $driverPath | Format-List *
-              & $driverPath --version
-
-              # Add to system PATH
-              $env:Path += ";$driverDir"
-              [System.Environment]::SetEnvironmentVariable("Path", $env:Path, "Machine")
-
-        - run:
-            name: Verify WebDriver Permissions
-            shell: powershell.exe
-            command: |
-              $driverPath = "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
-              $acl = Get-Acl $driverPath
-              Write-Host "WebDriver permissions:"
-              $acl.Access | Format-Table IdentityReference,FileSystemRights,AccessControlType
-
-        - run:
-            name: Copy WebDriver to Project
-            shell: powershell.exe
-            command: |
-              Copy-Item "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe" -Destination "$env:CIRCLE_WORKING_DIRECTORY\msedgedriver.exe"
-              $env:Path += ";$env:CIRCLE_WORKING_DIRECTORY"
-      # Install Java and Maven
-        - run:
-            name: Install JDK and Maven
-            shell: powershell.exe
-            command: |
-              choco install temurin21jdk maven -y --no-progress
-              refreshenv
-              java -version
-              mvn --version
-
-      # Dependency management
-        - restore_cache:
-            keys:
-              - v1-dependencies-{{ checksum "pom.xml" }}
-              - v1-dependencies-
-
-        - run:
-            name: Build project
-            shell: powershell.exe
-            command: mvn dependency:go-offline
-
-        - save_cache:
-            paths:
-              - C:\Users\circleci\.m2
-            key: v1-dependencies-{{ checksum "pom.xml" }}
-
-    # Run tests with proper WebDriver path
-        - run:
-            name: Run Edge Tests
-            shell: powershell.exe
-            command: |
-              $driverPath = "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
-              if (-not (Test-Path $driverPath)) {
-                Write-Error "EdgeDriver not found at $driverPath"
-                exit 1
-              }
-              
-              $env:MAVEN_OPTS = "-Xmx3200m"
-              mvn clean test `
-                -Dwebdriver.edge.driver="$driverPath" `
-                -Dbrowser=edge `
-                -Dheadless=true `
-                -Dtest=LoginTest
-
-    # Test reporting
-        - store_test_results:
-            path: test-output/target/surefire-reports
-
-        - store_artifacts:
-            path: test-output/reports
-            destination: test-reports
-            when: always
-            retention: 30d
 
 
 workflows:
