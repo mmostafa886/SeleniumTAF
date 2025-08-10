@@ -107,6 +107,7 @@ jobs:
           name: Install Java and Maven
           command: |
             choco install temurin maven -y --no-progress
+            refreshenv
             java -version
             mvn --version
 
