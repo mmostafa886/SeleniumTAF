@@ -96,20 +96,13 @@ jobs:
       - run:
           name: Install Edge WebDriver
           command: |
-            $edgeVersion = (& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version).Split('.')[0]
-            $driverUrl = "https://msedgedriver.azureedge.net/$edgeVersion/edgedriver_win64.zip"
-            # Clean previous installation
-            Remove-Item -Path "C:\SeleniumWebDrivers\EdgeDriver" -Recurse -Force -ErrorAction SilentlyContinue
-            New-Item -ItemType Directory -Path "C:\SeleniumWebDrivers\EdgeDriver" -Force
-            # Download and extract
-            Invoke-WebRequest $driverUrl -OutFile "edgedriver.zip"
+            $edgeVersion = & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version
+            $driverVersion = $edgeVersion.Split(".")[0]
+            Invoke-WebRequest "https://msedgedriver.azureedge.net/$driverVersion/edgedriver_win64.zip" -OutFile "edgedriver.zip"
             Expand-Archive -Path "edgedriver.zip" -DestinationPath "C:\SeleniumWebDrivers\EdgeDriver" -Force
-            Remove-Item -Path "edgedriver.zip"
-            # Verify
-            if (-not (Test-Path "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe")) {
-            Write-Error "EdgeDriver installation failed!"
-            exit 1
-          }
+            $env:PATH += ";C:\SeleniumWebDrivers\EdgeDriver"
+            [System.Environment]::SetEnvironmentVariable("PATH", $env:PATH, [System.EnvironmentVariableTarget]::Machine)
+            Write-Host "WebDriver installed to C:\SeleniumWebDrivers\EdgeDriver"
 
       # Install Java and Maven
       - run:
@@ -139,8 +132,6 @@ jobs:
           command: |
             $env:MAVEN_OPTS = "-Xmx3200m"
             $driverPath = "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
-            # Verify driver exists
-            if (-not (Test-Path $driverPath)) { Write-Error "EdgeDriver not found at $driverPath" exit 1 }
             mvn clean test -Dbrowser=edge -Dheadless=true -D"webdriver.edge.driver=$driverPath" -Dtest=LoginTest -X
 
       - store_test_results:
