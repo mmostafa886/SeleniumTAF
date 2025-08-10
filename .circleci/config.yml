@@ -6,98 +6,47 @@ version: 2.1
 orbs:
   maven: circleci/maven@2.1.1
   browser-tools: circleci/browser-tools@2.2.1
-  win: circleci/windows@5.0 # The Windows orb gives you everything you need to start using the Windows executor.
 
 jobs:
-#  chrome-test:
-#    docker:
-#      - image: cimg/openjdk:21.0.5
-#    steps:
-#      - checkout
-#
-#      # Use the browser-tools orb to install Chrome and Chromedriver
-#      - browser-tools/install-browser-tools:
-#          browser: chrome
-#          install-geckodriver: false
-#          install-msedgedriver: false
-#
-#      # The maven orb's test command handles caching and test execution
-#      - maven/test:
-#          test-command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
-#          # The maven/test command also handles caching automatically
-#
-#      # Clean the testng-results.xml file
-#      - run:
-#          name: Clean test results
-#          command: rm -f test-output/target/surefire-reports/testng-results.xml
-#
-#      # Store the xml test results
-#      - store_test_results:
-#          path: test-output/target/surefire-reports
-#
-#      # Store the Allure html report
-#      - store_artifacts:
-#          path: test-output/reports
-#          destination: test-reports
-#          when: always
-#          retention: 30d
+  chrome-test:
+    docker:
+      - image: cimg/openjdk:21.0.5
+    steps:
+      - checkout
 
-  edge-test:
-    build:
-      executor:
-        name: windows/default
-        size: medium
-      working_directory: ~/project
-      environment:
-        MAVEN_OPTS: -Xmx3200m
-      steps:
-        - checkout
-        - run:
-            name: Install Edge Browser and WebDriver
-            command: |
-              # Edge browser is typically pre-installed on Windows executors.
-              # We need to download and set up the EdgeDriver.
-              # Find the latest stable EdgeDriver version from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
-              # Replace 127.0.2555.3 with the actual latest stable version
-              Invoke-WebRequest -Uri "https://msedgedriver.azureedge.net/127.0.2555.3/edgedriver_win64.zip" -OutFile "$env:TEMP\edgedriver_win64.zip"
-              Expand-Archive -Path "$env:TEMP\edgedriver_win64.zip" -DestinationPath "C:\SeleniumDrivers"
-              # Add EdgeDriver to PATH
-              [Environment]::SetEnvironmentVariable("Path", "$env:Path;C:\SeleniumDrivers", "Machine")
-        - restore_cache:
-            keys:
-              - v1-dependencies-{{ checksum "pom.xml" }}
-              - v1-dependencies-
-        - run: mvn dependency:go-offline
-        - save_cache:
-            paths:
-              - ~/.m2
-            key: v1-dependencies-{{ checksum "pom.xml" }}
+      # Use the browser-tools orb to install Chrome and Chromedriver
+      - browser-tools/install-browser-tools:
+          browser: chrome
+          install-geckodriver: false
+          install-msedgedriver: false
 
-        - run:
-            name: Run Selenium tests using TestNG with Edge
-            command: |
-              mvn clean test
+      # The maven orb's test command handles caching and test execution
+      - maven/test:
+          test-command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest=LoginTest
+          # The maven/test command also handles caching automatically
 
-        - store_test_results:
-            path: test-output/target/surefire-reports
+      # Clean the testng-results.xml file
+      - run:
+          name: Clean test results
+          command: rm -f test-output/target/surefire-reports/testng-results.xml
 
-        - store_artifacts:
-            path: test-output/reports
-            destination: test-reports
-            when: always
-            retention: 30d
+      # Store the xml test results
+      - store_test_results:
+          path: test-output/target/surefire-reports
+
+      # Store the Allure html report
+      - store_artifacts:
+          path: test-output/reports
+          destination: test-reports
+          when: always
+          retention: 30d
 
 workflows:
   version: 2
 
   on_push:
     jobs:
-#      - chrome-test:
-#          filters:
-#            branches:
-#              only:
-#                - AutomationExercise
-      - edge-test:
+      - chrome-test:
           filters:
             branches:
               only:
@@ -112,5 +61,4 @@ workflows:
               only:
                 - AutomationExercise
     jobs:
-      #- chrome-test
-      - edge-test
+      - chrome-test
