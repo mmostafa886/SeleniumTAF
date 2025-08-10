@@ -75,7 +75,7 @@ jobs:
 
   edge-test:
     executor:
-      name: win/default  # Built-in Windows executor
+      name: windows-server-2022-gui  # Built-in Windows executor
       shell: powershell.exe  # Default shell for all steps
       size: medium  # Windows requires at least medium resource class
 
