@@ -42,50 +42,50 @@ jobs:
 #          when: always
 #          retention: 30d
 
-edge-test:
-  build:
-    executor:
-      name: windows/default
-      size: medium
-    working_directory: ~/project
-    environment:
-      MAVEN_OPTS: -Xmx3200m
-    steps:
-      - checkout
-      - run:
-          name: Install Edge Browser and WebDriver
-          command: |
-            # Edge browser is typically pre-installed on Windows executors.
-            # We need to download and set up the EdgeDriver.
-            # Find the latest stable EdgeDriver version from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
-            # Replace 127.0.2555.3 with the actual latest stable version
-            Invoke-WebRequest -Uri "https://msedgedriver.azureedge.net/127.0.2555.3/edgedriver_win64.zip" -OutFile "$env:TEMP\edgedriver_win64.zip"
-            Expand-Archive -Path "$env:TEMP\edgedriver_win64.zip" -DestinationPath "C:\SeleniumDrivers"
-            # Add EdgeDriver to PATH
-            [Environment]::SetEnvironmentVariable("Path", "$env:Path;C:\SeleniumDrivers", "Machine")
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "pom.xml" }}
-            - v1-dependencies-
-      - run: mvn dependency:go-offline
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
+  edge-test:
+    build:
+      executor:
+        name: windows/default
+        size: medium
+      working_directory: ~/project
+      environment:
+        MAVEN_OPTS: -Xmx3200m
+      steps:
+        - checkout
+        - run:
+            name: Install Edge Browser and WebDriver
+            command: |
+              # Edge browser is typically pre-installed on Windows executors.
+              # We need to download and set up the EdgeDriver.
+              # Find the latest stable EdgeDriver version from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
+              # Replace 127.0.2555.3 with the actual latest stable version
+              Invoke-WebRequest -Uri "https://msedgedriver.azureedge.net/127.0.2555.3/edgedriver_win64.zip" -OutFile "$env:TEMP\edgedriver_win64.zip"
+              Expand-Archive -Path "$env:TEMP\edgedriver_win64.zip" -DestinationPath "C:\SeleniumDrivers"
+              # Add EdgeDriver to PATH
+              [Environment]::SetEnvironmentVariable("Path", "$env:Path;C:\SeleniumDrivers", "Machine")
+        - restore_cache:
+            keys:
+              - v1-dependencies-{{ checksum "pom.xml" }}
+              - v1-dependencies-
+        - run: mvn dependency:go-offline
+        - save_cache:
+            paths:
+              - ~/.m2
+            key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      - run:
-          name: Run Selenium tests using TestNG with Edge
-          command: |
-            mvn clean test
+        - run:
+            name: Run Selenium tests using TestNG with Edge
+            command: |
+              mvn clean test
 
-      - store_test_results:
-          path: test-output/target/surefire-reports
+        - store_test_results:
+            path: test-output/target/surefire-reports
 
-      - store_artifacts:
-          path: test-output/reports
-          destination: test-reports
-          when: always
-          retention: 30d
+        - store_artifacts:
+            path: test-output/reports
+            destination: test-reports
+            when: always
+            retention: 30d
 
 workflows:
   version: 2
