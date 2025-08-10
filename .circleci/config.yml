@@ -12,29 +12,60 @@ jobs:
     docker:
       - image: cimg/openjdk:21.0.5
     steps:
+      # Checkout the code from the Branch contains the config.yml
+      # https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository
       - checkout
 
-      # Use the browser-tools orb to install Chrome and Chromedriver
-      - browser-tools/install-browser-tools:
-          browser: chrome
-          install-geckodriver: false
-          install-msedgedriver: false
+      # Install Chrome & Chromedriver
+      - run:
+          name: Install Chrome and Chromedriver
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y wget
+            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+            rm google-chrome-stable_current_amd64.deb
+            google-chrome --version
 
-      # The maven orb's test command handles caching and test execution
-      - maven/test:
-          test-command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest=LoginTest
-          # The maven/test command also handles caching automatically
 
-      # Clean the testng-results.xml file
+      # Restore previously cached dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            - v1-dependencies-
+
+      #Build the project and download dependencies
+      - run:
+          name: Build project and download dependencies
+          command: mvn dependency:go-offline
+
+      # creates a new cache of your project's dependencies to accelerate future builds.
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+
+      # Run tests (customize the execution command to run the tests on chrome)
+      - run:
+          name: Run Tests
+          command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
+          environment:
+            MAVEN_OPTS: -Xmx3200m
+            DISPLAY: ":99"
+
+      #This file is not created in a standard way & causes issues when it comes to uploading test results.
+      # so it needs to be deleted before the "store-test-results step".
       - run:
           name: Clean test results
           command: rm -f test-output/target/surefire-reports/testng-results.xml
 
-      # Store the xml test results
+      # Store the xml test results to the Tests directory of the pipeline
       - store_test_results:
+          name: Clean test results
           path: test-output/target/surefire-reports
 
-      # Store the Allure html report
+      # Store the test reports to the TestReports directory of the pipeline (in the Artifacts tab of the pipeline)
+      # In this project, this will be the Allure html report
       - store_artifacts:
           path: test-output/reports
           destination: test-reports
