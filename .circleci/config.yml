@@ -140,7 +140,7 @@ workflows:
 
   on_push:
     jobs:
-      - chrome-test:
+      - edge-test:
           filters:
             branches:
               only:
@@ -155,4 +155,4 @@ workflows:
               only:
                 - AutomationExercise
     jobs:
-      - chrome-test
+      - edge-test
