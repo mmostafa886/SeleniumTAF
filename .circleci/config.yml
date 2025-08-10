@@ -1,147 +1,117 @@
 version: 2.1
 
-# are reusable packages of configuration elements (commands, jobs, executors) that help simplify your CI/CD pipeline setup.
-#They're essentially shared libraries for CircleCI configurations.
-#https://circleci.com/developer/orbs
+# Reusable packages of configuration elements (commands, jobs, executors) that help simplify your CI/CD pipeline setup.
+# They're essentially shared libraries for CircleCI configurations.
+# https://circleci.com/developer/orbs
 orbs:
   maven: circleci/maven@2.1.1
   browser-tools: circleci/browser-tools@2.2.1
   win: circleci/windows@5.0 # The Windows orb gives you everything you need to start using the Windows executor.
 
+# Executors are a key part of your configuration.
+# They define the environment in which your jobs will run.
 executors:
   windows-edge:
     executor: win/default
     shell: powershell.exe
     size: medium
+    environment:
+      # The browser-tools orb will automatically set this path, so it's not needed here
+      # However, if you have a specific setup, you can keep it
+      # EDGE_DRIVER_PATH: "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
+      MAVEN_OPTS: -Xmx3200m
 
 jobs:
 #  chrome-test:
 #    docker:
 #      - image: cimg/openjdk:21.0.5
 #    steps:
-#      # Checkout the code from the Branch contains the config.yml
-#      # https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository
 #      - checkout
 #
-#      # Install Chrome & Chromedriver
-#      - run:
-#          name: Install Chrome and Chromedriver
-#          command: |
-#            sudo apt-get update
-#            sudo apt-get install -y wget
-#            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-#            sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-#            rm google-chrome-stable_current_amd64.deb
-#            google-chrome --version
+#      # Use the browser-tools orb to install Chrome and Chromedriver
+#      - browser-tools/install-browser-tools:
+#          browser: chrome
+#          install-geckodriver: false
+#          install-msedgedriver: false
 #
+#      # The maven orb's test command handles caching and test execution
+#      - maven/test:
+#          test-command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
+#          # The maven/test command also handles caching automatically
 #
-#      # Restore previously cached dependencies
-#      - restore_cache:
-#          keys:
-#            - v1-dependencies-{{ checksum "pom.xml" }}
-#            - v1-dependencies-
-#
-#      #Build the project and download dependencies
-#      - run:
-#          name: Build project and download dependencies
-#          command: mvn dependency:go-offline
-#
-#      # creates a new cache of your project's dependencies to accelerate future builds.
-#      - save_cache:
-#          paths:
-#            - ~/.m2
-#          key: v1-dependencies-{{ checksum "pom.xml" }}
-#
-#      # Run tests (customize the execution command to run the tests on chrome)
-#      - run:
-#          name: Run Tests
-#          command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
-#          environment:
-#            MAVEN_OPTS: -Xmx3200m
-#            DISPLAY: ":99"
-#
-#      #This file is not created in a standard way & causes issues when it comes to uploading test results.
-#      # so it needs to be deleted before the "store-test-results step".
+#      # Clean the testng-results.xml file
 #      - run:
 #          name: Clean test results
 #          command: rm -f test-output/target/surefire-reports/testng-results.xml
 #
-#      # Store the xml test results to the Tests directory of the pipeline
+#      # Store the xml test results
 #      - store_test_results:
-#          name: Clean test results
 #          path: test-output/target/surefire-reports
 #
-#      # Store the test reports to the TestReports directory of the pipeline (in the Artifacts tab of the pipeline)
-#      # In this project, this will be the Allure html report
+#      # Store the Allure html report
 #      - store_artifacts:
 #          path: test-output/reports
 #          destination: test-reports
 #          when: always
 #          retention: 30d
 
-edge-test:
-  executor: windows-edge
-  steps:
-    - checkout
+  edge-test:
+    executor: windows-edge
+    steps:
+      - checkout
 
-    # Leverage the browser-tools orb to install Edge
-    - browser-tools/install-browser-tools:
-        browser: msedge
-        install-chromedriver: false  # We need the Edge driver, not Chromedriver
-        install-geckodriver: false
-        install-msedgedriver: true
+      # Use the browser-tools orb to install Edge and the Edge driver
+      - browser-tools/install-browser-tools:
+          browser: msedge
+          install-chromedriver: false
+          install-geckodriver: false
+          install-msedgedriver: true
 
-    # Restore previously cached dependencies
-    - restore_cache:
-        keys:
-          - v1-dependencies-{{ checksum "pom.xml" }}
-          - v1-dependencies-
+      # Restore previously cached dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            - v1-dependencies-
 
-    # Build the project and download dependencies
-    - run:
-        name: Build project and download dependencies
-        command: mvn dependency:go-offline
+      # Build the project and download dependencies
+      - run:
+          name: Build project and download dependencies
+          command: mvn dependency:go-offline
 
-    # creates a new cache of your project's dependencies to accelerate future builds.
-    - save_cache:
-        paths:
-          - ~/.m2
-        key: v1-dependencies-{{ checksum "pom.xml" }}
+      # Creates a new cache of your project's dependencies
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
 
-    # Run tests (customize the execution command to run the tests on edge)
-    - run:
-        name: Run Tests
-        command: mvn clean test -Dbrowser=edge -Dheadless=new -Dtest=LoginTest
-        environment:
-          MAVEN_OPTS: -Xmx3200m
+      # Run tests with the provided configuration
+      - run:
+          name: Run Edge Tests
+          command: |
+            mvn clean test -Dbrowser=edge -Dheadless=true -Dtest=LoginTest
 
-    #This file is not created in a standard way & causes issues when it comes to uploading test results.
-    # so it needs to be deleted before the "store-test-results step".
-    - run:
-        name: Clean test results
-        command: |
-          if (Test-Path "test-output\target\surefire-reports\testng-results.xml") {
-              Remove-Item "test-output\target\surefire-reports\testng-results.xml"
-          }
+      # Clean the testng-results.xml file
+      - run:
+          name: Clean test results
+          command: |
+            if (Test-Path "test-output\target\surefire-reports\testng-results.xml") {
+                Remove-Item "test-output\target\surefire-reports\testng-results.xml"
+            }
 
-    # Store the xml test results to the Tests directory of the pipeline
-    - store_test_results:
-        name: Clean test results
-        path: test-output/target/surefire-reports
+      # Store the xml test results
+      - store_test_results:
+          path: test-output/target/surefire-reports
 
-    # Store the test reports to the TestReports directory of the pipeline (in the Artifacts tab of the pipeline)
-    # In this project, this will be the Allure html report
-    - store_artifacts:
-        path: test-output/reports
-        destination: test-reports
-        when: always
-        retention: 30d
-
+      # Store the Allure html report
+      - store_artifacts:
+          path: test-output/reports
+          destination: test-reports
+          when: always
+          retention: 30d
 
 workflows:
   version: 2
 
-  #Push-to-branch workflow
   on_push:
     jobs:
 #      - chrome-test:
@@ -150,12 +120,11 @@ workflows:
 #              only:
 #                - AutomationExercise
       - edge-test:
-            filters:
-              branches:
-                only:
-                  - AutomationExercise
+          filters:
+            branches:
+              only:
+                - AutomationExercise
 
-  #Nightly workflow
   nightly:
     triggers:
       - schedule:
