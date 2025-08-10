@@ -6,7 +6,6 @@ version: 2.1
 orbs:
   maven: circleci/maven@2.1.1
   browser-tools: circleci/browser-tools@2.2.1
-  win: circleci/windows@5.0 # The Windows orb gives you everything you need to start using the Windows executor.
 
 
 jobs:
@@ -75,43 +74,26 @@ jobs:
 #          retention: 30d
 
   edge-test:
-    executor:
-      name: win/server-2022  # Built-in Windows executor
-      shell: powershell.exe  # Default shell for all steps
-      size: medium  # Windows requires at least medium resource class
-
+    docker:
+      - image: cimg/openjdk:21.0.5
     steps:
       - checkout
 
-      # Install Edge browser using Chocolatey
+      # Install Edge & Edge driver
       - run:
-          name: Install Microsoft Edge
+          name: Install Edge and Edge driver
           command: |
-            choco upgrade microsoft-edge -y --no-progress
-            $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-            Write-Host "Edge version:"
-            & $edgePath --version
-
-      # Install matching Edge WebDriver
-      - run:
-          name: Install Edge WebDriver
-          command: |
-            $edgeVersion = & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version
-            $driverVersion = $edgeVersion.Split(".")[0]
-            Invoke-WebRequest "https://msedgedriver.azureedge.net/$driverVersion/edgedriver_win64.zip" -OutFile "edgedriver.zip"
-            Expand-Archive -Path "edgedriver.zip" -DestinationPath "C:\SeleniumWebDrivers\EdgeDriver" -Force
-            $env:PATH += ";C:\SeleniumWebDrivers\EdgeDriver"
-            [System.Environment]::SetEnvironmentVariable("PATH", $env:PATH, [System.EnvironmentVariableTarget]::Machine)
-            Write-Host "WebDriver installed to C:\SeleniumWebDrivers\EdgeDriver"
-
-      # Install Java and Maven
-      - run:
-          name: Install Java and Maven
-          command: |
-            choco install temurin maven -y --no-progress
-            refreshenv
-            java -version
-            mvn --version
+            sudo apt-get update
+            sudo apt-get install -y wget gnupg
+            # Add Microsoft GPG key
+            curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
+            # Add Edge repository
+            echo "deb [signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
+            # Install Edge
+            sudo apt-get update
+            sudo apt-get install -y microsoft-edge-stable
+            # Verify installation
+            microsoft-edge --version
 
       - restore_cache:
           keys:
@@ -119,22 +101,27 @@ jobs:
             - v1-dependencies-
 
       - run:
-          name: Build project
+          name: Build project and download dependencies
           command: mvn dependency:go-offline
 
       - save_cache:
           paths:
-            - C:\Users\circleci\.m2
+            - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
       - run:
-          name: Run Tests with Edge
-          command: |
-            $env:MAVEN_OPTS = "-Xmx3200m"
-            $env:DISPLAY = ":99"
-            mvn clean test -Dbrowser=edge -Dheadless=true -Dtest=LoginTest -X
+          name: Run Tests
+          command: mvn clean test -Dbrowser=edge -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
+          environment:
+            MAVEN_OPTS: -Xmx3200m
+            DISPLAY: ":99"
+
+      - run:
+          name: Clean test results
+          command: rm -f test-output/target/surefire-reports/testng-results.xml
 
       - store_test_results:
+          name: Clean test results
           path: test-output/target/surefire-reports
 
       - store_artifacts:
