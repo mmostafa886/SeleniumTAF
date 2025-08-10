@@ -74,26 +74,24 @@ jobs:
 
   edge-test:
     executor:
-      name: win/default
-      size: medium  # Windows requires medium resource class at minimum
+      name: win/default  # Built-in Windows executor
+      shell: powershell.exe  # Default shell for all steps
+      size: medium  # Windows requires at least medium resource class
 
     steps:
       - checkout
 
-      # Install Edge browser
+      # Install Edge browser using Chocolatey
       - run:
           name: Install Microsoft Edge
-          shell: powershell.exe
           command: |
-            # Install Edge via Chocolatey (Windows package manager)
             choco install microsoft-edge -y --no-progress
             Write-Host "Edge version:"
             & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version
 
-      # Install Edge WebDriver
+      # Install matching Edge WebDriver
       - run:
           name: Install Edge WebDriver
-          shell: powershell.exe
           command: |
             $edgeVersion = & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version
             $driverVersion = $edgeVersion.Split(".")[0]
@@ -103,12 +101,12 @@ jobs:
             [System.Environment]::SetEnvironmentVariable("PATH", $env:PATH, [System.EnvironmentVariableTarget]::Machine)
             Write-Host "WebDriver installed to C:\SeleniumWebDrivers\EdgeDriver"
 
-      # Maven setup
+      # Install Java and Maven
       - run:
-          name: Install Maven
-          shell: powershell.exe
+          name: Install Java and Maven
           command: |
-            choco install maven -y --no-progress
+            choco install adoptopenjdk21 maven -y --no-progress
+            java -version
             mvn --version
 
       - restore_cache:
@@ -117,24 +115,20 @@ jobs:
             - v1-dependencies-
 
       - run:
-          name: Build project and download dependencies
-          shell: powershell.exe
+          name: Build project
           command: mvn dependency:go-offline
 
       - save_cache:
           paths:
-            - C:\Users\circleci\.m2  # Windows path for Maven cache
+            - C:\Users\circleci\.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      # Run tests
       - run:
           name: Run Tests with Edge
-          shell: powershell.exe
           command: |
             $env:MAVEN_OPTS = "-Xmx3200m"
             mvn clean test -Dbrowser=edge -Dheadless=true -Dwebdriver.edge.driver="C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe" -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
 
-      # Store test results
       - store_test_results:
           path: test-output/target/surefire-reports
 
