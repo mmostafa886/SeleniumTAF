@@ -44,9 +44,10 @@ jobs:
             DISPLAY: ":99"
 
       - store_test_results:
+          name: Clean test results
+          command: |
+              rm -f test-output/target/surefire-reports/testng-results.xml
           path: test-output/target/surefire-reports
-          when: always
-          retention: 30d
 
       - store_artifacts:
           path: test-output/reports
