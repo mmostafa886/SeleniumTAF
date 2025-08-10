@@ -87,37 +87,53 @@ jobs:
             name: Install Microsoft Edge
             shell: powershell.exe
             command: |
+              # Install Edge using Chocolatey
               choco install microsoft-edge -y --no-progress
-              Write-Host "Edge version:"
-              & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version
+              
+              # Verify installation
+              $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+              if (-not (Test-Path $edgePath)) {
+                Write-Error "Edge installation failed!"
+                exit 1
+              }
+              Write-Host "Edge installed at: $edgePath"
 
         - run:
             name: Install EdgeDriver
             shell: powershell.exe
             command: |
-              $edgeVersion = (& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version).Split('.')[0]
-              $driverUrl = "https://msedgedriver.azureedge.net/$edgeVersion/edgedriver_win64.zip"
+              # Get Edge version reliably
+              $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+              $edgeVersion = (Get-Item $edgePath).VersionInfo.FileVersion
+              $majorVersion = $edgeVersion.Split('.')[0]
               
-              # Clean previous installation
-              Remove-Item -Path "C:\SeleniumWebDrivers\EdgeDriver" -Recurse -Force -ErrorAction SilentlyContinue
-              New-Item -ItemType Directory -Path "C:\SeleniumWebDrivers\EdgeDriver" -Force
+              Write-Host "Detected Edge version: $edgeVersion"
+              Write-Host "Using WebDriver version: $majorVersion"
+              
+              # Download matching WebDriver
+              $driverUrl = "https://msedgedriver.azureedge.net/$majorVersion/edgedriver_win64.zip"
+              $driverDir = "C:\SeleniumWebDrivers\EdgeDriver"
+              
+              # Clean and create directory
+              Remove-Item -Path $driverDir -Recurse -Force -ErrorAction SilentlyContinue
+              New-Item -ItemType Directory -Path $driverDir -Force
               
               # Download and extract
-              Invoke-WebRequest $driverUrl -OutFile "edgedriver.zip"
-              Expand-Archive -Path "edgedriver.zip" -DestinationPath "C:\SeleniumWebDrivers\EdgeDriver" -Force
-              Remove-Item -Path "edgedriver.zip" -Force
+              Invoke-WebRequest $driverUrl -OutFile "$env:TEMP\edgedriver.zip"
+              Expand-Archive -Path "$env:TEMP\edgedriver.zip" -DestinationPath $driverDir -Force
+              Remove-Item -Path "$env:TEMP\edgedriver.zip" -Force
+              
+              # Verify WebDriver
+              $driverPath = "$driverDir\msedgedriver.exe"
+              if (-not (Test-Path $driverPath)) {
+              Write-Error "EdgeDriver installation failed!"
+              exit 1
+              }
               
               # Add to PATH
-              $env:Path += ";C:\SeleniumWebDrivers\EdgeDriver"
+              $env:Path += ";$driverDir"
               [System.Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::Machine)
-              
-              # Verify
-              if (-not (Test-Path "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe")) {
-                Write-Error "EdgeDriver installation failed!"
-                exit 1
-              }
-              & "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe" --version
-
+              Write-Host "EdgeDriver installed at: $driverPath"
       # Install Java and Maven
         - run:
             name: Install JDK and Maven
