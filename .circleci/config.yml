@@ -78,7 +78,7 @@ jobs:
     executor:
       name: win/default
       shell: powershell.exe
-      resource_class: windows.medium
+      size: medium
     steps:
         - checkout
 
