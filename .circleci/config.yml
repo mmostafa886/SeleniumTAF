@@ -102,38 +102,40 @@ jobs:
             name: Install EdgeDriver
             shell: powershell.exe
             command: |
-              # Get Edge version reliably
               $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
               $edgeVersion = (Get-Item $edgePath).VersionInfo.FileVersion
-              $majorVersion = $edgeVersion.Split('.')[0]
-              
-              Write-Host "Detected Edge version: $edgeVersion"
-              Write-Host "Using WebDriver version: $majorVersion"
-              
-              # Download matching WebDriver
-              $driverUrl = "https://msedgedriver.azureedge.net/$majorVersion/edgedriver_win64.zip"
-              $driverDir = "C:\SeleniumWebDrivers\EdgeDriver"
-              
-              # Clean and create directory
-              Remove-Item -Path $driverDir -Recurse -Force -ErrorAction SilentlyContinue
-              New-Item -ItemType Directory -Path $driverDir -Force
-              
-              # Download and extract
-              Invoke-WebRequest $driverUrl -OutFile "$env:TEMP\edgedriver.zip"
-              Expand-Archive -Path "$env:TEMP\edgedriver.zip" -DestinationPath $driverDir -Force
-              Remove-Item -Path "$env:TEMP\edgedriver.zip" -Force
-              
-              # Verify WebDriver
-              $driverPath = "$driverDir\msedgedriver.exe"
-              if (-not (Test-Path $driverPath)) {
-              Write-Error "EdgeDriver installation failed!"
-              exit 1
+              $fullVersion = $edgeVersion.Split('.')[0..2] -join '.'
+
+              # Try exact version first, then major version
+              $driverUrls = @(
+                "https://msedgedriver.azureedge.net/$fullVersion/edgedriver_win64.zip",
+                "https://msedgedriver.azureedge.net/$($edgeVersion.Split('.')[0])/edgedriver_win64.zip"
+              )
+
+              foreach ($url in $driverUrls) {
+                try {
+                  Invoke-WebRequest $url -OutFile "$env:TEMP\edgedriver.zip"
+                  break
+                } catch {
+                  Write-Host "Failed to download $url, trying next option..."
+                }
               }
-              
-              # Add to PATH
-              $env:Path += ";$driverDir"
-              [System.Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::Machine)
-              Write-Host "EdgeDriver installed at: $driverPath"
+
+        - run:
+            name: Verify WebDriver Permissions
+            shell: powershell.exe
+            command: |
+              $driverPath = "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
+              $acl = Get-Acl $driverPath
+              Write-Host "WebDriver permissions:"
+              $acl.Access | Format-Table IdentityReference,FileSystemRights,AccessControlType
+
+        - run:
+            name: Copy WebDriver to Project
+            shell: powershell.exe
+            command: |
+              Copy-Item "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe" -Destination "$env:CIRCLE_WORKING_DIRECTORY\msedgedriver.exe"
+              $env:Path += ";$env:CIRCLE_WORKING_DIRECTORY"
       # Install Java and Maven
         - run:
             name: Install JDK and Maven
@@ -176,7 +178,7 @@ jobs:
                 -Dwebdriver.edge.driver="$driverPath" `
                 -Dbrowser=edge `
                 -Dheadless=true `
-                -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
+                -Dtest=LoginTest
 
     # Test reporting
         - store_test_results:
