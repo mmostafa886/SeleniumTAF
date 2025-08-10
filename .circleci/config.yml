@@ -6,6 +6,7 @@ version: 2.1
 orbs:
   maven: circleci/maven@2.1.1
   browser-tools: circleci/browser-tools@2.2.1
+  win: circleci/windows@5.0 # The Windows orb gives you everything you need to start using the Windows executor.
 
 
 jobs:
@@ -74,61 +75,102 @@ jobs:
 #          retention: 30d
 
   edge-test:
-    docker:
-      - image: cimg/openjdk:21.0.5
+    executor:
+      name: win/default
+      shell: powershell.exe
+      resource_class: windows.medium
     steps:
-      - checkout
+        - checkout
 
-      # Install Edge & Edge driver
-      - run:
-          name: Install Edge and Edge driver
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y wget gnupg
-            # Add Microsoft GPG key
-            curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
-            # Add Edge repository
-            echo "deb [signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
-            # Install Edge
-            sudo apt-get update
-            sudo apt-get install -y microsoft-edge-stable
-            # Verify installation
-            microsoft-edge --version
+      # Install Edge and WebDriver
+        - run:
+            name: Install Microsoft Edge
+            shell: powershell.exe
+            command: |
+              choco install microsoft-edge -y --no-progress
+              Write-Host "Edge version:"
+              & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version
 
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "pom.xml" }}
-            - v1-dependencies-
+        - run:
+            name: Install EdgeDriver
+            shell: powershell.exe
+            command: |
+              $edgeVersion = (& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version).Split('.')[0]
+              $driverUrl = "https://msedgedriver.azureedge.net/$edgeVersion/edgedriver_win64.zip"
+              
+              # Clean previous installation
+              Remove-Item -Path "C:\SeleniumWebDrivers\EdgeDriver" -Recurse -Force -ErrorAction SilentlyContinue
+              New-Item -ItemType Directory -Path "C:\SeleniumWebDrivers\EdgeDriver" -Force
+              
+              # Download and extract
+              Invoke-WebRequest $driverUrl -OutFile "edgedriver.zip"
+              Expand-Archive -Path "edgedriver.zip" -DestinationPath "C:\SeleniumWebDrivers\EdgeDriver" -Force
+              Remove-Item -Path "edgedriver.zip" -Force
+              
+              # Add to PATH
+              $env:Path += ";C:\SeleniumWebDrivers\EdgeDriver"
+              [System.Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::Machine)
+              
+              # Verify
+              if (-not (Test-Path "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe")) {
+                Write-Error "EdgeDriver installation failed!"
+                exit 1
+              }
+              & "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe" --version
 
-      - run:
-          name: Build project and download dependencies
-          command: mvn dependency:go-offline
+      # Install Java and Maven
+        - run:
+            name: Install JDK and Maven
+            shell: powershell.exe
+            command: |
+              choco install temurin21jdk maven -y --no-progress
+              refreshenv
+              java -version
+              mvn --version
 
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
+      # Dependency management
+        - restore_cache:
+            keys:
+              - v1-dependencies-{{ checksum "pom.xml" }}
+              - v1-dependencies-
 
-      - run:
-          name: Run Tests
-          command: mvn clean test -Dbrowser=edge -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
-          environment:
-            MAVEN_OPTS: -Xmx3200m
-            DISPLAY: ":99"
+        - run:
+            name: Build project
+            shell: powershell.exe
+            command: mvn dependency:go-offline
 
-      - run:
-          name: Clean test results
-          command: rm -f test-output/target/surefire-reports/testng-results.xml
+        - save_cache:
+            paths:
+              - C:\Users\circleci\.m2
+            key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      - store_test_results:
-          name: Clean test results
-          path: test-output/target/surefire-reports
+    # Run tests with proper WebDriver path
+        - run:
+            name: Run Edge Tests
+            shell: powershell.exe
+            command: |
+              $driverPath = "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
+              if (-not (Test-Path $driverPath)) {
+                Write-Error "EdgeDriver not found at $driverPath"
+                exit 1
+              }
+              
+              $env:MAVEN_OPTS = "-Xmx3200m"
+              mvn clean test `
+                -Dwebdriver.edge.driver="$driverPath" `
+                -Dbrowser=edge `
+                -Dheadless=true `
+                -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
 
-      - store_artifacts:
-          path: test-output/reports
-          destination: test-reports
-          when: always
-          retention: 30d
+    # Test reporting
+        - store_test_results:
+            path: test-output/target/surefire-reports
+
+        - store_artifacts:
+            path: test-output/reports
+            destination: test-reports
+            when: always
+            retention: 30d
 
 
 workflows:
