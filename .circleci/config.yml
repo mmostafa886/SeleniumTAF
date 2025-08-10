@@ -131,8 +131,8 @@ jobs:
           name: Run Tests with Edge
           command: |
             $env:MAVEN_OPTS = "-Xmx3200m"
-            $driverPath = "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
-            mvn clean test -Dbrowser=edge -Dheadless=true -D"webdriver.edge.driver=$driverPath" -Dtest=LoginTest -X
+            $env:DISPLAY = ":99"
+            mvn clean test -Dbrowser=edge -Dheadless=true -Dtest=LoginTest -X
 
       - store_test_results:
           path: test-output/target/surefire-reports
