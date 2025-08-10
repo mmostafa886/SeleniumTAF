@@ -84,7 +84,10 @@ jobs:
       # Verify that Maven is available in the environment.
       - run:
           name: Verify Maven Installation
-          command: mvn --version
+          command: | 
+            mvn --version
+            microsoft-edge --version
+            msedgedriver --version
 
 
       # Restore previously cached dependencies
