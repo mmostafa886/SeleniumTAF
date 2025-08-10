@@ -15,8 +15,6 @@ executors:
     win/default:
       shell: powershell.exe
       size: medium
-      environment:
-        EDGE_DRIVER_PATH: "C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe"
 
 jobs:
 #  chrome-test:
