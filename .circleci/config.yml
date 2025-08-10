@@ -48,7 +48,7 @@ jobs:
           command: mvn clean test -Dbrowser=chrome -Dheadless=true -Dtest=LoginTest
           environment:
             MAVEN_OPTS: -Xmx3200m
-            DISPLAY: ":99"
+           # DISPLAY: ":99"
 
       #This file is not created in a standard way & causes issues when it comes to uploading test results.
       # so it needs to be deleted before the "store-test-results step".
@@ -113,7 +113,7 @@ jobs:
           command: mvn clean test -Dbrowser=edge -Dheadless=true -Dtest=LoginTest
           environment:
             MAVEN_OPTS: -Xmx3200m
-            DISPLAY: ":99"
+            #DISPLAY: ":99"
 
       #This file is not created in a standard way & causes issues when it comes to uploading test results.
       # so it needs to be deleted before the "store-test-results step".
