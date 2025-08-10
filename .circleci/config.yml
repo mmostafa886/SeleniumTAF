@@ -86,118 +86,58 @@ edge-test:
   steps:
     - checkout
 
-    # System Preparation
-    - run:
-        name: Prepare System
-        shell: powershell.exe
-        command: |
-          # Enable detailed logging
-          $ErrorActionPreference = "Stop"
-          Set-PSDebug -Trace 1
-          
-          # Create driver directory with full permissions
-          New-Item -Path "C:\SeleniumWebDrivers\EdgeDriver" -ItemType Directory -Force
-          icacls "C:\SeleniumWebDrivers\EdgeDriver" /grant "Everyone:(OI)(CI)F" /T
+    # Leverage the browser-tools orb to install Edge
+    - browser-tools/install-browser-tools:
+        browser: msedge
+        install-chromedriver: false  # We need the Edge driver, not Chromedriver
+        install-geckodriver: false
+        install-msedgedriver: true
 
-    # Edge Installation with Validation
-    - run:
-        name: Install Microsoft Edge
-        shell: powershell.exe
-        command: |
-          Write-Host "Installing Microsoft Edge..."
-          choco install microsoft-edge -y --no-progress --force --ignore-checksums
-          
-          # Validate installation
-          $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-          if (-not (Test-Path $edgePath)) {
-            throw "Edge installation failed - binary not found"
-          }
-          
-          $version = (Get-Item $edgePath).VersionInfo.FileVersion
-          Write-Host "Microsoft Edge $version successfully installed"
+    # Restore previously cached dependencies
+    - restore_cache:
+        keys:
+          - v1-dependencies-{{ checksum "pom.xml" }}
+          - v1-dependencies-
 
-    # EdgeDriver Installation with Atomic Operations
+    # Build the project and download dependencies
     - run:
-        name: Install EdgeDriver
-        shell: powershell.exe
-        command: |
-          # Get exact Edge version
-          $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-          $version = (Get-Item $edgePath).VersionInfo.FileVersion
-          $majorVersion = $version.Split('.')[0]
-          
-          # Download with checksum verification
-          $tempDir = "C:\Temp"
-          New-Item -Path $tempDir -ItemType Directory -Force
-          $driverUrl = "https://msedgedriver.azureedge.net/$majorVersion/edgedriver_win64.zip"
-          $driverZip = "$tempDir\edgedriver.zip"
-          
-          Write-Host "Downloading EdgeDriver from $driverUrl"
-          (New-Object System.Net.WebClient).DownloadFile($driverUrl, $driverZip)
-          
-          # Atomic extraction
-          $tempExtract = "$tempDir\edgedriver_temp"
-          Expand-Archive -Path $driverZip -DestinationPath $tempExtract -Force
-          Move-Item -Path "$tempExtract\msedgedriver.exe" -Destination $env:EDGE_DRIVER_PATH -Force
-          
-          # Verify executable
-          if (-not (Test-Path $env:EDGE_DRIVER_PATH)) {
-            throw "EdgeDriver extraction failed"
-          }
-          
-          # Set permissions
-          icacls $env:EDGE_DRIVER_PATH /grant "Everyone:F"
-          & $env:EDGE_DRIVER_PATH --version
+        name: Build project and download dependencies
+        command: mvn dependency:go-offline
 
-    # Java/Maven Setup
-    - run:
-        name: Install Java and Maven
-        shell: powershell.exe
-        command: |
-          choco install temurin21jdk maven -y --no-progress
-          refreshenv
-          java -version
-          mvn --version
+    # creates a new cache of your project's dependencies to accelerate future builds.
+    - save_cache:
+        paths:
+          - ~/.m2
+        key: v1-dependencies-{{ checksum "pom.xml" }}
 
-    # Test Execution with Full Diagnostics
+    # Run tests (customize the execution command to run the tests on edge)
     - run:
-        name: Run Edge Tests
-        shell: powershell.exe
+        name: Run Tests
+        command: mvn clean test -Dbrowser=edge -Dheadless=new -Dtest=LoginTest
+        environment:
+          MAVEN_OPTS: -Xmx3200m
+
+    #This file is not created in a standard way & causes issues when it comes to uploading test results.
+    # so it needs to be deleted before the "store-test-results step".
+    - run:
+        name: Clean test results
         command: |
-          # Pre-execution validation
-          if (-not (Test-Path $env:EDGE_DRIVER_PATH)) {
-            Write-Host "Directory contents:"
-            Get-ChildItem "C:\SeleniumWebDrivers" -Recurse
-            throw "EdgeDriver not found at $env:EDGE_DRIVER_PATH"
-          }
-          
-          # Environment setup
-          $env:MAVEN_OPTS = "-Xmx3200m -XX:+HeapDumpOnOutOfMemoryError"
-          $env:EDGE_DRIVER_LOG = "$env:CIRCLE_WORKING_DIRECTORY\edgedriver.log"
-          
-          # Execute tests with debug logging
-          mvn clean test `
-            -Dwebdriver.edge.driver="$env:EDGE_DRIVER_PATH" `
-            -Dbrowser=edge `
-            -Dheadless=new `
-            -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**" `
-            -Dselenium.LOGGER.level=ALL
-          
-          # Capture logs if tests fail
-          if ($LASTEXITCODE -ne 0) {
-            if (Test-Path $env:EDGE_DRIVER_LOG) {
-              Get-Content $env:EDGE_DRIVER_LOG
-            }
+          if (Test-Path "test-output\target\surefire-reports\testng-results.xml") {
+              Remove-Item "test-output\target\surefire-reports\testng-results.xml"
           }
 
-    # Artifacts Collection
+    # Store the xml test results to the Tests directory of the pipeline
     - store_test_results:
+        name: Clean test results
         path: test-output/target/surefire-reports
 
+    # Store the test reports to the TestReports directory of the pipeline (in the Artifacts tab of the pipeline)
+    # In this project, this will be the Allure html report
     - store_artifacts:
         path: test-output/reports
         destination: test-reports
-
+        when: always
+        retention: 30d
 
 
 workflows:
