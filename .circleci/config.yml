@@ -19,8 +19,12 @@ jobs:
       # Install Chrome & Chromedriver
       - browser-tools/install_chrome #https://circleci.com/developer/orbs/orb/circleci/browser-tools#commands-install_chrome
       - browser-tools/install_chromedriver #https://circleci.com/developer/orbs/orb/circleci/browser-tools#commands-install_chromedriver
+
+      # Verify that Maven, Browser & Driver is available in the environment.
       - run:
+          name: Verify Maven, Browser & Driver Installations
           command: |
+            mvn --version
             google-chrome --version
             chromedriver --version
 
@@ -52,13 +56,13 @@ jobs:
 
       #This file is not created in a standard way & causes issues when it comes to uploading test results.
       # so it needs to be deleted before the "store-test-results step".
-      - run:
-          name: Clean test results
-          command: rm -f test-output/target/surefire-reports/testng-results.xml
+#      - run:
+#          name: Clean test results
+#          command: rm -f test-output/target/surefire-reports/testng-results.xml
 
       # Store the xml test results to the Tests directory of the pipeline
       - store_test_results:
-          name: Clean test results
+          name: Upload test results
           path: test-output/target/surefire-reports
 
       # Store the test reports to the TestReports directory of the pipeline (in the Artifacts tab of the pipeline)
@@ -81,9 +85,9 @@ jobs:
       - browser-tools/install_edge #https://circleci.com/developer/orbs/orb/circleci/browser-tools#commands-install_edge
       - browser-tools/install_edge_driver #https://circleci.com/developer/orbs/orb/circleci/browser-tools#commands-install_edge_driver
 
-      # Verify that Maven is available in the environment.
+      # Verify that Maven, Browser & Driver is available in the environment.
       - run:
-          name: Verify Maven Installation
+          name: Verify Maven, Browser & Driver Installations
           command: | 
             mvn --version
             microsoft-edge --version
@@ -123,7 +127,7 @@ jobs:
 
       # Store the xml test results to the Tests directory of the pipeline
       - store_test_results:
-          name: Clean test results
+          name: Upload test results
           path: test-output/target/surefire-reports
 
       # Store the test reports to the TestReports directory of the pipeline (in the Artifacts tab of the pipeline)
