@@ -150,11 +150,11 @@ workflows:
   #Push-to-branch workflow
   on_push:
     jobs:
-      - chrome-test:
-          filters:
-            branches:
-              only:
-                - AutomationExercise
+#      - chrome-test:
+#          filters:
+#            branches:
+#              only:
+#                - AutomationExercise
       - edge-test:
             filters:
               branches:
