@@ -43,10 +43,12 @@ jobs:
             MAVEN_OPTS: -Xmx3200m
             DISPLAY: ":99"
 
+      - run:
+          name: Clean test results
+          command: rm -f test-output/target/surefire-reports/testng-results.xml
+
       - store_test_results:
           name: Clean test results
-          command: |
-              rm -f test-output/target/surefire-reports/testng-results.xml
           path: test-output/target/surefire-reports
 
       - store_artifacts:
