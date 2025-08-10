@@ -60,6 +60,15 @@ jobs:
 #          name: Clean test results
 #          command: rm -f test-output/target/surefire-reports/testng-results.xml
 
+      # Diagnostic step to confirm files are created
+      - run:
+          name: List Test Output Directory Contents
+          command: |
+            echo "Listing contents of the 'test-output' directory:"
+            ls -laR test-output
+            echo "Checking size of the 'test-output/reports' directory:"
+            du -sh test-output/reports
+
       # Store the xml test results to the Tests directory of the pipeline
       - store_test_results:
           name: Upload test results
