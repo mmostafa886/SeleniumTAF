@@ -71,7 +71,7 @@ jobs:
 
   edge-test:
     docker:
-      - image: cimg/base
+      - image: cimg/base:edge
     steps:
       # Use the browser-tools orb to install Edge and its driver
       - browser-tools/install_edge
@@ -135,6 +135,11 @@ workflows:
             branches:
               only:
                 - AutomationExercise
+      - chrome-test:
+          filters:
+            branches:
+              only:
+                - AutomationExercise
 
   nightly:
     triggers:
@@ -146,3 +151,4 @@ workflows:
                 - AutomationExercise
     jobs:
       - edge-test
+      - chrome-test
