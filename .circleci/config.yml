@@ -73,26 +73,43 @@ jobs:
           retention: 30d
 
   edge-test:
-    docker:
-      - image: cimg/openjdk:21.0.5
+    executor:
+      name: win/default
+      size: medium  # Windows requires medium resource class at minimum
+
     steps:
       - checkout
 
-      # Install Edge & Edge driver
+      # Install Edge browser
       - run:
-          name: Install Edge and Edge driver
+          name: Install Microsoft Edge
+          shell: powershell.exe
           command: |
-            sudo apt-get update
-            sudo apt-get install -y wget gnupg
-            # Add Microsoft GPG key
-            curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
-            # Add Edge repository
-            echo "deb [signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
-            # Install Edge
-            sudo apt-get update
-            sudo apt-get install -y microsoft-edge-stable
-            # Verify installation
-            microsoft-edge --version
+            # Install Edge via Chocolatey (Windows package manager)
+            choco install microsoft-edge -y --no-progress
+            Write-Host "Edge version:"
+            & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version
+
+      # Install Edge WebDriver
+      - run:
+          name: Install Edge WebDriver
+          shell: powershell.exe
+          command: |
+            $edgeVersion = & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --version
+            $driverVersion = $edgeVersion.Split(".")[0]
+            Invoke-WebRequest "https://msedgedriver.azureedge.net/$driverVersion/edgedriver_win64.zip" -OutFile "edgedriver.zip"
+            Expand-Archive -Path "edgedriver.zip" -DestinationPath "C:\SeleniumWebDrivers\EdgeDriver" -Force
+            $env:PATH += ";C:\SeleniumWebDrivers\EdgeDriver"
+            [System.Environment]::SetEnvironmentVariable("PATH", $env:PATH, [System.EnvironmentVariableTarget]::Machine)
+            Write-Host "WebDriver installed to C:\SeleniumWebDrivers\EdgeDriver"
+
+      # Maven setup
+      - run:
+          name: Install Maven
+          shell: powershell.exe
+          command: |
+            choco install maven -y --no-progress
+            mvn --version
 
       - restore_cache:
           keys:
@@ -101,26 +118,24 @@ jobs:
 
       - run:
           name: Build project and download dependencies
+          shell: powershell.exe
           command: mvn dependency:go-offline
 
       - save_cache:
           paths:
-            - ~/.m2
+            - C:\Users\circleci\.m2  # Windows path for Maven cache
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
+      # Run tests
       - run:
-          name: Run Tests
-          command: mvn clean test -Dbrowser=edge -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
-          environment:
-            MAVEN_OPTS: -Xmx3200m
-            DISPLAY: ":99"
+          name: Run Tests with Edge
+          shell: powershell.exe
+          command: |
+            $env:MAVEN_OPTS = "-Xmx3200m"
+            mvn clean test -Dbrowser=edge -Dheadless=true -Dwebdriver.edge.driver="C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe" -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
 
-      - run:
-          name: Clean test results
-          command: rm -f test-output/target/surefire-reports/testng-results.xml
-
+      # Store test results
       - store_test_results:
-          name: Clean test results
           path: test-output/target/surefire-reports
 
       - store_artifacts:
