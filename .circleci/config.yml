@@ -44,10 +44,10 @@ jobs:
             DISPLAY: ":99"
 
       - store_test_results:
-          path: target/surefire-reports
+          path: test-output/reports
 
       - store_artifacts:
-          path: target/surefire-reports
+          path: test-output/reports
           destination: test-reports
           when: always
           retention: 30d
