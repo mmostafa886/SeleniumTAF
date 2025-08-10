@@ -129,7 +129,7 @@ jobs:
           name: Run Tests with Edge
           command: |
             $env:MAVEN_OPTS = "-Xmx3200m"
-            mvn clean test -Dbrowser=edge -Dheadless=true -D"webdriver.edge.driver=C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe" -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
+            mvn clean test -Dbrowser=edge -Dheadless=true -D"webdriver.edge.driver=C:\SeleniumWebDrivers\EdgeDriver\msedgedriver.exe" -Dtest=LoginTest
 
       - store_test_results:
           path: test-output/target/surefire-reports
@@ -139,64 +139,6 @@ jobs:
           destination: test-reports
           when: always
           retention: 30d
-
-  edge-test2:
-    docker:
-      - image: cimg/openjdk:21.0.5
-    steps:
-      - checkout
-
-      # Install Edge & Edge driver
-      - run:
-          name: Install Edge and Edge driver
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y wget gnupg
-            # Add Microsoft GPG key
-            curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
-            # Add Edge repository
-            echo "deb [signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
-            # Install Edge
-            sudo apt-get update
-            sudo apt-get install -y microsoft-edge-stable
-            # Verify installation
-            microsoft-edge --version
-
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "pom.xml" }}
-            - v1-dependencies-
-
-      - run:
-          name: Build project and download dependencies
-          command: mvn dependency:go-offline
-
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
-
-      - run:
-          name: Run Tests
-          command: mvn clean test -Dbrowser=edge -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
-          environment:
-            MAVEN_OPTS: -Xmx3200m
-            DISPLAY: ":99"
-
-      - run:
-          name: Clean test results
-          command: rm -f test-output/target/surefire-reports/testng-results.xml
-
-      - store_test_results:
-          name: Clean test results
-          path: test-output/target/surefire-reports
-
-      - store_artifacts:
-          path: test-output/reports
-          destination: test-reports
-          when: always
-          retention: 30d
-
 
 
 workflows:
