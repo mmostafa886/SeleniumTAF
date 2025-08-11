@@ -41,15 +41,14 @@ public class AllureReportGenerator {
 
     //open Allure report in browser
     public static void openReport(String reportFileName) {
-        if (!getProperty("remoteExecution").toLowerCase().contains("false")) return;
+        if (!getProperty("remoteExecution").toLowerCase().contains("false") || getProperty("cicd").toLowerCase().contains("true")) return;
         Path reportPath = AllureConstants.REPORT_PATH.resolve(reportFileName);
-        LogsManager.info("Attempting to open Allure Report: " + reportPath);
-        switch (OSUtils.getCurrentOS()) {
-            case WINDOWS -> TerminalUtils.executeTerminalCommand("cmd.exe", "/c", "start", reportPath.toString());
-            case MAC -> TerminalUtils.executeTerminalCommand("open", reportPath.toString());
-            case LINUX -> TerminalUtils.executeTerminalCommand("xdg-open", reportPath.toString());
-            default -> LogsManager.warn("Opening Allure Report is not supported on this OS.");
-        }
+          LogsManager.info("Attempting to open Allure Report: " + reportPath);
+          switch (OSUtils.getCurrentOS()) {
+              case WINDOWS -> TerminalUtils.executeTerminalCommand("cmd.exe", "/c", "start", reportPath.toString());
+              case MAC, LINUX -> TerminalUtils.executeTerminalCommand("open", reportPath.toString());
+              default -> LogsManager.warn("Opening Allure Report is not supported on this OS.");
+          }
     }
 
     //copy history folder to results folder

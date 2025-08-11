@@ -20,6 +20,12 @@ jobs:
       - browser-tools/install_chrome #https://circleci.com/developer/orbs/orb/circleci/browser-tools#commands-install_chrome
       - browser-tools/install_chromedriver #https://circleci.com/developer/orbs/orb/circleci/browser-tools#commands-install_chromedriver
 
+    # Define a parameter for the default browser.
+    parameters:
+      default_browser:
+        type: string
+        default: "edge"
+
       # Verify that Maven, Browser & Driver is available in the environment.
       - run:
           name: Verify Maven, Browser & Driver Installations
