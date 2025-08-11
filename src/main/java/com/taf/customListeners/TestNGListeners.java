@@ -52,7 +52,7 @@ public class TestNGListeners implements
         AllureReportGenerator.copyHistory();
         AllureReportGenerator.generateReports(false);
         AllureReportGenerator.generateReports(true);
-        AllureReportGenerator.openReport(AllureReportGenerator.renameReport());
+        //AllureReportGenerator.openReport(AllureReportGenerator.renameReport());
         LogsManager.info("Test Execution Finished");
     }
 
