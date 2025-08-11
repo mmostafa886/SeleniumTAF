@@ -102,6 +102,13 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
       --restart=on-failure \
       --network seleniumtaf_grid \
       jenkins/jenkins:latest-jdk21
+### CircleCI
+- A `CircleCI` configuration file `config.yml` was created under the directory `.circleci` with detailed comments on each part of the configuration.
+- This file contains 2 jobs & both of these jobs execute all the tests but one for `Chrome` & the other for `Edge`.
+- It must be taken into consideration how the pipelines are configured `(https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository)`.
+- The Execution trigger will be disabled not to execute the script with every code push.
+- Triggers configuration can be found under: `[project_Name] >>Settings >>Triggers` & Add a trigger pf type "All pushes" so that the pipeline/workflow will be triggered with every new code push and for any branch with config.yml ). 
+
 
 ## TO-DOs:
 - Generate Allure report on a dockerized container , not on the host machine.
