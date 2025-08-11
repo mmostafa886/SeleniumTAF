@@ -42,8 +42,8 @@ public class AllureReportGenerator {
     //open Allure report in browser
     public static void openReport(String reportFileName) {
         if (!getProperty("remoteExecution").toLowerCase().contains("false")) return;
-
         Path reportPath = AllureConstants.REPORT_PATH.resolve(reportFileName);
+        LogsManager.info("Attempting to open Allure Report: " + reportPath);
         switch (OSUtils.getCurrentOS()) {
             case WINDOWS -> TerminalUtils.executeTerminalCommand("cmd.exe", "/c", "start", reportPath.toString());
             case MAC -> TerminalUtils.executeTerminalCommand("open", reportPath.toString());
