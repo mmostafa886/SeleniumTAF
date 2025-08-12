@@ -1,16 +1,12 @@
 package com.taf.utils.reporting;
 
-import java.awt.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.taf.utils.dataReader.PropertyReader.getProperty;
 
-import com.taf.utils.FileUtils;
-import com.taf.utils.OSUtils;
-import com.taf.utils.TerminalUtils;
-import com.taf.utils.TimeManager;
+import com.taf.utils.*;
 import com.taf.utils.logs.LogsManager;
 
 import static com.taf.utils.reporting.AllureConstants.HISTORY_FOLDER;
@@ -42,15 +38,24 @@ public class AllureReportGenerator {
 
     //open Allure report in browser
     public static void openReport(String reportFileName) {
-        if (!getProperty("remoteExecution").toLowerCase().contains("false")
-                || GraphicsEnvironment.isHeadless()) return;
+        if (!getProperty("remoteExecution").equalsIgnoreCase("false")
+                || EnvironmentUtils.isRunningInCI()) {
+            return;
+        }
+
+//        // Skip in CI environments
+//        LogsManager.info("CI value:",System.getenv("CI"), "and CIRCLECI value:",System.getenv("CIRCLECI"));
+//        if (System.getenv("CI") != null || System.getenv("CIRCLECI") != null) {
+//            return;
+//        }
+
         Path reportPath = AllureConstants.REPORT_PATH.resolve(reportFileName);
-          LogsManager.info("Attempting to open Allure Report: " + reportPath);
-          switch (OSUtils.getCurrentOS()) {
-              case WINDOWS -> TerminalUtils.executeTerminalCommand("cmd.exe", "/c", "start", reportPath.toString());
-              case MAC, LINUX -> TerminalUtils.executeTerminalCommand("open", reportPath.toString());
-              default -> LogsManager.warn("Opening Allure Report is not supported on this OS.");
-          }
+        LogsManager.info("Attempting to open Allure Report: " + reportPath);
+        switch (OSUtils.getCurrentOS()) {
+            case WINDOWS -> TerminalUtils.executeTerminalCommand("cmd.exe", "/c", "start", reportPath.toString());
+            case MAC, LINUX -> TerminalUtils.executeTerminalCommand("open", reportPath.toString());
+            default -> LogsManager.warn("Opening Allure Report is not supported on this OS.");
+        }
     }
 
     //copy history folder to results folder
