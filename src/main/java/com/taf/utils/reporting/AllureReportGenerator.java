@@ -6,10 +6,7 @@ import java.util.List;
 
 import static com.taf.utils.dataReader.PropertyReader.getProperty;
 
-import com.taf.utils.FileUtils;
-import com.taf.utils.OSUtils;
-import com.taf.utils.TerminalUtils;
-import com.taf.utils.TimeManager;
+import com.taf.utils.*;
 import com.taf.utils.logs.LogsManager;
 
 import static com.taf.utils.reporting.AllureConstants.HISTORY_FOLDER;
@@ -41,8 +38,14 @@ public class AllureReportGenerator {
 
     //open Allure report in browser
     public static void openReport(String reportFileName) {
-        if (!getProperty("remoteExecution").toLowerCase().contains("false")
-                || getProperty("cicdEnabled").toLowerCase().contains("true")) return;
+        String remoteExecution = getProperty("remoteExecution");
+        boolean isRunningInCI = EnvironmentUtils.isRunningInCI();
+        if (!remoteExecution.equalsIgnoreCase("false") || isRunningInCI) {
+            LogsManager.info("remoteExecution is set to: {"+remoteExecution+"} and isRunningInCI is set to: {"+isRunningInCI+"}"
+                    ,"\nSkipping opening Allure Report in browser.");
+            return;
+        }
+
         Path reportPath = AllureConstants.REPORT_PATH.resolve(reportFileName);
         LogsManager.info("Attempting to open Allure Report: " + reportPath);
         switch (OSUtils.getCurrentOS()) {

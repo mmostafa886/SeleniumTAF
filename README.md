@@ -86,7 +86,11 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - The groups were added as constants in the `Groups` class under the `utils` package.
 - The test inside a specific test package can be triggered by executing the command `mvn clean test -Dtest="com.taf.tests.ui.*Test"`.
 - To execute all the tests (especially inside a CI/CD pipeline), execute a command with regex, Ex. `mvn clean test -Dtest="regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"`
+### Allure Reporting
+- The `AllureReportGenerator` class was created to generate the Allure report automatically after the execution ends.
+- The Report is not opened if the execution was through CI/CD Pipeline.
 ## CI/CD
+- The CI/CD pipelines were configured for `GitHub Actions`, `Jenkins`, & `CircleCI`.
 ### GitHub_Actions
 - A `GitHub Actions Workflow` file `E2E_Tests.yml` was created under the directory `.github/workflows`.
 - This file contains 2 jobs & both of these jobs execute all the tests but one for `Chrome` & the other for `Edge`.
