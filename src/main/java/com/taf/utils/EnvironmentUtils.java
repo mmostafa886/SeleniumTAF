@@ -27,8 +27,8 @@ public class EnvironmentUtils {
         };
 
         for (String var : ciVars) {
-            LogsManager.info("Checking CI environment variable {" + var + "} equals: ", System.getenv(var));
             if (System.getenv(var) != null) {
+                LogsManager.info("Checking CI environment variable {" + var + "} equals: ", System.getenv(var));
                 return true;
             }
         }
