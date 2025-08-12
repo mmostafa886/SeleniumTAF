@@ -40,8 +40,7 @@ public class AllureReportGenerator {
     public static void openReport(String reportFileName) {
         String remoteExecution = getProperty("remoteExecution");
         boolean isRunningInCI = EnvironmentUtils.isRunningInCI();
-        if (!remoteExecution.equalsIgnoreCase("false")
-                || isRunningInCI) {
+        if (!remoteExecution.equalsIgnoreCase("false") || isRunningInCI) {
             LogsManager.info("remoteExecution is set to: {"+remoteExecution+"} and isRunningInCI is set to: {"+isRunningInCI+"}"
                     ,"\nSkipping opening Allure Report in browser.");
             return;
