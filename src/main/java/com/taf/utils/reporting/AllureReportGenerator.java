@@ -1,5 +1,6 @@
 package com.taf.utils.reporting;
 
+import java.awt.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,8 @@ public class AllureReportGenerator {
 
     //open Allure report in browser
     public static void openReport(String reportFileName) {
-        if (!getProperty("remoteExecution").toLowerCase().contains("false") || getProperty("cicdEnabled").toLowerCase().contains("true")) return;
+        if (!getProperty("remoteExecution").toLowerCase().contains("false")
+                || GraphicsEnvironment.isHeadless()) return;
         Path reportPath = AllureConstants.REPORT_PATH.resolve(reportFileName);
           LogsManager.info("Attempting to open Allure Report: " + reportPath);
           switch (OSUtils.getCurrentOS()) {
