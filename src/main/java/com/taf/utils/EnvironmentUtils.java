@@ -1,8 +1,11 @@
 package com.taf.utils;
 
+import com.taf.utils.logs.LogsManager;
+
 public class EnvironmentUtils {
 
-    private EnvironmentUtils() {}
+    private EnvironmentUtils() {
+    }
 
     public static boolean isRunningInCI() {
         // Check standard CI environment variables
@@ -24,6 +27,7 @@ public class EnvironmentUtils {
         };
 
         for (String var : ciVars) {
+            LogsManager.info("Checking CI environment variable {" + var + "} equals: ", System.getenv(var));
             if (System.getenv(var) != null) {
                 return true;
             }

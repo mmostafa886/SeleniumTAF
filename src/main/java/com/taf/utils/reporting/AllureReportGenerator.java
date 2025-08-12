@@ -43,12 +43,6 @@ public class AllureReportGenerator {
             return;
         }
 
-//        // Skip in CI environments
-//        LogsManager.info("CI value:",System.getenv("CI"), "and CIRCLECI value:",System.getenv("CIRCLECI"));
-//        if (System.getenv("CI") != null || System.getenv("CIRCLECI") != null) {
-//            return;
-//        }
-
         Path reportPath = AllureConstants.REPORT_PATH.resolve(reportFileName);
         LogsManager.info("Attempting to open Allure Report: " + reportPath);
         switch (OSUtils.getCurrentOS()) {
