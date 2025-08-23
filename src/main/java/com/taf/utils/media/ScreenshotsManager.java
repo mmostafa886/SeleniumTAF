@@ -3,6 +3,7 @@ package com.taf.utils.media;
 import com.taf.utils.TimeManager;
 import com.taf.utils.logs.LogsManager;
 import com.taf.utils.reporting.AllureAttachmentManager;
+import com.taf.utils.reporting.AllureConstants;
 import io.qameta.allure.Step;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
@@ -14,14 +15,14 @@ import java.io.File;
 
 public class ScreenshotsManager {
 
-    public static final String SCREENSHOTS_PATH = "test-output/ScreenShots/";
+    public static final String SCREENSHOTS_PATH = "test-output/screenshots/";
 
     /**
      * Take a full page screenshot and save it with a timestamp.
      * @param driver the WebDriver instance
      * @param screenshotName the name to use for the screenshot file
      */
-    //@Step("Taking full page screenshot with name: {screenshotName}")
+//    @Step("Taking full page screenshot with name: {screenshotName}")
     public static void takeFullPageScreenshot(WebDriver driver, String screenshotName) {
         try {
             // Capture screenshot using TakesScreenshot

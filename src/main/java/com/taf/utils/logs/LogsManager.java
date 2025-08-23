@@ -8,7 +8,7 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
 
 public class LogsManager {
 
-    public static final String LOGS_PATH = AllureConstants.USER_DIR + "test-output/Logs/";
+    public static final String LOGS_PATH = AllureConstants.USER_DIR + "/test-output/Logs/";
     private static final String FQCN = LogsManager.class.getName();
 
     private static Logger logger() {

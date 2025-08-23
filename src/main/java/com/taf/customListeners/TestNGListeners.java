@@ -61,35 +61,43 @@ public class TestNGListeners implements
         String testDescription = testResult.getMethod().getDescription();
         if (method.isTestMethod()) {
             FileUtils.clearFileContents(LogsManager.LOGS_PATH + "logs.log");
-            LogsManager.info("Logs cleared for test:", testMethodName +"/"+testDescription);
-            if (testResult.getInstance() instanceof UITest)
-            {
+            LogsManager.info("Logs cleared for test:", testMethodName + "/" + testDescription);
+            if (testResult.getInstance() instanceof UITest) {
                 ScreenRecordManager.startRecording();
             }
-            LogsManager.info("Test Case:", testMethodName +"/"+testDescription, "starting ....");
+            LogsManager.info("Test Case:", testMethodName + "/" + testDescription, "starting ....");
         }
     }
 
     public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
         String testMethodName = testResult.getName();
         String testDescription = testResult.getMethod().getDescription();
+        String fullTestName = testMethodName + "_" + testDescription;
         WebDriver driver = null;
         if (method.isTestMethod()) {
             if (testResult.getInstance() instanceof UITest)
-            {
                 ScreenRecordManager.stopRecording(testResult.getName());
-                if (testResult.getInstance() instanceof WebDriverProvider provider)
-                    driver = provider.getWebDriver(); //initialize driver from WebDriverProvider
-                switch (testResult.getStatus()){
-                    case ITestResult.SUCCESS -> ScreenshotsManager.takeFullPageScreenshot(driver,"passed-" + testResult.getName());
-                    case ITestResult.FAILURE -> ScreenshotsManager.takeFullPageScreenshot(driver,"failed-" + testResult.getName());
-                    case ITestResult.SKIP -> ScreenshotsManager.takeFullPageScreenshot(driver,"skipped-" + testResult.getName());
+
+            try {
+            if (testResult.getInstance() instanceof WebDriverProvider provider) {
+                driver = provider.getWebDriver();//initialize driver from WebDriverProvider
+                switch (testResult.getStatus()) {
+/*                    case ITestResult.SUCCESS ->
+                            ScreenshotsManager.takeFullPageScreenshot(driver, "passed-" + fullTestName);*/
+                    case ITestResult.FAILURE ->
+                            ScreenshotsManager.takeFullPageScreenshot(driver, "failed-" + fullTestName);
+/*                    case ITestResult.SKIP ->
+                            ScreenshotsManager.takeFullPageScreenshot(driver, "skipped-" + fullTestName);*/
                 }
+            } } catch (Exception e) {
+                LogsManager.error("Error taking screenshot:", e.getMessage());
+                LogsManager.info("Driver not initialized or the Test is an API test.");
+            }
                 AllureAttachmentManager.attachRecords(testResult.getName());
             }
 
             Validation.assertAll(testResult);
-            LogsManager.info("Test Case:", testMethodName +"/"+testDescription, "finished.");
+            LogsManager.info("Test Case:", fullTestName, "finished.");
             //attach logs to allure report
             try {
                 File logFile = new File(LogsManager.LOGS_PATH + "logs.log");
@@ -100,7 +108,7 @@ public class TestNGListeners implements
                 LogsManager.error("Error attaching logs", e.getMessage());
             }
         }
-    }
+
 
     public void onTestSuccess(ITestResult result) {
         IRetryAnalyzer retry = result.getMethod().getRetryAnalyzer(result);

@@ -35,14 +35,14 @@ public class RegisterTestAPI extends BaseTest {
                         testData.getJsonData("year"),
                         testData.getJsonData("firstName"),
                         testData.getJsonData("lastName"),
-                        testData.getJsonData("companyName"),
+                        testData.getJsonData("company"),
                         testData.getJsonData("address1"),
                         testData.getJsonData("address2"),
                         testData.getJsonData("country"),
                         testData.getJsonData("state"),
                         testData.getJsonData("city"),
-                        testData.getJsonData("zipcode"),
-                        testData.getJsonData("mobileNumber")
+                        testData.getJsonData("zipCode"),
+                        testData.getJsonData("phone")
                 )
                 .verifyUserCreatedSuccessfully();
     }

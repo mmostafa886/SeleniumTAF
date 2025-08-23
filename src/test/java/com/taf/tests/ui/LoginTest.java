@@ -27,12 +27,13 @@ import org.testng.annotations.Test;
 @Tags({@Tag(Groups.LOGIN), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
 public class LoginTest extends BaseTest {
 
-    String timestamp = TimeManager.getCompactTimeStamp();
+
 
     @Description("Verify user can login with valid credentials")
     @Test(description = "Valid Login Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
     public void validLoginTC()
     {
+        String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Valid-Login Test Started ...");
         new UserManagementAPI().createRegisterUserAccount(
                 testData.getJsonData("name"),
@@ -61,6 +62,7 @@ public class LoginTest extends BaseTest {
     @Test(description = "Invalid Login (Invalid Email) Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
     public void inValidLoginUsingInvalidEmailTC()
     {
+        String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Invalid-Login (Invalid Email) Test Started ...");
         new UserManagementAPI().createRegisterUserAccount(
                         testData.getJsonData("name"),
@@ -87,6 +89,7 @@ public class LoginTest extends BaseTest {
     @Test(description = "Invalid Login (Invalid Email) Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
     public void inValidLoginUsingInvalidPasswordTC()
     {
+        String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Invalid-Login (Invalid Password) Test Started ...");
         new UserManagementAPI().createRegisterUserAccount(
                         testData.getJsonData("name"),
