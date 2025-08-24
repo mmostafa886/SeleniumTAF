@@ -1,3 +1,4 @@
+
 #!/bin/bash
 #1- Create the needed docker configuration from the (docker-compose.yml) including network, hub & nodes
 docker-compose up -d
@@ -10,7 +11,7 @@ while ! curl -sSL "http://localhost:4444/wd/hub/status" | jq -r ".value.ready" |
 done
 
 #3- Execute the tests
-docker-compose run --rm test-runner mvn clean test
+docker-compose run --rm test-runner mvn clean test -Dbrowser=edge -Dheadless=true -Dtest="%regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"
 #mvn clean test -Dbrowser=chrome
 #mvn clean test -Dbrowser=firefox
 #mvn clean test -Dbrowser=edge

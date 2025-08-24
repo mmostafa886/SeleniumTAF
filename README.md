@@ -50,7 +50,7 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
             - `mvn clean test -Dheadless=false`</font>
         - <font size=2>**Properties Files**: any properties file under the `src/main/resources/` directory can be used but mainly the `webApp.properties` file is used to provide such properties.</font>
 
-## Notes
+## <font size=5>**Notes**</font>
 ### Dockerized/Remote Execution:
 - For Dockerized execution, ensure that the Docker is installed & running on the used machine, use the `ExecuteAndGenerateReport.sh` script which executes the tests & do other steps as well (Like opening the report automatically after the execution ends).
     - The `docker-compose.yml` file is used to define the services, networks, and volumes for the Dockerized environment (including Selenium Hub & nodes and Test Runner container as well).
@@ -78,6 +78,8 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 ### Retry on Failure:
 - Add `RetryAnalyzer` class to retry the failed tests.
 - The retry Analyzer is used inside the `TestNGListener` class to retry the failed tests.
+### Allure Report:
+- The `AllureReportGenerator >>openReport()` method is modified to open the Allure report automatically after the execution ends.
 ### Using Groups for Test Execution:
 - Add `groups` attribute to the `@Test` annotation to group the tests.
 - The `groups` attribute can be used to group the tests by their functionality or targeted testing type (like: `cart`, `login`, `smoke`, `regression`, etc.).
@@ -86,11 +88,7 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - The groups were added as constants in the `Groups` class under the `utils` package.
 - The test inside a specific test package can be triggered by executing the command `mvn clean test -Dtest="com.taf.tests.ui.*Test"`.
 - To execute all the tests (especially inside a CI/CD pipeline), execute a command with regex, Ex. `mvn clean test -Dtest="regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"`
-### Allure Reporting
-- The `AllureReportGenerator` class was created to generate the Allure report automatically after the execution ends.
-- The Report is not opened if the execution was through CI/CD Pipeline.
 ## CI/CD
-- The CI/CD pipelines were configured for `GitHub Actions`, `Jenkins`, & `CircleCI`.
 ### GitHub_Actions
 - A `GitHub Actions Workflow` file `E2E_Tests.yml` was created under the directory `.github/workflows`.
 - This file contains 2 jobs & both of these jobs execute all the tests but one for `Chrome` & the other for `Edge`.
@@ -110,9 +108,8 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - A `CircleCI` configuration file `config.yml` was created under the directory `.circleci` with detailed comments on each part of the configuration.
 - This file contains 2 jobs & both of these jobs execute all the tests but one for `Chrome` & the other for `Edge`.
 - It must be taken into consideration how the pipelines are configured `(https://circleci.com/docs/guides/orchestrate/triggers-overview/#run-a-pipeline-on-commit-to-your-code-repository)`.
-- The Execution trigger will be disabled not to execute the script with every code push.
-- Triggers configuration can be found under: `[project_Name] >>Settings >>Triggers` & Add a trigger pf type "All pushes" so that the pipeline/workflow will be triggered with every new code push and for any branch with config.yml ). 
-
+- The `EnvironmentUtils` class is used to detect if the execution is on a `CI/CD` pipeline or not.
+- The `AllureReportGenerator >>openReport()` method is modified not to open the Allure report automatically after the execution ends as it causes an issue with CircleCI.
 
 ## TO-DOs:
 - Generate Allure report on a dockerized container , not on the host machine.

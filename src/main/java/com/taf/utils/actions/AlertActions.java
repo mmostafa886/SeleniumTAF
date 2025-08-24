@@ -109,10 +109,10 @@ public class AlertActions {
                 ((JavascriptExecutor) driver).executeScript(
                         "document.querySelectorAll('ins.adsbygoogle').forEach(el => el.remove());"
                 );
-                LogsManager.info("Footer commercial dismissed successfully.");
-                return true; // Footer commercial is dismissed.
+                LogsManager.info("Google commercials hidden successfully.");
+                return true; // Footer commercial is hidden.
             } catch (Exception e) {
-                LogsManager.warn("Footer commercial not found or not dismissed. Continue ");
+                LogsManager.warn("Google commercials not found or was not hidden. Continue......");
                 return true;
             }
         });

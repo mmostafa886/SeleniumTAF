@@ -14,7 +14,7 @@ import java.io.File;
 
 public class ScreenshotsManager {
 
-    public static final String SCREENSHOTS_PATH = "test-output/ScreenShots/";
+    public static final String SCREENSHOTS_PATH = "test-output/screenshots/";
 
     /**
      * Take a full page screenshot and save it with a timestamp.
@@ -30,7 +30,6 @@ public class ScreenshotsManager {
             // Save screenshot to a file if needed
             File screenshotFile = new File(SCREENSHOTS_PATH + screenshotName + "-" + TimeManager.getTimeStamp() + ".png");
             FileUtils.copyFile(screenshotSrc, screenshotFile);
-
 
             AllureAttachmentManager.attachScreenshot(screenshotName,screenshotFile.getAbsolutePath());
 
