@@ -44,8 +44,7 @@ public class CartPage {
     public CartPage navigate()
     {
         driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb")+cartEndpoint);
-        driver.alert().dismissCommercialsIfPresent();
-        driver.alert().dismissConsentPopupIfPresent();
+        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
         return this;
     }
     @Step("Click On Proceed To Checkout Button")

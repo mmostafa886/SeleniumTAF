@@ -5,7 +5,7 @@ import com.taf.drivers.GUIWebDriver;
 import com.taf.drivers.UITest;
 import com.taf.pages.components.NavBarComponent;
 import com.taf.pages.SignUpAndLoginPage;
-import com.taf.tests.BaseTest;
+import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
 @Owner("Ashraf")
 @UITest
 @Tags({@Tag(Groups.LOGIN), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class LoginTest extends BaseTest {
+public class LoginTest extends BaseGuiTest {
 
 
 
@@ -47,7 +47,7 @@ public class LoginTest extends BaseTest {
                 .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
                 .enterLoginPassword(testData.getJsonData("password"))
                 .clickLoginButton()
-                .navigationBar
+                .getNavigationBar()
                 .verifyUserLabel(testData.getJsonData("name"));
 
         new UserManagementAPI().deleteUserAccount(
@@ -119,15 +119,15 @@ public class LoginTest extends BaseTest {
         testData = new JsonReader("login-data");
     }
 
+    @Override
     @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        driver = new GUIWebDriver();
-        new NavBarComponent(driver).navigate();
-        driver.browser().closeExtensionTab();
+        super.setUp();
     }
 
+    @Override
     @AfterMethod(alwaysRun = true)
     public void tearDown() {
-        driver.quitDriver();
+        super.tearDown();
     }
 }

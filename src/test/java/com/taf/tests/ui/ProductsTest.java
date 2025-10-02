@@ -1,11 +1,10 @@
 package com.taf.tests.ui;
 
-
 import com.taf.drivers.GUIWebDriver;
 import com.taf.drivers.UITest;
 import com.taf.pages.ProductsPage;
 import com.taf.pages.components.NavBarComponent;
-import com.taf.tests.BaseTest;
+import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.dataReader.JsonReader;
 import io.qameta.allure.*;
@@ -23,7 +22,7 @@ import org.testng.annotations.Test;
 @Owner("Ashraf")
 @UITest
 @Tags({@Tag(Groups.PRODUCTS), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class ProductsTest extends BaseTest {
+public class ProductsTest extends BaseGuiTest {
 
     @Description("Search for a product and validate its details")
     @Test(description = "Search for a product without login and validate its details"
@@ -60,9 +59,7 @@ public class ProductsTest extends BaseTest {
 
     @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        driver = new GUIWebDriver();
-        new NavBarComponent(driver).navigate();
-        driver.browser().closeExtensionTab();
+       super.setUp();
     }
 
     @AfterMethod(alwaysRun = true)

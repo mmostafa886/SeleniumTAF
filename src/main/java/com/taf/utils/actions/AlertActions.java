@@ -92,20 +92,20 @@ public class AlertActions {
     }
 
     @Step("Dismiss consent popup if present")
-    public void dismissConsentPopupIfPresent() {
+    public AlertActions dismissConsentPopupIfPresent() {
             try {
                 new ElementActions(driver).clickWithCustomWait(consentButton);
                 LogsManager.info("Consent popup dismissed successfully.");
             } catch (Exception e) {
                 LogsManager.warn("Consent popup not found or not dismissed. Continue ");
             }
+            return this;
     }
 
     @Step("Dismiss footer commercial if present")
-    public void dismissCommercialsIfPresent() {
+    public AlertActions dismissCommercialsIfPresent() {
         waitManager.fluentWait(3).until(d -> {
             try {
-               // new ElementActions(driver).click(footerCommercial);
                 ((JavascriptExecutor) driver).executeScript(
                         "document.querySelectorAll('ins.adsbygoogle').forEach(el => el.remove());"
                 );
@@ -116,6 +116,7 @@ public class AlertActions {
                 return true;
             }
         });
+        return this;
     }
 
 }

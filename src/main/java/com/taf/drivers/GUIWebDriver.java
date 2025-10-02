@@ -30,7 +30,7 @@ public class GUIWebDriver {
      * This ensures thread safety by providing each thread its own WebDriver instance,
      * preventing concurrency issues when running tests in parallel.
      */
-    private ThreadLocal<WebDriver> driverThreadLocal = new ThreadLocal<>();
+    private final ThreadLocal<WebDriver> driverThreadLocal = new ThreadLocal<>();
 
     /**
      * Constructor for GUIWebDriver.

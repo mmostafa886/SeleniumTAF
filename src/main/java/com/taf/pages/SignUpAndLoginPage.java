@@ -4,12 +4,14 @@ import com.taf.drivers.GUIWebDriver;
 import com.taf.pages.components.NavBarComponent;
 import com.taf.utils.dataReader.PropertyReader;
 import io.qameta.allure.Step;
+import lombok.Getter;
 import org.openqa.selenium.By;
 
 public class SignUpAndLoginPage {
 
-    public NavBarComponent navigationBar;
-    private GUIWebDriver driver;
+    @Getter
+    private final NavBarComponent navigationBar;
+    private final GUIWebDriver driver;
     private final String signUpLoginUrl = "/login";
     public SignUpAndLoginPage(GUIWebDriver driver) {
         this.driver = driver;
@@ -31,16 +33,15 @@ public class SignUpAndLoginPage {
     @Step("Navigate to SignUp/Login page")
     public SignUpAndLoginPage navigate() {
         driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + signUpLoginUrl);
-        driver.alert().dismissCommercialsIfPresent();
-        driver.alert().dismissConsentPopupIfPresent();
+        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
         return this;
     }
 
     @Step("Enter SignUp  Name {name} and Email {email} in the SignUp form")
     public SignUpAndLoginPage enterSignUpDetails(String name, String email) {
-        driver.element().type(signUpName, name);
-        driver.element().type(signUpEmail, email);
-        driver.element().click(signUpButton);
+        driver.element().type(signUpName, name)
+                .type(signUpEmail, email)
+                .click(signUpButton);
         return this;
     }
 

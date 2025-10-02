@@ -8,7 +8,7 @@ import com.taf.pages.CheckoutPage;
 import com.taf.pages.ProductsPage;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.pages.components.NavBarComponent;
-import com.taf.tests.BaseTest;
+import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
@@ -18,6 +18,7 @@ import io.qameta.allure.testng.Tags;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 @Epic("Automation Exercise")
 @Feature("UI Payment")
 @Story("Payment")
@@ -25,7 +26,7 @@ import org.testng.annotations.Test;
 @Owner("Ashraf")
 @UITest
 @Tags({@Tag(Groups.PAYMENT), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class PaymentTest extends BaseTest {
+public class PaymentTest extends BaseGuiTest {
 
     String timestamp = TimeManager.getCompactTimeStamp();
 
@@ -62,7 +63,7 @@ public class PaymentTest extends BaseTest {
                 .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
                 .enterLoginPassword(testData.getJsonData("password"))
                 .clickLoginButton()
-                .navigationBar
+                .getNavigationBar()
                 .verifyUserLabel(testData.getJsonData("name"));
     }
 
@@ -147,16 +148,14 @@ public class PaymentTest extends BaseTest {
 
     //Configurations
     @BeforeClass(alwaysRun = true)
-    protected void setUp() {
+    public void setUp() {
         testData = new JsonReader("checkout-data");
-        driver = new GUIWebDriver();
-        new NavBarComponent(driver).navigate();
-        driver.browser().closeExtensionTab();
+        super.setUp();
     }
 
 
     @AfterClass(alwaysRun = true)
     public void tearDown() {
-        driver.quitDriver();
+        super.tearDown();
     }
 }

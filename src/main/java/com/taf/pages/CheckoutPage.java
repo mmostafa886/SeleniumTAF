@@ -37,8 +37,7 @@ public class CheckoutPage {
     @Step("Navigate To Checkout Page")
     public CheckoutPage navigate() {
         driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + checkoutEndpoint);
-        driver.alert().dismissCommercialsIfPresent();
-        driver.alert().dismissConsentPopupIfPresent();
+        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
         return this;
     }
 

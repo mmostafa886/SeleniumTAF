@@ -2,10 +2,11 @@ package com.taf.tests;
 
 import com.taf.drivers.GUIWebDriver;
 import com.taf.drivers.WebDriverProvider;
+import com.taf.pages.components.NavBarComponent;
 import com.taf.utils.dataReader.JsonReader;
 import org.openqa.selenium.WebDriver;
 
-public class BaseTest implements WebDriverProvider {
+public class BaseGuiTest implements WebDriverProvider {
 
     protected GUIWebDriver driver;
     protected JsonReader testData;
@@ -15,4 +16,14 @@ public class BaseTest implements WebDriverProvider {
         return driver.get();
     }
 
+
+    public void setUp() {
+        driver = new GUIWebDriver();
+        new NavBarComponent(driver).navigate();
+        driver.browser().closeExtensionTab();
+    }
+
+    public void tearDown() {
+        driver.quitDriver();
+    }
 }

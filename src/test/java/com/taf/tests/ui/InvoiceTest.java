@@ -5,7 +5,7 @@ import com.taf.drivers.GUIWebDriver;
 import com.taf.drivers.UITest;
 import com.taf.pages.*;
 import com.taf.pages.components.NavBarComponent;
-import com.taf.tests.BaseTest;
+import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
@@ -15,6 +15,7 @@ import io.qameta.allure.testng.Tags;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 @Epic("Automation Exercise")
 @Feature("UI Invoice")
 @Story("Invoice")
@@ -22,7 +23,7 @@ import org.testng.annotations.Test;
 @Owner("Ashraf")
 @UITest
 @Tags({@Tag(Groups.INVOICE), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class InvoiceTest  extends BaseTest {
+public class InvoiceTest extends BaseGuiTest {
 
     String timestamp = TimeManager.getSimpleTimeStamp();
 
@@ -53,19 +54,19 @@ public class InvoiceTest  extends BaseTest {
 
     @Description("Login to account")
     @Test(dependsOnMethods = "registerNewAccount", description = "Login"
-    , groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
+            , groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
     public void loginToAccount() {
         new SignUpAndLoginPage(driver).navigate()
                 .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
                 .enterLoginPassword(testData.getJsonData("password"))
                 .clickLoginButton()
-                .navigationBar
+                .getNavigationBar()
                 .verifyUserLabel(testData.getJsonData("name"));
     }
 
     @Description("Add product to cart")
     @Test(dependsOnMethods = {"loginToAccount", "registerNewAccount"}, description = "Add product to cart"
-    , groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
+            , groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
     public void addProductToCart() {
         new ProductsPage(driver)
                 .navigate()
@@ -82,7 +83,7 @@ public class InvoiceTest  extends BaseTest {
 
     @Description("Checkout the product added to Cart")
     @Test(dependsOnMethods = {"addProductToCart", "loginToAccount", "registerNewAccount"}, description = "Checkout"
-    , groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
+            , groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
     public void checkout() {
         new CartPage(driver)
                 .clickOnProceedToCheckout()
@@ -121,7 +122,7 @@ public class InvoiceTest  extends BaseTest {
         new CheckoutPage(driver)
                 .clickOnPlaceOrder()
                 .fillCardInfo(testData.getJsonData("card.cardName")
-                        ,testData.getJsonData("card.cardNumber"),
+                        , testData.getJsonData("card.cardNumber"),
                         testData.getJsonData("card.cvc")
                         , testData.getJsonData("card.exMonth")
                         , testData.getJsonData("card.exYear")
@@ -132,20 +133,20 @@ public class InvoiceTest  extends BaseTest {
 
     @Description("Download the order invoice")
     @Test(dependsOnMethods =
-            {"paymentTest","checkout", "addProductToCart", "loginToAccount", "registerNewAccount"},
-    description = "Download Invoice", groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
+            {"paymentTest", "checkout", "addProductToCart", "loginToAccount", "registerNewAccount"},
+            description = "Download Invoice", groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
     public void downloadInvoice() {
         new PaymentPage(driver)
                 .clickOnDownloadInvoiceButton()
                 .verifyDownloadedFile(testData.getJsonData("invoiceName"));
     }
 
-   @Description("Delete account through API as post condition")
-    @Test(dependsOnMethods = {"paymentTest","checkout","loginToAccount","registerNewAccount"}
+    @Description("Delete account through API as post condition")
+    @Test(dependsOnMethods = {"paymentTest", "checkout", "loginToAccount", "registerNewAccount"}
             , description = "Delete Account", groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
     public void deleteAccountAsPostCondition() {
         new UserManagementAPI()
-                .deleteUserAccount( testData.getJsonData("email") + timestamp + "@gmail.com",
+                .deleteUserAccount(testData.getJsonData("email") + timestamp + "@gmail.com",
                         testData.getJsonData("password"
                         ))
                 .verifyUserDeletedSuccessfully();
@@ -153,11 +154,9 @@ public class InvoiceTest  extends BaseTest {
 
     //Configurations
     @BeforeClass(alwaysRun = true)
-    protected void setUp() {
+    public void setUp() {
         testData = new JsonReader("checkout-data");
-        driver = new GUIWebDriver(); //blank 0
-        driver.browser().closeExtensionTab();
-        new NavBarComponent(driver).navigate();
+        super.setUp();
     }
 
 

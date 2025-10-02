@@ -4,7 +4,7 @@ import com.taf.drivers.GUIWebDriver;
 import com.taf.drivers.UITest;
 import com.taf.pages.ProductsPage;
 import com.taf.pages.components.NavBarComponent;
-import com.taf.tests.BaseTest;
+import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.dataReader.JsonReader;
 import io.qameta.allure.*;
@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 @Owner("Ashraf")
 @UITest
 @Tags({@Tag(Groups.CART), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class CartTest extends BaseTest {
+public class CartTest extends BaseGuiTest {
 
 
     @Description("Verify product details on cart without login")
@@ -50,13 +50,11 @@ public class CartTest extends BaseTest {
 
     @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        driver = new GUIWebDriver();
-        new NavBarComponent(driver).navigate();
-        driver.browser().closeExtensionTab();
+        super.setUp();
     }
 
     @AfterMethod(alwaysRun = true)
     public void tearDown() {
-        driver.quitDriver();
+        super.tearDown();
     }
 }

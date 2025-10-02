@@ -20,9 +20,10 @@ public class ElementActions {
 
     //click method
     @Step("Click on element with locator: {0}")
-    public void click(By locator) {
+    public ElementActions click(By locator) {
         LogsManager.info("Attempting to click on element with locator:", locator.toString());
         waitManager.fluentWait().until(driver -> clickOperation(locator));
+        return this;
     }
 
     @Step("Click on element with locator: {0}")
@@ -161,7 +162,7 @@ public class ElementActions {
 
     //select from dropdown
     @Step("Select value '{1}' from dropdown with locator: {0}")
-    public void selectFromDropdown(By locator, String value) {
+    public ElementActions selectFromDropdown(By locator, String value) {
         waitManager.fluentWait().until(d ->
                 {
                     try {
@@ -176,6 +177,7 @@ public class ElementActions {
                     }
                 }
         );
+        return this;
     }
 
     @Step("Get the number of Elements with locator: {0}")

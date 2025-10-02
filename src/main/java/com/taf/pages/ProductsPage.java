@@ -54,8 +54,7 @@ public class ProductsPage {
     @Step("Navigate to Products Page")
     public ProductsPage navigate() {
         driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + productPage);
-        driver.alert().dismissCommercialsIfPresent();
-        driver.alert().dismissConsentPopupIfPresent();
+        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
         return this;
     }
 

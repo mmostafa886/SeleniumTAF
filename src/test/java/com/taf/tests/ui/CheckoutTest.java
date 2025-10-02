@@ -7,7 +7,7 @@ import com.taf.pages.CartPage;
 import com.taf.pages.ProductsPage;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.pages.components.NavBarComponent;
-import com.taf.tests.BaseTest;
+import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
@@ -17,6 +17,7 @@ import io.qameta.allure.testng.Tags;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 @Epic("Checkout Management")
 @Feature("UI Checkout Management")
 @Story("Checkout Management")
@@ -24,7 +25,7 @@ import org.testng.annotations.Test;
 @Owner("Ashraf")
 @UITest
 @Tags({@Tag(Groups.CHECKOUT), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class CheckoutTest extends BaseTest {
+public class CheckoutTest extends BaseGuiTest {
 
     String timestamp;
 
@@ -62,7 +63,7 @@ public class CheckoutTest extends BaseTest {
                 .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
                 .enterLoginPassword(testData.getJsonData("password"))
                 .clickLoginButton()
-                .navigationBar
+                .getNavigationBar()
                 .verifyUserLabel(testData.getJsonData("name"));
     }
 
@@ -130,7 +131,7 @@ public class CheckoutTest extends BaseTest {
 
     //Configurations
     @BeforeClass(alwaysRun = true)
-    protected void setUp() {
+    public void setUp() {
         testData = new JsonReader("checkout-data");
         driver = new GUIWebDriver();
         new NavBarComponent(driver).navigate();

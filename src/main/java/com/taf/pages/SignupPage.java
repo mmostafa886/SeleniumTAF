@@ -50,22 +50,22 @@ public class SignupPage {
                                            String address1, String address2, String country,
                                            String state, String city, String zipcode, String mobileNumber) {
         selectTitle(title);
-        driver.element().type(passwordInput, password);
-        driver.element().selectFromDropdown(daySelect, day);
-        driver.element().selectFromDropdown(monthSelect, month);
-        driver.element().selectFromDropdown(yearSelect, year);
-        driver.element().click(newsletterCheckbox);
-        driver.element().click(specialOffersCheckbox);
-        driver.element().type(firstNameInputAddress, firstName);
-        driver.element().type(lastNameInputAddress, lastName);
-        driver.element().type(companyInput, company);
-        driver.element().type(address1Input, address1);
-        driver.element().type(address2Input, address2);
-        driver.element().selectFromDropdown(countrySelect, country);
-        driver.element().type(stateInput, state);
-        driver.element().type(cityInput, city);
-        driver.element().type(zipcodeInput, zipcode);
-        driver.element().type(mobileNumberInput, mobileNumber);
+        driver.element().type(passwordInput, password)
+                .selectFromDropdown(daySelect, day)
+                .selectFromDropdown(monthSelect, month)
+                .selectFromDropdown(yearSelect, year)
+                .click(newsletterCheckbox)
+                .click(specialOffersCheckbox)
+                .type(firstNameInputAddress, firstName)
+                .type(lastNameInputAddress, lastName)
+                .type(companyInput, company)
+                .type(address1Input, address1)
+                .type(address2Input, address2)
+                .selectFromDropdown(countrySelect, country)
+                .type(stateInput, state)
+                .type(cityInput, city)
+                .type(zipcodeInput, zipcode)
+                .type(mobileNumberInput, mobileNumber);
         return this;
     }
 

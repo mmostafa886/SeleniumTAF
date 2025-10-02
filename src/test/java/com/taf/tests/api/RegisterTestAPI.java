@@ -1,7 +1,7 @@
 package com.taf.tests.api;
 
 import com.taf.apis.UserManagementAPI;
-import com.taf.tests.BaseTest;
+import com.taf.tests.BaseApiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
@@ -17,7 +17,7 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @Tags({@Tag(Groups.REGISTRATION), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class RegisterTestAPI extends BaseTest {
+public class RegisterTestAPI extends BaseApiTest {
 
     String timestamp = TimeManager.getSimpleTimeStamp();
 

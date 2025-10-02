@@ -29,8 +29,7 @@ public class ProductDetailsPage {
     //actions
     public ProductDetailsPage navigate() {
         driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + productDetailsEndpoint);
-        driver.alert().dismissCommercialsIfPresent();
-        driver.alert().dismissConsentPopupIfPresent();
+        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
         return this;
     }
 

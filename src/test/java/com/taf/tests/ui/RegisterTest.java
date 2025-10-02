@@ -6,7 +6,7 @@ import com.taf.drivers.UITest;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.pages.SignupPage;
 import com.taf.pages.components.NavBarComponent;
-import com.taf.tests.BaseTest;
+import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 @Owner("Ashraf")
 @UITest
 @Tags({@Tag(Groups.REGISTRATION), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class RegisterTest extends BaseTest {
+public class RegisterTest extends BaseGuiTest {
 
      String registerTimeStamp;
 
@@ -116,9 +116,7 @@ public class RegisterTest extends BaseTest {
     //Configuration Methods.
     @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        driver = new GUIWebDriver();
-        new NavBarComponent(driver).navigate();
-        driver.browser().closeExtensionTab();
+     super.setUp();
     }
 
     @AfterMethod(alwaysRun = true)
