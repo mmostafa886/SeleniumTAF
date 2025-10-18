@@ -22,14 +22,14 @@ public class ElementActions {
     @Step("Click on element with locator: {0}")
     public ElementActions click(By locator) {
         LogsManager.info("Attempting to click on element with locator:", locator.toString());
-        waitManager.fluentWait().until(driver -> clickOperation(locator));
+        waitManager.fluentWait().until(driver1 -> clickOperation(locator));
         return this;
     }
 
     @Step("Click on element with locator: {0}")
     public void clickWithCustomWait(By locator) {
         LogsManager.info("Attempting to click on element with locator:", locator.toString());
-        waitManager.fluentWait(5).until(driver -> clickOperation(locator));
+        waitManager.fluentWait(5).until(driver1 -> clickOperation(locator));
     }
 
      public boolean clickOperation(By locator) {
@@ -53,7 +53,7 @@ public class ElementActions {
      }
 
     //type method
-    @Step("Type text '{1}' into element with locator: {0}")
+    @Step("Type text '{1}' into element with locator: '{0}'")
     public ElementActions type(By locator, String text) {
         waitManager.fluentWait().until(d -> {
             try {
@@ -92,7 +92,6 @@ public class ElementActions {
     //getText method
     @Step("Get text from element with locator: {0}")
     public String getText(By locator) {
-        String text;
         return waitManager.fluentWait().until(d -> {
             try {
                 WebElement element = d.findElement(locator);
@@ -129,9 +128,6 @@ public class ElementActions {
     @Step("Scroll to element with locator: {0}")
     public void scrollToElementJS(By locator) {
         WebElement element = findElement(locator);
-        Point intialLocation = element.getLocation();
-        int initialX = intialLocation.getX();
-        int initialY = intialLocation.getY();
         waitManager.fluentWait().until(d -> {
             ((JavascriptExecutor) driver).executeScript("""
                             arguments[0].scrollIntoView({behavior: "smooth", block: "center",inline: "center"});""", element);
