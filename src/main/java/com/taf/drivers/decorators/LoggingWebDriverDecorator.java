@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -156,7 +157,16 @@ public class LoggingWebDriverDecorator extends WebDriverDecorator {
             long duration = System.currentTimeMillis() - startTime;
             LogsManager.debug("Navigation completed in " + duration + "ms");
         }
-        
+
+        @Override
+        public void to(URL url) {
+            LogsManager.info("Navigating to URL via Navigation: " + url.toString());
+            long startTime = System.currentTimeMillis();
+            navigation.to(url);
+            long duration = System.currentTimeMillis() - startTime;
+            LogsManager.debug("Navigation completed in " + duration + "ms");
+        }
+
         @Override
         public void refresh() {
             LogsManager.info("Refreshing current page");

@@ -75,6 +75,9 @@ public class BrowserActions {
     }
 
 
-
-
+    public String getPageTitle() {
+        String title = driver.getTitle();
+        LogsManager.info("Page title is:", title);
+        return title;
+    }
 }

@@ -18,12 +18,23 @@ public class DriverConfigParser {
      */
     public static boolean isHeadlessMode() {
         boolean headless = headlessMode || isRemote;
-
-        String logMessage = isRemote ? "Remote_Execution is {True}, Headless mode is {True} all the time for remote execution."
-                : headlessMode ? "Headless mode is {True}."
-                : "Headless mode is {False} (both remote execution & headless mode are false).";
+        String logMessage = determineLogMessage();
         LogsManager.info(logMessage);
         return headless;
+    }
+
+    /**
+     * Determines the appropriate log message based on remote execution and headless mode settings.
+     * @return String containing the log message describing the current configuration
+     */
+    private static String determineLogMessage() {
+        if (isRemote) {
+            return "Remote_Execution is {True}, Headless mode is {True} all the time for remote execution.";
+        } else if (headlessMode) {
+            return "Headless mode is {True}.";
+        } else {
+            return "Headless mode is {False} (both remote execution & headless mode are false).";
+        }
     }
 
     /**
@@ -48,4 +59,3 @@ public class DriverConfigParser {
         return isRemote ? "Enabled" : "Disabled";
     }
 }
-

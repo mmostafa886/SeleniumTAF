@@ -1,62 +1,58 @@
 package com.taf.drivers;
 
 import com.taf.utils.logs.LogsManager;
-import org.openqa.selenium.PageLoadStrategy;
-import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.taf.drivers.DriverConfigParser.*;
 
+/**
+ * FirefoxFactory creates and configures Firefox WebDriver instances.
+ * Uses DriverOptionsBuilder for configuration, implementing the Builder Pattern.
+ * 
+ * Design Patterns Applied:
+ * - Factory Pattern: Creates Firefox driver instances
+ * - Builder Pattern: Uses DriverOptionsBuilder for configuration
+ * - Template Method: Extends AbstractDriver
+ */
 public class FirefoxFactory extends AbstractDriver {
 
+    /**
+     * Create Firefox options using the DriverOptionsBuilder
+     * Demonstrates the Builder Pattern in action
+     * 
+     * @return Configured FirefoxOptions
+     */
     private FirefoxOptions options() {
-        FirefoxOptions options = new FirefoxOptions();
-        options.addPreference("dom.webnotifications.enabled", false); // disables notifications
-        options.addPreference("dom.disable_open_during_load", false); // disables popups
-        options.addArguments("--start-maximized"); // Example option to start Chrome maximized
-/*        options.addArguments("--disable-infobars"); // Example option to disable infobars
-        options.addArguments("--disable-extensions");
-        options.addArguments("--disable-gpu"); // Example option to disable GPU hardware acceleration
-        options.addArguments("--disable-notifications"); // Example option to disable notifications
-        options.addArguments("--disable-popup-blocking"); // Example option to disable popup blocking*/
-        if (DriverConfigParser.isHeadlessMode()) options.addArguments("--headless");// Run in headless mode if specified in the configuration
-        Map<String, Object> prefs = new HashMap<>();
-        String userDir = System.getProperty("user.dir");
-        String downloadPath = userDir + "\\src\\test\\resources\\downloads";
-        prefs.put("profile.default_content_settings.popups", 0);
-        prefs.put("download.prompt_for_download", false);
-        prefs.put("download.default_directory",downloadPath);
-        options.setUnhandledPromptBehaviour(UnexpectedAlertBehaviour.IGNORE);
-        options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
-        options.setCapability(CapabilityType.UNHANDLED_PROMPT_BEHAVIOUR, UnexpectedAlertBehaviour.IGNORE);
-        options.setAcceptInsecureCerts(true); // Accept insecure certificates
-        options.setPageLoadStrategy(PageLoadStrategy.EAGER); // Set page load strategy to normal
-
-        return options;
+        LogsManager.debug("Building Firefox options using DriverOptionsBuilder");
+        
+        return DriverOptionsBuilder.forFirefox()
+                .withDefaultConfiguration(isRemote)
+                .addPreference("dom.webnotifications.enabled", false)
+                .addPreference("dom.disable_open_during_load", false)
+                .build();
     }
 
     @Override
     public WebDriver createDriver() {
         LogsManager.info("\"Firefox\" browser is starting...");
+        FirefoxOptions firefoxOptions = options();
+        
         if (isRemote) {
             try {
                 LogsManager.info("\"Firefox\" Remote session is starting...");
-                return new RemoteWebDriver(URI.create("http://" + remoteHost + ":" + remotePort + "/wd/hub").toURL(), options());
+                return new RemoteWebDriver(URI.create("http://" + remoteHost + ":" + remotePort + "/wd/hub").toURL(), firefoxOptions);
             } catch (Exception e) {
                 LogsManager.error("Couldn't create remote \"Firefox\" driver:" + e.getMessage());
                 throw new RuntimeException("Couldn't create remote \"Firefox\" driver: " + e.getMessage());
             }
         } else {
             LogsManager.info("\"Firefox\" Local session is starting...");
-            return new FirefoxDriver(options());
+            return new FirefoxDriver(firefoxOptions);
         }
     }
 }

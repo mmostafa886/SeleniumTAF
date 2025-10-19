@@ -7,7 +7,7 @@ import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.AbstractDriverOptions;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.remote.CapabilityType;
 
 import java.io.File;
@@ -26,7 +26,7 @@ import java.util.Map;
  * - Fluent Interface: Method chaining for readable configuration
  * - Factory Pattern: Creates appropriate options based on browser type
  */
-public class DriverOptionsBuilder<T extends AbstractDriverOptions<T>> {
+public class DriverOptionsBuilder<T extends MutableCapabilities> {
     
     private final T options;
     private final List<String> arguments;

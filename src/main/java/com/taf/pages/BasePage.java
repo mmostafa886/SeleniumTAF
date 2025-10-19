@@ -20,11 +20,14 @@ import org.openqa.selenium.WebElement;
  */
 public abstract class BasePage<T extends BasePage<T>> {
     
+    // Constants for configuration
+    protected static final int DEFAULT_RETRY_ATTEMPTS = 3;
+    protected static final int RETRY_DELAY_MS = 500;
+    
     @Getter
     protected final GUIWebDriver driver;
     
-    @Getter
-    protected final NavBarComponent navigationBar;
+    private NavBarComponent navigationBar; // Lazy loaded
     
     protected final WaitManager waitManager;
     
@@ -33,10 +36,23 @@ public abstract class BasePage<T extends BasePage<T>> {
      * @param driver The GUIWebDriver instance for this page
      */
     protected BasePage(GUIWebDriver driver) {
+        if (driver == null) {
+            throw new IllegalArgumentException("Driver cannot be null");
+        }
         this.driver = driver;
-        this.navigationBar = new NavBarComponent(driver);
         this.waitManager = new WaitManager(driver.get());
         LogsManager.debug("Initialized " + this.getClass().getSimpleName());
+    }
+    
+    /**
+     * Get navigation bar component with lazy initialization
+     * @return NavBarComponent instance
+     */
+    public NavBarComponent getNavigationBar() {
+        if (navigationBar == null) {
+            navigationBar = new NavBarComponent(driver);
+        }
+        return navigationBar;
     }
     
     /**
@@ -48,26 +64,58 @@ public abstract class BasePage<T extends BasePage<T>> {
     
     /**
      * Navigate to this page using the defined page URL
-     * Template Method Pattern: Defines the skeleton for navigation
+     * Template Method Pattern: Defines the skeleton for navigation with error handling
      * @return Current page instance for method chaining
+     * @throws IllegalStateException if navigation fails
      */
     @SuppressWarnings("unchecked")
     public T navigate() {
         String fullUrl = getBaseUrl() + getPageUrl();
         LogsManager.info("Navigating to: " + fullUrl);
-        driver.browser().navigateTo(fullUrl);
-        handlePopupsAfterNavigation();
-        waitForPageLoad();
+        
+        try {
+            driver.browser().navigateTo(fullUrl);
+            handlePopupsAfterNavigation();
+            waitForPageLoad();
+            verifyPageLoaded();
+            LogsManager.debug("Successfully navigated to: " + fullUrl);
+        } catch (Exception e) {
+            LogsManager.error("Failed to navigate to: " + fullUrl, e.getMessage());
+            throw new IllegalStateException("Navigation failed: " + fullUrl, e);
+        }
+        
         return (T) this;
     }
     
     /**
-     * Wait for the page to load completely
+     * Wait for the page to load completely using JavaScript ready state
      * Can be overridden by specific pages for custom wait logic
      */
     protected void waitForPageLoad() {
-        // Default implementation - can be overridden
-        waitManager.pageLoadTimeout();
+        try {
+            waitManager.pageLoadTimeout();
+            LogsManager.debug("Page loaded successfully: " + this.getClass().getSimpleName());
+        } catch (Exception e) {
+            LogsManager.warn("Page load timeout for: " + this.getClass().getSimpleName());
+        }
+    }
+    
+    /**
+     * Hook method for page-specific verification after navigation
+     * Override in subclasses to add custom verification logic
+     */
+    protected void verifyPageLoaded() {
+        // Default: verify URL contains page path
+        String expectedUrl = getPageUrl();
+        if (expectedUrl != null && !expectedUrl.isEmpty()) {
+            String currentUrl = getCurrentUrl();
+            if (!currentUrl.contains(expectedUrl)) {
+                LogsManager.warn(String.format(
+                    "URL verification warning - Expected URL to contain: %s, Current URL: %s",
+                    expectedUrl, currentUrl
+                ));
+            }
+        }
     }
     
     /**
@@ -99,12 +147,17 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
     
     /**
-     * Check if element is displayed on the page
+     * Check if element is displayed on the page with error handling
      * @param locator The locator of the element
      * @return true if element is displayed, false otherwise
      */
     protected boolean isElementDisplayed(By locator) {
-        return driver.element().isDisplayed(locator);
+        try {
+            return driver.element().isDisplayed(locator);
+        } catch (Exception e) {
+            LogsManager.debug("Element not displayed: " + locator);
+            return false;
+        }
     }
     
     /**
@@ -118,12 +171,18 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
     
     /**
-     * Get text from an element
+     * Get text from an element with null safety
      * @param locator The locator of the element
-     * @return The text content of the element
+     * @return The text content of the element, or empty string if element not found
      */
     protected String getElementText(By locator) {
-        return driver.element().getText(locator);
+        try {
+            String text = driver.element().getText(locator);
+            return text != null ? text : "";
+        } catch (Exception e) {
+            LogsManager.warn("Failed to get text from element: " + locator, e.getMessage());
+            return "";
+        }
     }
     
     /**
@@ -138,13 +197,15 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
     
     /**
-     * Type text into an element
+     * Type text into an element with improved logging
      * @param locator The locator of the element
      * @param text The text to type
      * @return Current page instance for method chaining
      */
     @SuppressWarnings("unchecked")
     protected T typeText(By locator, String text) {
+        LogsManager.debug(String.format("Typing text into %s: %s", locator, 
+            text.length() > 50 ? text.substring(0, 47) + "..." : text));
         driver.element().type(locator, text);
         return (T) this;
     }
@@ -157,7 +218,6 @@ public abstract class BasePage<T extends BasePage<T>> {
      */
     @SuppressWarnings("unchecked")
     protected T clearAndTypeText(By locator, String text) {
-        driver.element().clear(locator);
         driver.element().type(locator, text);
         return (T) this;
     }
@@ -198,7 +258,7 @@ public abstract class BasePage<T extends BasePage<T>> {
      */
     @SuppressWarnings("unchecked")
     protected T scrollToElement(By locator) {
-        driver.element().scrollToElement(locator);
+        driver.element().scrollToElementJS(locator);
         return (T) this;
     }
     
@@ -215,7 +275,7 @@ public abstract class BasePage<T extends BasePage<T>> {
      * @return The current URL
      */
     public String getCurrentUrl() {
-        return driver.browser().getCurrentURL();
+        return driver.browser().getCurrentUrl();
     }
     
     /**
@@ -231,7 +291,7 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
     
     /**
-     * Verify element text equals expected
+     * Verify element text equals expected with improved error messages
      * Fluent validation interface
      * @param locator The locator of the element
      * @param expectedText The expected text
@@ -240,6 +300,13 @@ public abstract class BasePage<T extends BasePage<T>> {
     @SuppressWarnings("unchecked")
     public T verifyElementText(By locator, String expectedText) {
         String actualText = getElementText(locator);
+        if (!actualText.equals(expectedText)) {
+            String errorMsg = String.format(
+                "Element text verification failed for %s%nExpected: '%s'%nActual: '%s'",
+                locator, expectedText, actualText
+            );
+            LogsManager.error(errorMsg);
+        }
         driver.verification().Equals(actualText, expectedText, 
             "Element text does not match. Expected: " + expectedText + ", Actual: " + actualText);
         return (T) this;
@@ -255,7 +322,7 @@ public abstract class BasePage<T extends BasePage<T>> {
     @SuppressWarnings("unchecked")
     public T verifyElementTextContains(By locator, String expectedSubstring) {
         String actualText = getElementText(locator);
-        driver.verification().Contains(actualText, expectedSubstring, 
+        driver.verification().Contains(actualText, expectedSubstring,
             "Element text does not contain expected substring. Expected substring: " + expectedSubstring);
         return (T) this;
     }
@@ -266,5 +333,95 @@ public abstract class BasePage<T extends BasePage<T>> {
      */
     protected void logAction(String action) {
         LogsManager.info("[" + this.getClass().getSimpleName() + "] " + action);
+    }
+    
+    /**
+     * Click element with retry logic for flaky elements
+     *
+     * @param locator The locator of the element to click
+     * @return Current page instance for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    protected T clickElementWithRetry(By locator) {
+        int attempts = 0;
+        Exception lastException = null;
+        
+        while (attempts < BasePage.DEFAULT_RETRY_ATTEMPTS) {
+            try {
+                waitForElementClickable(locator);
+                driver.element().click(locator);
+                LogsManager.debug("Successfully clicked element: " + locator);
+                return (T) this;
+            } catch (Exception e) {
+                lastException = e;
+                attempts++;
+                LogsManager.warn(String.format("Click attempt %d failed for: %s", attempts, locator));
+                
+                if (attempts < BasePage.DEFAULT_RETRY_ATTEMPTS) {
+                    try {
+                        Thread.sleep(RETRY_DELAY_MS);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Interrupted during retry", ie);
+                    }
+                }
+            }
+        }
+
+        LogsManager.error("Failed to click element after " + BasePage.DEFAULT_RETRY_ATTEMPTS + " attempts: " + locator);
+        throw new RuntimeException("Click failed after retries: " + locator, lastException);
+    }
+
+    /**
+     * Wait for URL to contain expected string
+     * @param urlFragment Expected URL fragment
+     * @param timeoutInSeconds Timeout in seconds
+     * @return true if URL contains fragment within timeout, false otherwise
+     */
+    protected boolean waitForUrlContains(String urlFragment, int timeoutInSeconds) {
+        try {
+            return waitManager.fluentWait(timeoutInSeconds).until(driver ->
+                driver.getCurrentUrl().contains(urlFragment)
+            );
+        } catch (Exception e) {
+            LogsManager.warn("URL did not contain expected fragment: " + urlFragment);
+            return false;
+        }
+    }
+    
+    /**
+     * Check if multiple elements are displayed
+     * @param locators Array of locators to check
+     * @return true if all elements are displayed, false otherwise
+     */
+    protected boolean areElementsDisplayed(By... locators) {
+        for (By locator : locators) {
+            if (!isElementDisplayed(locator)) {
+                LogsManager.debug("Element not displayed: " + locator);
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Wait for element to disappear from the page
+     * @param locator The locator of the element
+     * @param timeoutInSeconds Timeout in seconds
+     * @return true if element disappeared, false if still visible after timeout
+     */
+    protected boolean waitForElementToDisappear(By locator, int timeoutInSeconds) {
+        try {
+            return waitManager.fluentWait(timeoutInSeconds).until(driver -> {
+                try {
+                    return !driver.findElement(locator).isDisplayed();
+                } catch (Exception e) {
+                    return true; // Element not found means it disappeared
+                }
+            });
+        } catch (Exception e) {
+            LogsManager.warn("Element did not disappear within timeout: " + locator);
+            return false;
+        }
     }
 }

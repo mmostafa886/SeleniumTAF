@@ -17,6 +17,9 @@ public class ScreenshotsManager {
 
     public static final String SCREENSHOTS_PATH = "test-output/screenshots/";
 
+    public ScreenshotsManager(WebDriver decoratedDriver) {
+    }
+
     /**
      * Take a full page screenshot and save it with a timestamp.
      * @param driver the WebDriver instance
@@ -62,5 +65,9 @@ public class ScreenshotsManager {
         } catch (Exception e) {
             LogsManager.error("Failed to Capture Element Screenshot" , e.getMessage());
         }
+    }
+
+    public void takeScreenshot(String screenshotName) {
+
     }
 }

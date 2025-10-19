@@ -190,4 +190,17 @@ public class ElementActions {
         });
         return driver.findElements(locator).size();
     }
+
+    public boolean isDisplayed(By locator) {
+        try {
+            WebElement element = driver.findElement(locator);
+            scrollToElementJS(locator);
+            boolean displayed = element.isDisplayed();
+            LogsManager.info("Element with locator:", locator.toString(), " is displayed: ", String.valueOf(displayed));
+            return displayed;
+        } catch (Exception e) {
+            LogsManager.error("Failed to determine if element with locator:", locator.toString(), " is displayed - Error:", e.getMessage());
+            return false;
+        }
+    }
 }

@@ -6,6 +6,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import java.net.URL;
+
 /**
  * ScreenshotWebDriverDecorator automatically captures screenshots during WebDriver operations.
  * It takes screenshots on navigation, before critical actions, and on errors.
@@ -157,7 +159,22 @@ public class ScreenshotWebDriverDecorator extends WebDriverDecorator {
                 throw e;
             }
         }
-        
+
+        @Override
+        public void to(URL url) {
+            try {
+                navigation.to(url);
+                if (screenshotOnNavigation) {
+                    takeScreenshot("after_navigate_to_url_" + screenshotCounter++);
+                }
+            } catch (Exception e) {
+                if (screenshotOnError) {
+                    takeScreenshot("error_navigate_to_url_" + screenshotCounter++);
+                }
+                throw e;
+            }
+        }
+
         @Override
         public void refresh() {
             try {

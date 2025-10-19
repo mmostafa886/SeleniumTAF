@@ -52,6 +52,14 @@ public class Validation extends BaseAssertion {
         softAssert.assertEquals(actual, expected, message);
     }
 
+    @Override
+    protected void assertContains(String actual, String expected, String message) {
+        used = true; // Mark that softAssert has been used.
+        LogsManager.info("Validating that actual value:", actual, "contains expected value:", expected);
+        softAssert.assertTrue(actual.contains(expected),
+                "Expected value: " + expected + " was not found in actual value: " + actual + ". " + message);
+    }
+
     /**
      * Soft_Assert all validations collected during the test execution.
      */

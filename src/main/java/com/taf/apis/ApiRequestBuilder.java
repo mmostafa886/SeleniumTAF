@@ -209,18 +209,7 @@ public class ApiRequestBuilder {
         this.fileToUpload = file;
         return this;
     }
-    
-    /**
-     * Set basic authentication
-     * @param username Username
-     * @param password Password
-     * @return Builder instance for chaining
-     */
-    public ApiRequestBuilder setBasicAuth(String username, String password) {
-        specBuilder.setAuth(io.restassured.authentication.AuthenticationScheme.basic(username, password));
-        return this;
-    }
-    
+
     /**
      * Set OAuth2 token
      * @param token OAuth2 token

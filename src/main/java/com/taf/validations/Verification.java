@@ -35,4 +35,11 @@ public class Verification extends BaseAssertion {
         LogsManager.info("Verifying that actual value:", actual, "equals expected value:", expected);
         Assert.assertEquals(actual.toLowerCase(), expected.toLowerCase(), message);
     }
+
+    @Override
+    protected void assertContains(String actual, String expected, String message) {
+        LogsManager.info("Verifying that actual value:", actual, "contains expected value:", expected);
+        Assert.assertTrue(actual.toLowerCase().contains(expected.toLowerCase()),
+                "Expected value: " + expected + " was not found in actual value: " + actual + ". " + message);
+    }
 }

@@ -30,8 +30,17 @@ public abstract class BaseAssertion {
 
     protected abstract void assertEquals(String actual, String expected, String message);
 
+    protected abstract void assertContains(String actual, String expected, String message);
+
+   @Step("Asserting that the expected value: {1} Equals the actual value: {0}")
     public BaseAssertion Equals(String actual, String expected, String message) {
         assertEquals(actual, expected, message);
+        return this;
+    }
+
+    @Step("Asserting that the expected value: {1} Contains the actual value: {0}")
+    public BaseAssertion Contains(String actual, String expected, String message) {
+        assertContains(actual, expected, message);
         return this;
     }
 

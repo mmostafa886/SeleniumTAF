@@ -55,7 +55,7 @@ public class ThreadLocalDriverManager {
     public static WebDriver getDriver() {
         WebDriver driver = driverThreadLocal.get();
         if (driver == null) {
-            LogsManager.warn("No WebDriver found for thread: " + Thread.currentThread().getId());
+            LogsManager.warn("No WebDriver found for thread: " + Thread.currentThread().threadId());
         }
         return driver;
     }
@@ -68,11 +68,11 @@ public class ThreadLocalDriverManager {
      */
     public static void setDriver(WebDriver driver) {
         if (driver == null) {
-            LogsManager.error("Attempted to set null driver for thread: " + Thread.currentThread().getId());
+            LogsManager.error("Attempted to set null driver for thread: " + Thread.currentThread().threadId());
             throw new IllegalArgumentException("WebDriver cannot be null");
         }
         
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         String threadName = Thread.currentThread().getName();
         
         // Remove existing driver if present
@@ -96,7 +96,7 @@ public class ThreadLocalDriverManager {
      */
     public static void removeDriver() {
         WebDriver driver = driverThreadLocal.get();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         
         if (driver != null) {
             try {

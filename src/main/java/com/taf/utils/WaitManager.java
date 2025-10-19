@@ -1,10 +1,7 @@
 package com.taf.utils;
 
 import com.taf.utils.dataReader.PropertyReader;
-import org.openqa.selenium.ElementClickInterceptedException;
-import org.openqa.selenium.ElementNotInteractableException;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import java.time.Duration;
@@ -54,5 +51,81 @@ public class WaitManager {
         exceptions.add(ElementNotInteractableException.class);
         exceptions.add(ElementClickInterceptedException.class);
         return exceptions;
+    }
+
+    /**
+     * Wait for element to be visible using default timeout
+     * @param locator Element locator
+     * @return WebElement once visible, or null if timeout occurs
+     */
+    public WebElement waitForVisibility(By locator) {
+        return waitForVisibility(locator, Long.parseLong(PropertyReader.getProperty("DEFAULT_WAIT")));
+    }
+
+    /**
+     * Wait for element to be visible with custom timeout
+     * @param locator Element locator
+     * @param timeoutInSeconds Custom timeout in seconds
+     * @return WebElement once visible, or null if timeout occurs
+     */
+    public WebElement waitForVisibility(By locator, long timeoutInSeconds) {
+        try {
+            return fluentWait(timeoutInSeconds).until(driver -> {
+                WebElement element = driver.findElement(locator);
+                return element.isDisplayed() ? element : null;
+            });
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Wait for element to be clickable using default timeout
+     * @param locator Element locator
+     * @return WebElement once clickable, or null if timeout occurs
+     */
+    public WebElement waitForClickability(By locator) {
+        return waitForClickability(locator, Long.parseLong(PropertyReader.getProperty("DEFAULT_WAIT")));
+    }
+
+    /**
+     * Wait for element to be clickable with custom timeout
+     * @param locator Element locator
+     * @param timeoutInSeconds Custom timeout in seconds
+     * @return WebElement once clickable, or null if timeout occurs
+     */
+    public WebElement waitForClickability(By locator, long timeoutInSeconds) {
+        try {
+            return fluentWait(timeoutInSeconds).until(driver -> {
+                WebElement element = driver.findElement(locator);
+                return (element.isDisplayed() && element.isEnabled()) ? element : null;
+            });
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Wait for page to load completely using document.readyState
+     * Uses default timeout from properties
+     */
+    public void pageLoadTimeout() {
+        pageLoadTimeout(Long.parseLong(PropertyReader.getProperty("DEFAULT_WAIT")));
+    }
+
+    /**
+     * Wait for page to load completely with custom timeout
+     * Uses JavaScript to check document.readyState
+     * @param timeoutInSeconds Custom timeout in seconds
+     */
+    public void pageLoadTimeout(long timeoutInSeconds) {
+        try {
+            fluentWait(timeoutInSeconds).until(driver ->
+                ((JavascriptExecutor) driver).executeScript("return document.readyState")
+                    .equals("complete")
+            );
+        } catch (TimeoutException e) {
+            // Page didn't load in time, log but don't fail
+        }
     }
 }
