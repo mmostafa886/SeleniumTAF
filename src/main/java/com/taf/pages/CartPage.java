@@ -1,24 +1,38 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
-import com.taf.utils.dataReader.PropertyReader;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
-public class CartPage {
-    private GUIWebDriver driver;
+/**
+ * CartPage handles shopping cart operations
+ * Extends BasePage for enhanced functionality
+ */
+public class CartPage extends BasePage<CartPage> {
 
-    public CartPage(GUIWebDriver driver) {
-        this.driver = driver;
-    }
+    // Page URL
+    private static final String CART_ENDPOINT = "/view_cart";
 
-    //vars
-    private String cartEndpoint = "/view_cart";
-
-    //locators
+    // Locators
     private final By proceedToCheckoutButton = By.xpath("//a[.='Proceed To Checkout']");
 
-    //dynamic locators
+    /**
+     * Constructor
+     * @param driver The GUIWebDriver instance
+     */
+    public CartPage(GUIWebDriver driver) {
+        super(driver);
+    }
+
+    /**
+     * Get page URL - required by BasePage
+     */
+    @Override
+    protected String getPageUrl() {
+        return CART_ENDPOINT;
+    }
+
+    // Dynamic locators
     private By productName(String productName) {
         return By.xpath("(//h4  /a[.='" + productName + "'])[1]");
     }
@@ -39,40 +53,33 @@ public class CartPage {
         return By.xpath("(//h4  /a[.='"+productName+"'] //following::td[@class='cart_delete'] /a)[1]");
     }
 
-    //actions
-    @Step("Navigate To Cart Page")
-    public CartPage navigate()
-    {
-        driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb")+cartEndpoint);
-        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
-        return this;
-    }
+    // Actions
+
     @Step("Click On Proceed To Checkout Button")
-    public CheckoutPage clickOnProceedToCheckout()
-    {
-        driver.element().click(proceedToCheckoutButton);
+    public CheckoutPage clickOnProceedToCheckout() {
+        clickElement(proceedToCheckoutButton);
         return new CheckoutPage(driver);
     }
+
     @Step("Remove Product From Cart")
-    public CartPage removeProduct(String pName)
-    {
-        driver.element().click(removeProductDL(pName));
+    public CartPage removeProduct(String pName) {
+        clickElement(removeProductDL(pName));
         return this;
     }
-    //validations
+
+    // Validations
+
     @Step("Verify Product Details On Cart")
-    public CartPage verifyProductDetailsOnCart (String productName, String productPrice, String productQuantity, String productTotal)
-    {
-        String actualProductName = driver.element().getText(productName(productName));
-        String actualProductPrice = driver.element().getText(productPrice(productName));
-        String actualProductQuantity = driver.element().getText(productQuantity(productName));
-        String actualProductTotal = driver.element().getText(productTotal(productName));
-        driver.validation().Equals(actualProductName,productName," Product Name is not matched");
-        driver.validation().Equals(actualProductPrice,productPrice," Product Price is not matched");
-        driver.validation().Equals(actualProductQuantity,productQuantity," Product Quantity is not matched");
-        driver.validation().Equals(actualProductTotal,productTotal," Product Total is not matched");
+    public CartPage verifyProductDetailsOnCart(String productName, String productPrice, String productQuantity, String productTotal) {
+        String actualProductName = getElementText(productName(productName));
+        String actualProductPrice = getElementText(productPrice(productName));
+        String actualProductQuantity = getElementText(productQuantity(productName));
+        String actualProductTotal = getElementText(productTotal(productName));
+        
+        driver.validation().Equals(actualProductName, productName, "Product Name is not matched");
+        driver.validation().Equals(actualProductPrice, productPrice, "Product Price is not matched");
+        driver.validation().Equals(actualProductQuantity, productQuantity, "Product Quantity is not matched");
+        driver.validation().Equals(actualProductTotal, productTotal, "Product Total is not matched");
         return this;
     }
-
-
 }

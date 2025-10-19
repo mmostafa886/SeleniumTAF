@@ -5,14 +5,16 @@ import com.taf.pages.components.NavBarComponent;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
-public class SignupPage {
-    private final GUIWebDriver driver;
+/**
+ * SignupPage handles user registration form
+ * Extends BasePage for enhanced functionality
+ */
+public class SignupPage extends BasePage<SignupPage> {
 
-    public SignupPage(GUIWebDriver driver) {
-        this.driver = driver;
-    }
+    // Page URL
+    private static final String SIGNUP_URL = "/signup";
 
-    //Locators
+    // Locators
     private final By firstNameInput = By.id("name");
     private final By emailInput = By.id("email");
     private final By passwordInput = By.id("password");
@@ -35,11 +37,28 @@ public class SignupPage {
     private final By accountCreatedSuccessMessage = By.cssSelector("h2>b");
     private final By continueButton = By.cssSelector("a[data-qa='continue-button']");
 
-    //Actions
+    /**
+     * Constructor
+     * @param driver The GUIWebDriver instance
+     */
+    public SignupPage(GUIWebDriver driver) {
+        super(driver);
+    }
+
+    /**
+     * Get page URL - required by BasePage
+     */
+    @Override
+    protected String getPageUrl() {
+        return SIGNUP_URL;
+    }
+
+    // Actions
+
     @Step("Select title {title}")
     private SignupPage selectTitle(String title) {
         By titleLocator = By.xpath("//input[@value='" + title + "']");
-        driver.element().click(titleLocator);
+        clickElement(titleLocator);
         return this;
     }
 
@@ -49,45 +68,44 @@ public class SignupPage {
                                            String firstName, String lastName, String company,
                                            String address1, String address2, String country,
                                            String state, String city, String zipcode, String mobileNumber) {
-        selectTitle(title);
-        driver.element().type(passwordInput, password)
+        logAction("Filling registration form");
+        selectTitle(title)
+                .typeText(passwordInput, password)
                 .selectFromDropdown(daySelect, day)
                 .selectFromDropdown(monthSelect, month)
                 .selectFromDropdown(yearSelect, year)
-                .click(newsletterCheckbox)
-                .click(specialOffersCheckbox)
-                .type(firstNameInputAddress, firstName)
-                .type(lastNameInputAddress, lastName)
-                .type(companyInput, company)
-                .type(address1Input, address1)
-                .type(address2Input, address2)
+                .clickElement(newsletterCheckbox)
+                .clickElement(specialOffersCheckbox)
+                .typeText(firstNameInputAddress, firstName)
+                .typeText(lastNameInputAddress, lastName)
+                .typeText(companyInput, company)
+                .typeText(address1Input, address1)
+                .typeText(address2Input, address2)
                 .selectFromDropdown(countrySelect, country)
-                .type(stateInput, state)
-                .type(cityInput, city)
-                .type(zipcodeInput, zipcode)
-                .type(mobileNumberInput, mobileNumber);
+                .typeText(stateInput, state)
+                .typeText(cityInput, city)
+                .typeText(zipcodeInput, zipcode)
+                .typeText(mobileNumberInput, mobileNumber);
         return this;
     }
 
     @Step("Click on Create Account button")
     public SignupPage clickCreateAccountButton() {
-        driver.element().click(createAccountButton);
+        clickElement(createAccountButton);
         return this;
     }
 
     @Step("Click on Continue button")
     public NavBarComponent clickContinueButton() {
-        driver.element().click(continueButton);
-        return new NavBarComponent(driver);
+        clickElement(continueButton);
+        return getNavigationBar();
     }
 
+    // Validations
 
-    //Validations
     @Step("Verify that account creation success")
     public SignupPage verifyAccountCreated() {
-        driver.verification().isElementVisible(accountCreatedSuccessMessage);
-        String successMessage = driver.element().getText(accountCreatedSuccessMessage);
-        driver.verification().Equals(successMessage, "Account Created!", "Account creation message is incorrect");
-        return this;
+        verifyElementDisplayed(accountCreatedSuccessMessage);
+        return verifyElementText(accountCreatedSuccessMessage, "Account Created!");
     }
 }

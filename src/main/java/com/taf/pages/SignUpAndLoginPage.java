@@ -1,24 +1,23 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
-import com.taf.pages.components.NavBarComponent;
-import com.taf.utils.dataReader.PropertyReader;
 import io.qameta.allure.Step;
-import lombok.Getter;
 import org.openqa.selenium.By;
 
-public class SignUpAndLoginPage {
+/**
+ * SignUpAndLoginPage handles user authentication and registration
+ * Extends BasePage to leverage common page functionality including:
+ * - Error handling and retry mechanisms
+ * - Null-safe element operations
+ * - Enhanced logging
+ * - Fluent interface for method chaining
+ */
+public class SignUpAndLoginPage extends BasePage<SignUpAndLoginPage> {
 
-    @Getter
-    private final NavBarComponent navigationBar;
-    private final GUIWebDriver driver;
-    private final String signUpLoginUrl = "/login";
-    public SignUpAndLoginPage(GUIWebDriver driver) {
-        this.driver = driver;
-        this.navigationBar = new NavBarComponent(driver);
-    }
+    // Page URL
+    private static final String SIGN_UP_LOGIN_URL = "/login";
 
-    //Locators
+    // Locators
     private final By loginUserName = By.cssSelector("[data-qa='login-email']");
     private final By loginPassword = By.cssSelector("[data-qa='login-password']");
     private final By loginButton = By.cssSelector("[data-qa='login-button']");
@@ -29,79 +28,79 @@ public class SignUpAndLoginPage {
     private final By loginError = By.cssSelector(".login-form p");
     private final By signUpError = By.cssSelector(".signup-form p");
 
-    //Actions
-    @Step("Navigate to SignUp/Login page")
-    public SignUpAndLoginPage navigate() {
-        driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + signUpLoginUrl);
-        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
-        return this;
+    /**
+     * Constructor - calls BasePage constructor
+     * @param driver The GUIWebDriver instance
+     */
+    public SignUpAndLoginPage(GUIWebDriver driver) {
+        super(driver);
     }
 
-    @Step("Enter SignUp  Name {name} and Email {email} in the SignUp form")
+    /**
+     * Get page URL - required by BasePage
+     * @return The login page URL path
+     */
+    @Override
+    protected String getPageUrl() {
+        return SIGN_UP_LOGIN_URL;
+    }
+
+    // Actions - Now using BasePage utility methods
+
+    @Step("Enter SignUp Name {name} and Email {email} in the SignUp form")
     public SignUpAndLoginPage enterSignUpDetails(String name, String email) {
-        driver.element().type(signUpName, name)
-                .type(signUpEmail, email)
-                .click(signUpButton);
+        logAction("Entering signup details");
+        typeText(signUpName, name).typeText(signUpEmail, email).clickElement(signUpButton);
         return this;
     }
 
     @Step("Enter Email {email} in the Login Email field")
     public SignUpAndLoginPage enterLoginEmail(String email) {
-        driver.element().type(loginUserName, email);
-        return this;
+        return typeText(loginUserName, email);
     }
 
     @Step("Enter Password {password} in the Login Password field")
     public SignUpAndLoginPage enterLoginPassword(String password) {
-        driver.element().type(loginPassword, password);
-        return this;
+        return typeText(loginPassword, password);
     }
 
     @Step("Click on Login button")
     public SignUpAndLoginPage clickLoginButton() {
-        driver.element().click(loginButton);
-        return this;
+        return clickElement(loginButton);
     }
 
     @Step("Enter Name {name} in the Signup Name field")
     public SignUpAndLoginPage enterSignUpName(String name) {
-        driver.element().type(signUpName, name);
-        return this;
+        return typeText(signUpName, name);
     }
 
     @Step("Enter Email {email} in the Signup Email field")
     public SignUpAndLoginPage enterSignUpEmail(String email) {
-        driver.element().type(signUpEmail, email);
-        return this;
+        return typeText(signUpEmail, email);
     }
 
     @Step("Click on Signup button")
     public SignUpAndLoginPage clickSignUpButton() {
-        driver.element().click(signUpButton);
-        return new SignUpAndLoginPage(driver);
+        clickElement(signUpButton);
+        return this;
     }
 
-    //Validations
+    // Validations - Now using BasePage verification methods
+
     @Step("Verify SignUp label is displayed")
     public SignUpAndLoginPage verifySignUpLabelIsDisplayed() {
-        driver.verification().isElementVisible(signUpLabel);
-        return this;
+        return verifyElementDisplayed(signUpLabel);
     }
 
     @Step("Verify Login Error message is displayed: {expectedError}")
     public SignUpAndLoginPage verifyLoginErrorMessage(String expectedError) {
-        driver.verification().isElementVisible(loginError);
-        String actualError = driver.element().getText(loginError);
-        driver.verification().Equals(actualError, expectedError, "Login error message does not match expected.");
-        return this;
+        verifyElementDisplayed(loginError);
+        return verifyElementText(loginError, expectedError);
     }
 
     @Step("Verify SignUp Error message is displayed: {expectedError}")
     public SignUpAndLoginPage verifySignUpErrorMessage(String expectedError) {
-        driver.verification().isElementVisible(signUpError);
-        String actualError = driver.element().getText(signUpError);
-        driver.verification().Equals(actualError, expectedError, "SignUp error message does not match expected.");
-        return this;
+        verifyElementDisplayed(signUpError);
+        return verifyElementText(signUpError, expectedError);
     }
-
 }

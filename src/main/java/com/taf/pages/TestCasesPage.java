@@ -2,11 +2,28 @@ package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
 
-public class TestCasesPage {
+/**
+ * TestCasesPage handles test cases display
+ * Extends BasePage for enhanced functionality
+ */
+public class TestCasesPage extends BasePage<TestCasesPage> {
 
-    GUIWebDriver driver;
+    // Page URL
+    private static final String TEST_CASES_URL = "/test_cases";
 
+    /**
+     * Constructor
+     * @param driver The GUIWebDriver instance
+     */
     public TestCasesPage(GUIWebDriver driver) {
-        this.driver = driver;
+        super(driver);
+    }
+
+    /**
+     * Get page URL - required by BasePage
+     */
+    @Override
+    protected String getPageUrl() {
+        return TEST_CASES_URL;
     }
 }

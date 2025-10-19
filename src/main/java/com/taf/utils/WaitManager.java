@@ -1,12 +1,14 @@
 package com.taf.utils;
 
 import com.taf.utils.dataReader.PropertyReader;
+import com.taf.utils.logs.LogsManager;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class WaitManager {
 
@@ -120,12 +122,12 @@ public class WaitManager {
      */
     public void pageLoadTimeout(long timeoutInSeconds) {
         try {
-            fluentWait(timeoutInSeconds).until(driver ->
-                ((JavascriptExecutor) driver).executeScript("return document.readyState")
-                    .equals("complete")
+            fluentWait(timeoutInSeconds).until(driver1 ->
+                    Objects.equals(((JavascriptExecutor) driver1).executeScript("return document.readyState")
+                            , "complete")
             );
         } catch (TimeoutException e) {
-            // Page didn't load in time, log but don't fail
+            LogsManager.warn("Page did not load completely within the timeout of: " + timeoutInSeconds + " seconds");
         }
     }
 }

@@ -4,18 +4,16 @@ import com.taf.drivers.GUIWebDriver;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
-public class PaymentPage {
+/**
+ * PaymentPage handles payment processing and invoice download
+ * Extends BasePage for enhanced functionality
+ */
+public class PaymentPage extends BasePage<PaymentPage> {
 
-    private GUIWebDriver driver;
+    // Page URL
+    private static final String PAYMENT_ENDPOINT = "/payment";
 
-    public PaymentPage(GUIWebDriver driver) {
-    this.driver = driver;
-    }
-
-    //vars
-    private String paymentEndpoint = "/payment";
-
-    //locators
+    // Locators
     private final By nameOnCard = By.name("name_on_card");
     private final By cardNumber = By.name("card_number");
     private final By cardCvc = By.name("cvc");
@@ -25,29 +23,47 @@ public class PaymentPage {
     private final By paymentSuccessMessage = By.cssSelector("h2 > b");
     private final By downloadInvoiceButton = By.xpath("//a[.='Download Invoice']");
 
-    //actions
+    /**
+     * Constructor
+     * @param driver The GUIWebDriver instance
+     */
+    public PaymentPage(GUIWebDriver driver) {
+        super(driver);
+    }
+
+    /**
+     * Get page URL - required by BasePage
+     */
+    @Override
+    protected String getPageUrl() {
+        return PAYMENT_ENDPOINT;
+    }
+
+    // Actions
+
     @Step("Fill card info")
-    public PaymentPage fillCardInfo(String nameOnCard, String cardNumber, String cardCvc, String cardMonthExpiration, String cardYearExpiration) {
-        driver.element().type(this.nameOnCard, nameOnCard)
-                .type(this.cardNumber, cardNumber)
-                .type(this.cardCvc, cardCvc)
-                .type(this.cardMonthExpiration, cardMonthExpiration)
-                .type(this.cardYearExpiration, cardYearExpiration)
-                .click(payButton);
+    public PaymentPage fillCardInfo(String nameOnCard, String cardNumber, String cardCvc, 
+                                     String cardMonthExpiration, String cardYearExpiration) {
+        typeText(this.nameOnCard, nameOnCard)
+                .typeText(this.cardNumber, cardNumber)
+                .typeText(this.cardCvc, cardCvc)
+                .typeText(this.cardMonthExpiration, cardMonthExpiration)
+                .typeText(this.cardYearExpiration, cardYearExpiration)
+                .clickElement(payButton);
         return this;
     }
 
     @Step("Click on download invoice button")
     public PaymentPage clickOnDownloadInvoiceButton() {
-        driver.element().click(downloadInvoiceButton);
+        clickElement(downloadInvoiceButton);
         return this;
     }
 
-    //validations
+    // Validations
+
     @Step("Verify payment success message")
     public PaymentPage verifyPaymentSuccessMessage(String expectedMessage) {
-        driver.verification().Equals(driver.element().getText(paymentSuccessMessage), expectedMessage, "Payment success message");
-        return this;
+        return verifyElementText(paymentSuccessMessage, expectedMessage);
     }
 
     @Step("Verify The file {0} is downloaded")
@@ -56,4 +72,3 @@ public class PaymentPage {
         return this;
     }
 }
-

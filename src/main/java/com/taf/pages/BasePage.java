@@ -3,6 +3,7 @@ package com.taf.pages;
 import com.taf.drivers.GUIWebDriver;
 import com.taf.pages.components.NavBarComponent;
 import com.taf.utils.WaitManager;
+import com.taf.utils.dataReader.PropertyReader;
 import com.taf.utils.logs.LogsManager;
 import lombok.Getter;
 import org.openqa.selenium.By;
@@ -77,7 +78,6 @@ public abstract class BasePage<T extends BasePage<T>> {
             driver.browser().navigateTo(fullUrl);
             handlePopupsAfterNavigation();
             waitForPageLoad();
-            verifyPageLoaded();
             LogsManager.debug("Successfully navigated to: " + fullUrl);
         } catch (Exception e) {
             LogsManager.error("Failed to navigate to: " + fullUrl, e.getMessage());
@@ -101,24 +101,6 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
     
     /**
-     * Hook method for page-specific verification after navigation
-     * Override in subclasses to add custom verification logic
-     */
-    protected void verifyPageLoaded() {
-        // Default: verify URL contains page path
-        String expectedUrl = getPageUrl();
-        if (expectedUrl != null && !expectedUrl.isEmpty()) {
-            String currentUrl = getCurrentUrl();
-            if (!currentUrl.contains(expectedUrl)) {
-                LogsManager.warn(String.format(
-                    "URL verification warning - Expected URL to contain: %s, Current URL: %s",
-                    expectedUrl, currentUrl
-                ));
-            }
-        }
-    }
-    
-    /**
      * Handle common popups after navigation
      * Implements common behavior that can be overridden
      */
@@ -131,7 +113,7 @@ public abstract class BasePage<T extends BasePage<T>> {
      * @return The base URL
      */
     protected String getBaseUrl() {
-        return com.taf.utils.dataReader.PropertyReader.getProperty("baseUrlWeb");
+        return PropertyReader.getProperty("baseUrlWeb");
     }
     
     /**
@@ -232,7 +214,17 @@ public abstract class BasePage<T extends BasePage<T>> {
         driver.element().hover(locator);
         return (T) this;
     }
-    
+
+    /**
+     * Select from dropdown by visible text
+     * @param locator The locator of the dropdown element
+     */
+    @SuppressWarnings("unchecked")
+    protected T selectFromDropdown(By locator, String visibleText) {
+        driver.element().selectFromDropdown(locator, visibleText);
+        return (T) this;
+    }
+
     /**
      * Wait for element to be visible
      * @param locator The locator of the element
@@ -241,6 +233,7 @@ public abstract class BasePage<T extends BasePage<T>> {
     protected WebElement waitForElementVisible(By locator) {
         return waitManager.waitForVisibility(locator);
     }
+
     
     /**
      * Wait for element to be clickable
