@@ -25,6 +25,9 @@ public abstract class BasePage<T extends BasePage<T>> {
     protected static final int DEFAULT_RETRY_ATTEMPTS = 3;
     protected static final int RETRY_DELAY_MS = 500;
     
+    // Performance optimization: Cache base URL (loaded once)
+    private static final String BASE_URL = PropertyReader.getProperty("baseUrlWeb");
+    
     @Getter
     protected final GUIWebDriver driver;
     
@@ -42,7 +45,7 @@ public abstract class BasePage<T extends BasePage<T>> {
         }
         this.driver = driver;
         this.waitManager = new WaitManager(driver.get());
-        LogsManager.debug("Initialized " + this.getClass().getSimpleName());
+        LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
     
     /**
@@ -77,27 +80,13 @@ public abstract class BasePage<T extends BasePage<T>> {
         try {
             driver.browser().navigateTo(fullUrl);
             handlePopupsAfterNavigation();
-            waitForPageLoad();
-            LogsManager.debug("Successfully navigated to: " + fullUrl);
+            LogsManager.info("Successfully navigated to: " + fullUrl);
         } catch (Exception e) {
             LogsManager.error("Failed to navigate to: " + fullUrl, e.getMessage());
             throw new IllegalStateException("Navigation failed: " + fullUrl, e);
         }
         
         return (T) this;
-    }
-    
-    /**
-     * Wait for the page to load completely using JavaScript ready state
-     * Can be overridden by specific pages for custom wait logic
-     */
-    protected void waitForPageLoad() {
-        try {
-            waitManager.pageLoadTimeout();
-            LogsManager.debug("Page loaded successfully: " + this.getClass().getSimpleName());
-        } catch (Exception e) {
-            LogsManager.warn("Page load timeout for: " + this.getClass().getSimpleName());
-        }
     }
     
     /**
@@ -110,10 +99,11 @@ public abstract class BasePage<T extends BasePage<T>> {
     
     /**
      * Get the base URL from properties
+     * Performance optimized: Returns cached value
      * @return The base URL
      */
     protected String getBaseUrl() {
-        return PropertyReader.getProperty("baseUrlWeb");
+        return BASE_URL;
     }
     
     /**
@@ -137,7 +127,7 @@ public abstract class BasePage<T extends BasePage<T>> {
         try {
             return driver.element().isDisplayed(locator);
         } catch (Exception e) {
-            LogsManager.debug("Element not displayed: " + locator);
+            LogsManager.info("Element not displayed: " + locator);
             return false;
         }
     }
@@ -162,7 +152,7 @@ public abstract class BasePage<T extends BasePage<T>> {
             String text = driver.element().getText(locator);
             return text != null ? text : "";
         } catch (Exception e) {
-            LogsManager.warn("Failed to get text from element: " + locator, e.getMessage());
+            LogsManager.info("Failed to get text from element: " + locator + " - " + e.getMessage());
             return "";
         }
     }
@@ -179,14 +169,14 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
     
     /**
-     * Type text into an element with improved logging
+     * Type text into an element
      * @param locator The locator of the element
      * @param text The text to type
      * @return Current page instance for method chaining
      */
     @SuppressWarnings("unchecked")
     protected T typeText(By locator, String text) {
-        LogsManager.debug(String.format("Typing text into %s: %s", locator, 
+        LogsManager.info(String.format("Typing text into %s: %s", locator, 
             text.length() > 50 ? text.substring(0, 47) + "..." : text));
         driver.element().type(locator, text);
         return (T) this;
@@ -284,7 +274,7 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
     
     /**
-     * Verify element text equals expected with improved error messages
+     * Verify element text equals expected
      * Fluent validation interface
      * @param locator The locator of the element
      * @param expectedText The expected text
@@ -298,7 +288,7 @@ public abstract class BasePage<T extends BasePage<T>> {
                 "Element text verification failed for %s%nExpected: '%s'%nActual: '%s'",
                 locator, expectedText, actualText
             );
-            LogsManager.error(errorMsg);
+            LogsManager.info(errorMsg);
         }
         driver.verification().Equals(actualText, expectedText, 
             "Element text does not match. Expected: " + expectedText + ", Actual: " + actualText);
@@ -343,7 +333,7 @@ public abstract class BasePage<T extends BasePage<T>> {
             try {
                 waitForElementClickable(locator);
                 driver.element().click(locator);
-                LogsManager.debug("Successfully clicked element: " + locator);
+                LogsManager.info("Successfully clicked element: " + locator);
                 return (T) this;
             } catch (Exception e) {
                 lastException = e;
@@ -390,7 +380,7 @@ public abstract class BasePage<T extends BasePage<T>> {
     protected boolean areElementsDisplayed(By... locators) {
         for (By locator : locators) {
             if (!isElementDisplayed(locator)) {
-                LogsManager.debug("Element not displayed: " + locator);
+                LogsManager.info("Element not displayed: " + locator);
                 return false;
             }
         }

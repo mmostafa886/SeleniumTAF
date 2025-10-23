@@ -7,12 +7,37 @@ import org.openqa.selenium.support.ui.FluentWait;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/**
+ * WaitManager provides centralized wait functionality with performance optimizations.
+ * Uses cached values to avoid repeated property reads and object creation.
+ */
 public class WaitManager {
 
     private WebDriver driver;
+    
+    // Performance optimization: Cache default wait timeout (loaded once)
+    private static final long DEFAULT_WAIT_TIMEOUT;
+    
+    // Performance optimization: Cache exception list (created once, reused everywhere)
+    private static final List<Class<? extends Exception>> IGNORED_EXCEPTIONS;
+    
+    static {
+        // Initialize cached values once when class is loaded
+        DEFAULT_WAIT_TIMEOUT = Long.parseLong(PropertyReader.getProperty("DEFAULT_WAIT"));
+        
+        // Create immutable exception list once
+        List<Class<? extends Exception>> exceptions = new ArrayList<>();
+        exceptions.add(NoSuchElementException.class);
+        exceptions.add(StaleElementReferenceException.class);
+        exceptions.add(ElementNotInteractableException.class);
+        exceptions.add(ElementClickInterceptedException.class);
+        IGNORED_EXCEPTIONS = Collections.unmodifiableList(exceptions);
+    }
 
     public WaitManager(WebDriver driver) {
         this.driver = driver;
@@ -22,10 +47,9 @@ public class WaitManager {
      * Creates a FluentWait instance for the WebDriver.
      * This wait will ignore specific exceptions and poll at regular intervals.
      * @return FluentWait instance configured for the WebDriver
-     * The timeout is set to 10 seconds by default and polling every 100 milliseconds.
      */
     public FluentWait<WebDriver> fluentWait() {
-        return fluentWait(Long.parseLong(PropertyReader.getProperty("DEFAULT_WAIT")));
+        return fluentWait(DEFAULT_WAIT_TIMEOUT);
     }
 
     /**
@@ -38,21 +62,7 @@ public class WaitManager {
         return new FluentWait<>(driver)
                 .withTimeout(Duration.ofSeconds(timeOutSeconds))
                 .pollingEvery(Duration.ofMillis(300))
-                .ignoreAll(getExceptions());
-    }
-
-    /**
-     * Returns a list of exceptions to ignore during the wait.
-     * This includes common exceptions that may occur when elements are not immediately available.
-     * @return ArrayList of exception classes to ignore
-     */
-    private ArrayList<Class<? extends Exception>> getExceptions() {
-        ArrayList<Class<? extends Exception>> exceptions = new ArrayList<>();
-        exceptions.add(NoSuchElementException.class);
-        exceptions.add(StaleElementReferenceException.class);
-        exceptions.add(ElementNotInteractableException.class);
-        exceptions.add(ElementClickInterceptedException.class);
-        return exceptions;
+                .ignoreAll(IGNORED_EXCEPTIONS);
     }
 
     /**
@@ -61,7 +71,7 @@ public class WaitManager {
      * @return WebElement once visible, or null if timeout occurs
      */
     public WebElement waitForVisibility(By locator) {
-        return waitForVisibility(locator, Long.parseLong(PropertyReader.getProperty("DEFAULT_WAIT")));
+        return waitForVisibility(locator, DEFAULT_WAIT_TIMEOUT);
     }
 
     /**
@@ -87,7 +97,7 @@ public class WaitManager {
      * @return WebElement once clickable, or null if timeout occurs
      */
     public WebElement waitForClickability(By locator) {
-        return waitForClickability(locator, Long.parseLong(PropertyReader.getProperty("DEFAULT_WAIT")));
+        return waitForClickability(locator, DEFAULT_WAIT_TIMEOUT);
     }
 
     /**
@@ -112,7 +122,7 @@ public class WaitManager {
      * Uses default timeout from properties
      */
     public void pageLoadTimeout() {
-        pageLoadTimeout(Long.parseLong(PropertyReader.getProperty("DEFAULT_WAIT")));
+        pageLoadTimeout(DEFAULT_WAIT_TIMEOUT);
     }
 
     /**
@@ -126,8 +136,9 @@ public class WaitManager {
                     Objects.equals(((JavascriptExecutor) driver1).executeScript("return document.readyState")
                             , "complete")
             );
+            LogsManager.info("Page loaded successfully within " + timeoutInSeconds + " seconds");
         } catch (TimeoutException e) {
-            LogsManager.warn("Page did not load completely within the timeout of: " + timeoutInSeconds + " seconds");
+            LogsManager.info("Page did not load completely within the timeout of: " + timeoutInSeconds + " seconds");
         }
     }
 }
