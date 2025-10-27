@@ -73,7 +73,7 @@ public class LoginTest extends BaseGuiTest {
                 .verifyUserCreatedSuccessfully();
 
         new SignUpAndLoginPage(driver).navigate()
-                .enterLoginEmail(testData.getJsonData("email")  + "@gmail.com")
+                .enterLoginEmail(testData.getJsonData("email")  + "wrong@gmail.com")
                 .enterLoginPassword(testData.getJsonData("password"))
                 .clickLoginButton()
                 .verifyLoginErrorMessage(testData.getJsonData("messages.error"));
