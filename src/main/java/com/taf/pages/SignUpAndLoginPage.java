@@ -14,9 +14,8 @@ import org.openqa.selenium.By;
  */
 public class SignUpAndLoginPage {
 
-    @Getter
-    private final NavBarComponent navigationBar;
     protected final GUIWebDriver driver;
+    private NavBarComponent navigationBar;
 
     // Page URL
     private static final String SIGN_UP_LOGIN_URL = "/login";
@@ -42,7 +41,17 @@ public class SignUpAndLoginPage {
         }
         this.driver = driver;
         LogsManager.info("Initialized " + this.getClass().getSimpleName());
-        this.navigationBar = new NavBarComponent(driver);
+    }
+
+    /**
+     * Get navigation bar component with lazy initialization
+     * @return NavBarComponent instance
+     */
+    public NavBarComponent getNavigationBar() {
+        if (navigationBar == null) {
+            navigationBar = new NavBarComponent(driver);
+        }
+        return navigationBar;
     }
 
     //Actions
