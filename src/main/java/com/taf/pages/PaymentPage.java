@@ -1,14 +1,22 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
+import com.taf.pages.components.NavBarComponent;
+import com.taf.utils.WaitManager;
+import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
+import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * PaymentPage handles payment processing and invoice download
- * Extends BasePage for enhanced functionality
  */
-public class PaymentPage extends BasePage<PaymentPage> {
+public class PaymentPage {
+
+    @Getter
+    protected final GUIWebDriver driver;
+    protected final WaitManager waitManager;
+    private NavBarComponent navigationBar;
 
     // Page URL
     private static final String PAYMENT_ENDPOINT = "/payment";
@@ -28,15 +36,23 @@ public class PaymentPage extends BasePage<PaymentPage> {
      * @param driver The GUIWebDriver instance
      */
     public PaymentPage(GUIWebDriver driver) {
-        super(driver);
+        if (driver == null) {
+            throw new IllegalArgumentException("Driver cannot be null");
+        }
+        this.driver = driver;
+        this.waitManager = new WaitManager(driver.get());
+        LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
 
     /**
-     * Get page URL - required by BasePage
+     * Get navigation bar component with lazy initialization
+     * @return NavBarComponent instance
      */
-    @Override
-    protected String getPageUrl() {
-        return PAYMENT_ENDPOINT;
+    public NavBarComponent getNavigationBar() {
+        if (navigationBar == null) {
+            navigationBar = new NavBarComponent(driver);
+        }
+        return navigationBar;
     }
 
     // Actions
@@ -44,18 +60,18 @@ public class PaymentPage extends BasePage<PaymentPage> {
     @Step("Fill card info")
     public PaymentPage fillCardInfo(String nameOnCard, String cardNumber, String cardCvc, 
                                      String cardMonthExpiration, String cardYearExpiration) {
-        typeText(this.nameOnCard, nameOnCard)
-                .typeText(this.cardNumber, cardNumber)
-                .typeText(this.cardCvc, cardCvc)
-                .typeText(this.cardMonthExpiration, cardMonthExpiration)
-                .typeText(this.cardYearExpiration, cardYearExpiration)
-                .clickElement(payButton);
+        driver.element().type(this.nameOnCard, nameOnCard);
+        driver.element().type(this.cardNumber, cardNumber);
+        driver.element().type(this.cardCvc, cardCvc);
+        driver.element().type(this.cardMonthExpiration, cardMonthExpiration);
+        driver.element().type(this.cardYearExpiration, cardYearExpiration);
+        driver.element().click(payButton);
         return this;
     }
 
     @Step("Click on download invoice button")
     public PaymentPage clickOnDownloadInvoiceButton() {
-        clickElement(downloadInvoiceButton);
+        driver.element().click(downloadInvoiceButton);
         return this;
     }
 
@@ -63,7 +79,10 @@ public class PaymentPage extends BasePage<PaymentPage> {
 
     @Step("Verify payment success message")
     public PaymentPage verifyPaymentSuccessMessage(String expectedMessage) {
-        return verifyElementText(paymentSuccessMessage, expectedMessage);
+        String actualText = driver.element().getText(paymentSuccessMessage);
+        driver.verification().Equals(actualText, expectedMessage, 
+            "Element text does not match. Expected: " + expectedMessage + ", Actual: " + actualText);
+        return this;
     }
 
     @Step("Verify The file {0} is downloaded")

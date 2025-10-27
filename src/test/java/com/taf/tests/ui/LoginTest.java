@@ -43,7 +43,8 @@ public class LoginTest extends BaseGuiTest {
                 testData.getJsonData("lastName"))
                 .verifyUserCreatedSuccessfully();
 
-        new SignUpAndLoginPage(driver).navigate()
+        new SignUpAndLoginPage(driver)
+                .navigate()
                 .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
                 .enterLoginPassword(testData.getJsonData("password"))
                 .clickLoginButton()
@@ -73,7 +74,7 @@ public class LoginTest extends BaseGuiTest {
                 .verifyUserCreatedSuccessfully();
 
         new SignUpAndLoginPage(driver).navigate()
-                .enterLoginEmail(testData.getJsonData("email")  + "@gmail.com")
+                .enterLoginEmail(testData.getJsonData("email")  + "wrong@gmail.com")
                 .enterLoginPassword(testData.getJsonData("password"))
                 .clickLoginButton()
                 .verifyLoginErrorMessage(testData.getJsonData("messages.error"));
@@ -86,7 +87,7 @@ public class LoginTest extends BaseGuiTest {
     }
 
     @Description("Verify user cannot login with invalid password")
-    @Test(description = "Invalid Login (Invalid Email) Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
+    @Test(description = "Invalid Login (Invalid Password) Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
     public void inValidLoginUsingInvalidPasswordTC()
     {
         String timestamp = TimeManager.getCompactTimeStamp();

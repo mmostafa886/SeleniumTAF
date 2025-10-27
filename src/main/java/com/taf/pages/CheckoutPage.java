@@ -1,14 +1,22 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
+import com.taf.pages.components.NavBarComponent;
+import com.taf.utils.WaitManager;
+import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
+import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * CheckoutPage handles order review and address verification
- * Extends BasePage for enhanced functionality
  */
-public class CheckoutPage extends BasePage<CheckoutPage> {
+public class CheckoutPage {
+
+    @Getter
+    protected final GUIWebDriver driver;
+    protected final WaitManager waitManager;
+    private NavBarComponent navigationBar;
 
     // Page URL
     private static final String CHECKOUT_ENDPOINT = "/checkout";
@@ -39,22 +47,30 @@ public class CheckoutPage extends BasePage<CheckoutPage> {
      * @param driver The GUIWebDriver instance
      */
     public CheckoutPage(GUIWebDriver driver) {
-        super(driver);
+        if (driver == null) {
+            throw new IllegalArgumentException("Driver cannot be null");
+        }
+        this.driver = driver;
+        this.waitManager = new WaitManager(driver.get());
+        LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
 
     /**
-     * Get page URL - required by BasePage
+     * Get navigation bar component with lazy initialization
+     * @return NavBarComponent instance
      */
-    @Override
-    protected String getPageUrl() {
-        return CHECKOUT_ENDPOINT;
+    public NavBarComponent getNavigationBar() {
+        if (navigationBar == null) {
+            navigationBar = new NavBarComponent(driver);
+        }
+        return navigationBar;
     }
 
     // Actions
 
     @Step("Click On Place Order Button")
     public PaymentPage clickOnPlaceOrder() {
-        clickElement(placeOrderButton);
+        driver.element().click(placeOrderButton);
         return new PaymentPage(driver);
     }
 
@@ -68,13 +84,13 @@ public class CheckoutPage extends BasePage<CheckoutPage> {
         String expectedCityStateZip = zip + " " + city + " " + state;
         
         driver.validation()
-            .Equals(getElementText(deliveryName), expectedName, "Delivery Name is not matched")
-            .Equals(getElementText(deliveryCompany), company, "Delivery Company is not matched")
-            .Equals(getElementText(deliveryAddress1), address1, "Delivery Address1 is not matched")
-            .Equals(getElementText(deliveryAddress2), address2, "Delivery Address2 is not matched")
-            .Equals(getElementText(deliveryCityStateZip), expectedCityStateZip, "Delivery CityStateZip is not matched")
-            .Equals(getElementText(deliveryCountry), country, "Delivery Country is not matched")
-            .Equals(getElementText(deliveryPhone), phone, "Delivery Phone is not matched");
+            .Equals(driver.element().getText(deliveryName), expectedName, "Delivery Name is not matched")
+            .Equals(driver.element().getText(deliveryCompany), company, "Delivery Company is not matched")
+            .Equals(driver.element().getText(deliveryAddress1), address1, "Delivery Address1 is not matched")
+            .Equals(driver.element().getText(deliveryAddress2), address2, "Delivery Address2 is not matched")
+            .Equals(driver.element().getText(deliveryCityStateZip), expectedCityStateZip, "Delivery CityStateZip is not matched")
+            .Equals(driver.element().getText(deliveryCountry), country, "Delivery Country is not matched")
+            .Equals(driver.element().getText(deliveryPhone), phone, "Delivery Phone is not matched");
         return this;
     }
 
@@ -86,13 +102,13 @@ public class CheckoutPage extends BasePage<CheckoutPage> {
         String expectedCityStateZip = zip + " " + city + " " + state;
         
         driver.validation()
-            .Equals(getElementText(billingName), expectedName, "Billing Name is not matched")
-            .Equals(getElementText(billingCompany), company, "Billing Company is not matched")
-            .Equals(getElementText(billingAddress1), address1, "Billing Address1 is not matched")
-            .Equals(getElementText(billingAddress2), address2, "Billing Address2 is not matched")
-            .Equals(getElementText(billingCityStateZip), expectedCityStateZip, "Billing CityStateZip is not matched")
-            .Equals(getElementText(billingCountry), country, "Billing Country is not matched")
-            .Equals(getElementText(billingPhone), phone, "Billing Phone is not matched");
+            .Equals(driver.element().getText(billingName), expectedName, "Billing Name is not matched")
+            .Equals(driver.element().getText(billingCompany), company, "Billing Company is not matched")
+            .Equals(driver.element().getText(billingAddress1), address1, "Billing Address1 is not matched")
+            .Equals(driver.element().getText(billingAddress2), address2, "Billing Address2 is not matched")
+            .Equals(driver.element().getText(billingCityStateZip), expectedCityStateZip, "Billing CityStateZip is not matched")
+            .Equals(driver.element().getText(billingCountry), country, "Billing Country is not matched")
+            .Equals(driver.element().getText(billingPhone), phone, "Billing Phone is not matched");
         return this;
     }
 }

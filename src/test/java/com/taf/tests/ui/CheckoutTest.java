@@ -59,7 +59,8 @@ public class CheckoutTest extends BaseGuiTest {
     @Test(dependsOnMethods = "registerNewAccount", description = "Login"
     , groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
     public void loginToAccount() {
-        new SignUpAndLoginPage(driver).navigate()
+        new SignUpAndLoginPage(driver)
+                .navigate()
                 .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
                 .enterLoginPassword(testData.getJsonData("password"))
                 .clickLoginButton()

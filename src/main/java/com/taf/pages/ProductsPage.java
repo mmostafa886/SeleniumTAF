@@ -1,15 +1,23 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
+import com.taf.pages.components.NavBarComponent;
+import com.taf.utils.WaitManager;
+import com.taf.utils.dataReader.PropertyReader;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
+import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * ProductsPage handles product browsing, searching and cart operations
- * Extends BasePage for enhanced functionality
  */
-public class ProductsPage extends BasePage<ProductsPage> {
+public class ProductsPage {
+
+    @Getter
+    protected final GUIWebDriver driver;
+    protected final WaitManager waitManager;
+    private NavBarComponent navigationBar;
 
     // Page URL
     private static final String PRODUCT_PAGE_URL = "/products";
@@ -26,15 +34,23 @@ public class ProductsPage extends BasePage<ProductsPage> {
      * @param driver The GUIWebDriver instance
      */
     public ProductsPage(GUIWebDriver driver) {
-        super(driver);
+        if (driver == null) {
+            throw new IllegalArgumentException("Driver cannot be null");
+        }
+        this.driver = driver;
+        this.waitManager = new WaitManager(driver.get());
+        LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
 
     /**
-     * Get page URL - required by BasePage
+     * Get navigation bar component with lazy initialization
+     * @return NavBarComponent instance
      */
-    @Override
-    protected String getPageUrl() {
-        return PRODUCT_PAGE_URL;
+    public NavBarComponent getNavigationBar() {
+        if (navigationBar == null) {
+            navigationBar = new NavBarComponent(driver);
+        }
+        return navigationBar;
     }
 
     // Dynamic locators
@@ -59,36 +75,42 @@ public class ProductsPage extends BasePage<ProductsPage> {
     }
 
     // Actions
+    @Step("Navigate to Products Page")
+    public ProductsPage navigate() {
+        driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + PRODUCT_PAGE_URL);
+        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
+        return this;
+    }
 
     @Step("Search for product: {productName}")
     public ProductsPage searchProduct(String productName) {
-        typeText(searchField, productName)
-                .clickElement(searchButton);
+        driver.element().type(searchField, productName);
+        driver.element().click(searchButton);
         return this;
     }
 
     @Step("Click on Add to Cart for product: {productName}")
     public ProductsPage clickOnAddToCart(String productName) {
-        hoverElement(hoverOnProduct(productName))
-                .clickElement(addToCartButton(productName));
+        driver.element().hover(hoverOnProduct(productName));
+        driver.element().click(addToCartButton(productName));
         return this;
     }
 
     @Step("Click on View Product for product: {productName}")
     public ProductDetailsPage clickOnViewProduct(String productName) {
-        clickElement(viewProduct(productName));
+        driver.element().click(viewProduct(productName));
         return new ProductDetailsPage(driver);
     }
 
     @Step("Click on View Cart")
     public CartPage clickOnViewCart() {
-        clickElement(viewCartButton);
+        driver.element().click(viewCartButton);
         return new CartPage(driver);
     }
 
     @Step("Click on Continue Shopping")
     public ProductsPage clickOnContinueShopping() {
-        clickElement(continueShoppingButton);
+        driver.element().click(continueShoppingButton);
         return this;
     }
 
@@ -96,11 +118,11 @@ public class ProductsPage extends BasePage<ProductsPage> {
 
     @Step("Validate product details for {productName} with price {productPrice}")
     public ProductsPage validateProductDetails(String productName, String productPrice) {
-        hoverElement(hoverOnProduct(productName));
-        String actualProductName = getElementText(productName(productName));
-        String actualProductPrice = getElementText(this.productPrice(productName));
+        driver.element().hover(hoverOnProduct(productName));
+        String actualProductName = driver.element().getText(productName(productName));
+        String actualProductPrice = driver.element().getText(this.productPrice(productName));
         
-        logAction("Validating product details for: " + actualProductName + " with price: " + actualProductPrice);
+        LogsManager.info("[" + this.getClass().getSimpleName() + "] Validating product details for: " + actualProductName + " with price: " + actualProductPrice);
         
         driver.validation().Equals(actualProductName, productName, "Product name does not match");
         driver.validation().Equals(actualProductPrice, productPrice, "Product price does not match");
@@ -109,6 +131,9 @@ public class ProductsPage extends BasePage<ProductsPage> {
 
     @Step("Validate item added label contains: {expectedText}")
     public ProductsPage validateItemAddedLabel(String expectedText) {
-        return verifyElementText(itemAddedLabel, expectedText);
+        String actualText = driver.element().getText(itemAddedLabel);
+        driver.verification().Equals(actualText, expectedText, 
+            "Element text does not match. Expected: " + expectedText + ", Actual: " + actualText);
+        return this;
     }
 }

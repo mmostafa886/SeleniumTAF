@@ -2,14 +2,21 @@ package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
 import com.taf.pages.components.NavBarComponent;
+import com.taf.utils.WaitManager;
+import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
+import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * SignupPage handles user registration form
- * Extends BasePage for enhanced functionality
  */
-public class SignupPage extends BasePage<SignupPage> {
+public class SignupPage {
+
+    @Getter
+    protected final GUIWebDriver driver;
+    protected final WaitManager waitManager;
+    private NavBarComponent navigationBar;
 
     // Page URL
     private static final String SIGNUP_URL = "/signup";
@@ -42,15 +49,23 @@ public class SignupPage extends BasePage<SignupPage> {
      * @param driver The GUIWebDriver instance
      */
     public SignupPage(GUIWebDriver driver) {
-        super(driver);
+        if (driver == null) {
+            throw new IllegalArgumentException("Driver cannot be null");
+        }
+        this.driver = driver;
+        this.waitManager = new WaitManager(driver.get());
+        LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
 
     /**
-     * Get page URL - required by BasePage
+     * Get navigation bar component with lazy initialization
+     * @return NavBarComponent instance
      */
-    @Override
-    protected String getPageUrl() {
-        return SIGNUP_URL;
+    public NavBarComponent getNavigationBar() {
+        if (navigationBar == null) {
+            navigationBar = new NavBarComponent(driver);
+        }
+        return navigationBar;
     }
 
     // Actions
@@ -58,7 +73,7 @@ public class SignupPage extends BasePage<SignupPage> {
     @Step("Select title {title}")
     private SignupPage selectTitle(String title) {
         By titleLocator = By.xpath("//input[@value='" + title + "']");
-        clickElement(titleLocator);
+        driver.element().click(titleLocator);
         return this;
     }
 
@@ -68,36 +83,36 @@ public class SignupPage extends BasePage<SignupPage> {
                                            String firstName, String lastName, String company,
                                            String address1, String address2, String country,
                                            String state, String city, String zipcode, String mobileNumber) {
-        logAction("Filling registration form");
-        selectTitle(title)
-                .typeText(passwordInput, password)
-                .selectFromDropdown(daySelect, day)
-                .selectFromDropdown(monthSelect, month)
-                .selectFromDropdown(yearSelect, year)
-                .clickElement(newsletterCheckbox)
-                .clickElement(specialOffersCheckbox)
-                .typeText(firstNameInputAddress, firstName)
-                .typeText(lastNameInputAddress, lastName)
-                .typeText(companyInput, company)
-                .typeText(address1Input, address1)
-                .typeText(address2Input, address2)
-                .selectFromDropdown(countrySelect, country)
-                .typeText(stateInput, state)
-                .typeText(cityInput, city)
-                .typeText(zipcodeInput, zipcode)
-                .typeText(mobileNumberInput, mobileNumber);
+        LogsManager.info("[" + this.getClass().getSimpleName() + "] Filling registration form");
+        selectTitle(title);
+        driver.element().type(passwordInput, password);
+        driver.element().selectFromDropdown(daySelect, day);
+        driver.element().selectFromDropdown(monthSelect, month);
+        driver.element().selectFromDropdown(yearSelect, year);
+        driver.element().click(newsletterCheckbox);
+        driver.element().click(specialOffersCheckbox);
+        driver.element().type(firstNameInputAddress, firstName);
+        driver.element().type(lastNameInputAddress, lastName);
+        driver.element().type(companyInput, company);
+        driver.element().type(address1Input, address1);
+        driver.element().type(address2Input, address2);
+        driver.element().selectFromDropdown(countrySelect, country);
+        driver.element().type(stateInput, state);
+        driver.element().type(cityInput, city);
+        driver.element().type(zipcodeInput, zipcode);
+        driver.element().type(mobileNumberInput, mobileNumber);
         return this;
     }
 
     @Step("Click on Create Account button")
     public SignupPage clickCreateAccountButton() {
-        clickElement(createAccountButton);
+        driver.element().click(createAccountButton);
         return this;
     }
 
     @Step("Click on Continue button")
     public NavBarComponent clickContinueButton() {
-        clickElement(continueButton);
+        driver.element().click(continueButton);
         return getNavigationBar();
     }
 
@@ -105,7 +120,10 @@ public class SignupPage extends BasePage<SignupPage> {
 
     @Step("Verify that account creation success")
     public SignupPage verifyAccountCreated() {
-        verifyElementDisplayed(accountCreatedSuccessMessage);
-        return verifyElementText(accountCreatedSuccessMessage, "Account Created!");
+        driver.verification().isElementVisible(accountCreatedSuccessMessage);
+        String actualText = driver.element().getText(accountCreatedSuccessMessage);
+        driver.verification().Equals(actualText, "Account Created!", 
+            "Element text does not match. Expected: Account Created!, Actual: " + actualText);
+        return this;
     }
 }

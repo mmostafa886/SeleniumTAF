@@ -1,12 +1,20 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
+import com.taf.pages.components.NavBarComponent;
+import com.taf.utils.WaitManager;
+import com.taf.utils.logs.LogsManager;
+import lombok.Getter;
 
 /**
  * DeleteAccountPage handles account deletion confirmation
- * Extends BasePage for enhanced functionality
  */
-public class DeleteAccountPage extends BasePage<DeleteAccountPage> {
+public class DeleteAccountPage {
+
+    @Getter
+    protected final GUIWebDriver driver;
+    protected final WaitManager waitManager;
+    private NavBarComponent navigationBar;
 
     // Page URL
     private static final String DELETE_ACCOUNT_URL = "/delete_account";
@@ -16,14 +24,22 @@ public class DeleteAccountPage extends BasePage<DeleteAccountPage> {
      * @param driver The GUIWebDriver instance
      */
     public DeleteAccountPage(GUIWebDriver driver) {
-        super(driver);
+        if (driver == null) {
+            throw new IllegalArgumentException("Driver cannot be null");
+        }
+        this.driver = driver;
+        this.waitManager = new WaitManager(driver.get());
+        LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
 
     /**
-     * Get page URL - required by BasePage
+     * Get navigation bar component with lazy initialization
+     * @return NavBarComponent instance
      */
-    @Override
-    protected String getPageUrl() {
-        return DELETE_ACCOUNT_URL;
+    public NavBarComponent getNavigationBar() {
+        if (navigationBar == null) {
+            navigationBar = new NavBarComponent(driver);
+        }
+        return navigationBar;
     }
 }

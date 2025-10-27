@@ -1,14 +1,22 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
+import com.taf.pages.components.NavBarComponent;
+import com.taf.utils.WaitManager;
+import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
+import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * CartPage handles shopping cart operations
- * Extends BasePage for enhanced functionality
  */
-public class CartPage extends BasePage<CartPage> {
+public class CartPage {
+
+    @Getter
+    protected final GUIWebDriver driver;
+    protected final WaitManager waitManager;
+    private NavBarComponent navigationBar;
 
     // Page URL
     private static final String CART_ENDPOINT = "/view_cart";
@@ -21,15 +29,23 @@ public class CartPage extends BasePage<CartPage> {
      * @param driver The GUIWebDriver instance
      */
     public CartPage(GUIWebDriver driver) {
-        super(driver);
+        if (driver == null) {
+            throw new IllegalArgumentException("Driver cannot be null");
+        }
+        this.driver = driver;
+        this.waitManager = new WaitManager(driver.get());
+        LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
 
     /**
-     * Get page URL - required by BasePage
+     * Get navigation bar component with lazy initialization
+     * @return NavBarComponent instance
      */
-    @Override
-    protected String getPageUrl() {
-        return CART_ENDPOINT;
+    public NavBarComponent getNavigationBar() {
+        if (navigationBar == null) {
+            navigationBar = new NavBarComponent(driver);
+        }
+        return navigationBar;
     }
 
     // Dynamic locators
@@ -57,13 +73,13 @@ public class CartPage extends BasePage<CartPage> {
 
     @Step("Click On Proceed To Checkout Button")
     public CheckoutPage clickOnProceedToCheckout() {
-        clickElement(proceedToCheckoutButton);
+        driver.element().click(proceedToCheckoutButton);
         return new CheckoutPage(driver);
     }
 
     @Step("Remove Product From Cart")
     public CartPage removeProduct(String pName) {
-        clickElement(removeProductDL(pName));
+        driver.element().click(removeProductDL(pName));
         return this;
     }
 
@@ -71,10 +87,10 @@ public class CartPage extends BasePage<CartPage> {
 
     @Step("Verify Product Details On Cart")
     public CartPage verifyProductDetailsOnCart(String productName, String productPrice, String productQuantity, String productTotal) {
-        String actualProductName = getElementText(productName(productName));
-        String actualProductPrice = getElementText(productPrice(productName));
-        String actualProductQuantity = getElementText(productQuantity(productName));
-        String actualProductTotal = getElementText(productTotal(productName));
+        String actualProductName = driver.element().getText(productName(productName));
+        String actualProductPrice = driver.element().getText(productPrice(productName));
+        String actualProductQuantity = driver.element().getText(productQuantity(productName));
+        String actualProductTotal = driver.element().getText(productTotal(productName));
         
         driver.validation().Equals(actualProductName, productName, "Product Name is not matched");
         driver.validation().Equals(actualProductPrice, productPrice, "Product Price is not matched");

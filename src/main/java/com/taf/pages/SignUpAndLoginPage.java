@@ -1,18 +1,23 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
+import com.taf.pages.components.NavBarComponent;
+import com.taf.utils.WaitManager;
+import com.taf.utils.dataReader.PropertyReader;
+import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
+import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * SignUpAndLoginPage handles user authentication and registration
- * Extends BasePage to leverage common page functionality including:
- * - Error handling and retry mechanisms
- * - Null-safe element operations
- * - Enhanced logging
- * - Fluent interface for method chaining
  */
-public class SignUpAndLoginPage extends BasePage<SignUpAndLoginPage> {
+public class SignUpAndLoginPage {
+
+    @Getter
+    protected final GUIWebDriver driver;
+    protected final WaitManager waitManager;
+    private NavBarComponent navigationBar;
 
     // Page URL
     private static final String SIGN_UP_LOGIN_URL = "/login";
@@ -29,78 +34,105 @@ public class SignUpAndLoginPage extends BasePage<SignUpAndLoginPage> {
     private final By signUpError = By.cssSelector(".signup-form p");
 
     /**
-     * Constructor - calls BasePage constructor
+     * Constructor
      * @param driver The GUIWebDriver instance
      */
     public SignUpAndLoginPage(GUIWebDriver driver) {
-        super(driver);
+        if (driver == null) {
+            throw new IllegalArgumentException("Driver cannot be null");
+        }
+        this.driver = driver;
+        this.waitManager = new WaitManager(driver.get());
+        LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
 
     /**
-     * Get page URL - required by BasePage
-     * @return The login page URL path
+     * Get navigation bar component with lazy initialization
+     * @return NavBarComponent instance
      */
-    @Override
-    protected String getPageUrl() {
-        return SIGN_UP_LOGIN_URL;
+    public NavBarComponent getNavigationBar() {
+        if (navigationBar == null) {
+            navigationBar = new NavBarComponent(driver);
+        }
+        return navigationBar;
     }
 
-    // Actions - Now using BasePage utility methods
+    //Actions
+    @Step("Navigate to SignUp/Login page")
+    public SignUpAndLoginPage navigate() {
+        driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + SIGN_UP_LOGIN_URL);
+        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
+        return this;
+    }
 
     @Step("Enter SignUp Name {name} and Email {email} in the SignUp form")
     public SignUpAndLoginPage enterSignUpDetails(String name, String email) {
-        logAction("Entering signup details");
-        typeText(signUpName, name).typeText(signUpEmail, email).clickElement(signUpButton);
+        LogsManager.info("[" + this.getClass().getSimpleName() + "] Entering signup details");
+        driver.element().type(signUpName, name);
+        driver.element().type(signUpEmail, email);
+        driver.element().click(signUpButton);
         return this;
     }
 
     @Step("Enter Email {email} in the Login Email field")
     public SignUpAndLoginPage enterLoginEmail(String email) {
-        return typeText(loginUserName, email);
+        driver.element().type(loginUserName, email);
+        return this;
     }
 
     @Step("Enter Password {password} in the Login Password field")
     public SignUpAndLoginPage enterLoginPassword(String password) {
-        return typeText(loginPassword, password);
+        driver.element().type(loginPassword, password);
+        return this;
     }
 
     @Step("Click on Login button")
     public SignUpAndLoginPage clickLoginButton() {
-        return clickElement(loginButton);
+        driver.element().click(loginButton);
+        return this;
     }
 
     @Step("Enter Name {name} in the Signup Name field")
     public SignUpAndLoginPage enterSignUpName(String name) {
-        return typeText(signUpName, name);
+        driver.element().type(signUpName, name);
+        return this;
     }
 
     @Step("Enter Email {email} in the Signup Email field")
     public SignUpAndLoginPage enterSignUpEmail(String email) {
-        return typeText(signUpEmail, email);
+        driver.element().type(signUpEmail, email);
+        return this;
     }
 
     @Step("Click on Signup button")
     public SignUpAndLoginPage clickSignUpButton() {
-        clickElement(signUpButton);
+        driver.element().click(signUpButton);
         return this;
     }
 
-    // Validations - Now using BasePage verification methods
+    // Validations
 
     @Step("Verify SignUp label is displayed")
     public SignUpAndLoginPage verifySignUpLabelIsDisplayed() {
-        return verifyElementDisplayed(signUpLabel);
+        driver.verification().isElementVisible(signUpLabel);
+        return this;
     }
 
     @Step("Verify Login Error message is displayed: {expectedError}")
     public SignUpAndLoginPage verifyLoginErrorMessage(String expectedError) {
-        verifyElementDisplayed(loginError);
-        return verifyElementText(loginError, expectedError);
+        driver.verification().isElementVisible(loginError);
+        String actualText = driver.element().getText(loginError);
+        driver.verification().Equals(actualText, expectedError, 
+            "Element text does not match. Expected: " + expectedError + ", Actual: " + actualText);
+        return this;
     }
 
     @Step("Verify SignUp Error message is displayed: {expectedError}")
     public SignUpAndLoginPage verifySignUpErrorMessage(String expectedError) {
-        verifyElementDisplayed(signUpError);
-        return verifyElementText(signUpError, expectedError);
+        driver.verification().isElementVisible(signUpError);
+        String actualText = driver.element().getText(signUpError);
+        driver.verification().Equals(actualText, expectedError, 
+            "Element text does not match. Expected: " + expectedError + ", Actual: " + actualText);
+        return this;
     }
 }

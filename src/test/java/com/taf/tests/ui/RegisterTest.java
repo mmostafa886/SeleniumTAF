@@ -35,7 +35,8 @@ public class RegisterTest extends BaseGuiTest {
     public void signUpTest() {
         LogsManager.info("Starting sign up test...");
         registerTimeStamp = TimeManager.getCompactTimeStamp();
-        new SignUpAndLoginPage(driver).navigate()
+        new SignUpAndLoginPage(driver)
+                .navigate()
                 .enterSignUpEmail(testData.getJsonData("email") + registerTimeStamp + "@gmail.com")
                 .enterSignUpName(testData.getJsonData("name") + registerTimeStamp)
                 .clickSignUpButton();
@@ -95,7 +96,8 @@ public class RegisterTest extends BaseGuiTest {
                 )
                 .verifyUserCreatedSuccessfully();
 
-        new SignUpAndLoginPage(driver).navigate()
+        new SignUpAndLoginPage(driver)
+                .navigate()
                 .enterSignUpName(testData.getJsonData("name"))
                 .enterSignUpEmail(testData.getJsonData("email") + registerTimeStamp  + "@gmail.com")
                 .clickSignUpButton()
