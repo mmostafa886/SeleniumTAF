@@ -19,7 +19,6 @@ import static com.taf.drivers.DriverConfigParser.*;
 /**
  * EdgeFactory creates and configures Edge WebDriver instances.
  * Uses DriverOptionsBuilder for configuration, implementing the Builder Pattern.
- * 
  * Design Patterns Applied:
  * - Factory Pattern: Creates Edge driver instances
  * - Builder Pattern: Uses DriverOptionsBuilder for configuration

@@ -2,13 +2,11 @@ package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
 import com.taf.builders.UserDataBuilder;
-import com.taf.drivers.GUIWebDriver;
 import com.taf.drivers.UITest;
 import com.taf.pages.CartPage;
 import com.taf.pages.CheckoutPage;
 import com.taf.pages.ProductsPage;
 import com.taf.pages.SignUpAndLoginPage;
-import com.taf.pages.components.NavBarComponent;
 import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;

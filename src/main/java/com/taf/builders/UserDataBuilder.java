@@ -11,7 +11,6 @@ import java.util.Random;
  * UserDataBuilder implements the Builder Pattern for creating user test data.
  * Provides a fluent interface for building user objects with various attributes.
  * Supports both complete and partial user data creation.
- * 
  * Design Patterns Applied:
  * - Builder Pattern: Step-by-step construction of user data
  * - Fluent Interface: Method chaining for readable data construction

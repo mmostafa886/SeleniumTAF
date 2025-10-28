@@ -18,7 +18,6 @@ import static io.restassured.RestAssured.given;
  * ApiRequestBuilder implements the Builder Pattern for REST API requests.
  * Provides a fluent interface for constructing and executing API requests with
  * comprehensive support for headers, parameters, authentication, and various HTTP methods.
- * 
  * Design Patterns Applied:
  * - Builder Pattern: Step-by-step construction of API requests
  * - Fluent Interface: Method chaining for readable request construction

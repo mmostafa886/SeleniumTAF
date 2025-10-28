@@ -12,7 +12,6 @@ import static com.taf.drivers.DriverConfigParser.*;
 /**
  * ChromeFactory creates and configures Chrome WebDriver instances.
  * Uses DriverOptionsBuilder for configuration, implementing the Builder Pattern.
- * 
  * Design Patterns Applied:
  * - Factory Pattern: Creates Chrome driver instances
  * - Builder Pattern: Uses DriverOptionsBuilder for configuration

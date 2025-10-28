@@ -9,7 +9,7 @@ import io.restassured.specification.RequestSpecification;
 import java.util.Map;
 
 public class Builder {
-    private  static String baseURI = PropertyReader.getProperty("baseUrlApi");
+    private  static final String baseURI = PropertyReader.getProperty("baseUrlApi");
     private Builder() {
         // Private constructor to prevent instantiation
     }

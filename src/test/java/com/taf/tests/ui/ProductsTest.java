@@ -1,9 +1,7 @@
 package com.taf.tests.ui;
 
-import com.taf.drivers.GUIWebDriver;
 import com.taf.drivers.UITest;
 import com.taf.pages.ProductsPage;
-import com.taf.pages.components.NavBarComponent;
 import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.dataReader.JsonReader;
