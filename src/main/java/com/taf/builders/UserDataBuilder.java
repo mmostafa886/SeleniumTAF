@@ -59,23 +59,7 @@ public class UserDataBuilder {
         LogsManager.debug("Creating new UserDataBuilder");
         return new UserDataBuilder();
     }
-    
-    /**
-     * Create a builder with minimal default data
-     * @return UserDataBuilder with minimal defaults
-     */
-    public static UserDataBuilder withMinimalDefaults() {
-        LogsManager.debug("Creating UserDataBuilder with minimal defaults");
-        String timestamp = TimeManager.getCompactTimeStamp();
-        return new UserDataBuilder()
-                .name("TestUser" + timestamp)
-                .email("testuser" + timestamp + "@test.com")
-                .password("Test@123")
-                .title(DEFAULT_TITLES[random.nextInt(DEFAULT_TITLES.length)])
-                .firstName("Test")
-                .lastName("User");
-    }
-    
+
     /**
      * Create a builder with complete default data
      * @return UserDataBuilder with complete defaults

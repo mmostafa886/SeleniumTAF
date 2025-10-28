@@ -1,10 +1,9 @@
 package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
-import com.taf.drivers.GUIWebDriver;
+import com.taf.builders.UserDataBuilder;
 import com.taf.drivers.UITest;
 import com.taf.pages.*;
-import com.taf.pages.components.NavBarComponent;
 import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
@@ -16,6 +15,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.util.Map;
+
 @Epic("Automation Exercise")
 @Feature("UI Invoice")
 @Story("Invoice")
@@ -26,29 +27,23 @@ import org.testng.annotations.Test;
 public class InvoiceTest extends BaseGuiTest {
 
     String timestamp = TimeManager.getSimpleTimeStamp();
+    Map<String, String> userData;
 
     @Description("Register a new account")
     @Test(description = "Account Registration", groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
     public void registerNewAccount() {
-        new UserManagementAPI().createRegisterUserAccount(
-                        testData.getJsonData("name"),
-                        testData.getJsonData("email") + timestamp + "@gmail.com",
-                        testData.getJsonData("password"),
-                        testData.getJsonData("titleMale"),
-                        testData.getJsonData("day"),
-                        testData.getJsonData("month"),
-                        testData.getJsonData("year"),
-                        testData.getJsonData("firstName"),
-                        testData.getJsonData("lastName"),
-                        testData.getJsonData("companyName"),
-                        testData.getJsonData("address1"),
-                        testData.getJsonData("address2"),
-                        testData.getJsonData("country"),
-                        testData.getJsonData("state"),
-                        testData.getJsonData("city"),
-                        testData.getJsonData("zipcode"),
-                        testData.getJsonData("mobileNumber")
-                )
+        // Build user data using UserDataBuilder
+        userData = UserDataBuilder.withRandomData()
+                .name(testData.getJsonData("name"))
+                .email(testData.getJsonData("email") + timestamp + "@gmail.com")
+                .password(testData.getJsonData("password"))
+                .firstName(testData.getJsonData("firstName"))
+                .state(testData.getJsonData("state"))
+                .city(testData.getJsonData("city"))
+                .zipcode(testData.getJsonData("zipcode"))
+                .buildAsMap();
+
+        new UserManagementAPI().createRegisterUserAccount(userData)
                 .verifyUserCreatedSuccessfully();
     }
 
@@ -58,8 +53,8 @@ public class InvoiceTest extends BaseGuiTest {
     public void loginToAccount() {
         new SignUpAndLoginPage(driver)
                 .navigate()
-                .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
-                .enterLoginPassword(testData.getJsonData("password"))
+                .enterLoginEmail(userData.get("email"))
+                .enterLoginPassword(userData.get("password"))
                 .clickLoginButton()
                 .getNavigationBar()
                 .verifyUserLabel(testData.getJsonData("name"));
@@ -89,30 +84,30 @@ public class InvoiceTest extends BaseGuiTest {
         new CartPage(driver)
                 .clickOnProceedToCheckout()
                 .verifyDeliveryAddress(
-                        testData.getJsonData("titleMale"),
-                        testData.getJsonData("firstName"),
-                        testData.getJsonData("lastName"),
-                        testData.getJsonData("companyName"),
-                        testData.getJsonData("address1"),
-                        testData.getJsonData("address2"),
-                        testData.getJsonData("city"),
-                        testData.getJsonData("state"),
-                        testData.getJsonData("zipcode"),
-                        testData.getJsonData("country"),
-                        testData.getJsonData("mobileNumber")
+                        userData.get("title"),
+                        userData.get("firstname"),
+                        userData.get("lastname"),
+                        userData.get("company"),
+                        userData.get("address1"),
+                        userData.get("address2"),
+                        userData.get("city"),
+                        userData.get("state"),
+                        userData.get("zipcode"),
+                        userData.get("country"),
+                        userData.get("mobile_number")
                 )
                 .verifyBillingAddress(
-                        testData.getJsonData("titleMale"),
-                        testData.getJsonData("firstName"),
-                        testData.getJsonData("lastName"),
-                        testData.getJsonData("companyName"),
-                        testData.getJsonData("address1"),
-                        testData.getJsonData("address2"),
-                        testData.getJsonData("city"),
-                        testData.getJsonData("state"),
-                        testData.getJsonData("zipcode"),
-                        testData.getJsonData("country"),
-                        testData.getJsonData("mobileNumber")
+                        userData.get("title"),
+                        userData.get("firstname"),
+                        userData.get("lastname"),
+                        userData.get("company"),
+                        userData.get("address1"),
+                        userData.get("address2"),
+                        userData.get("city"),
+                        userData.get("state"),
+                        userData.get("zipcode"),
+                        userData.get("country"),
+                        userData.get("mobile_number")
                 );
     }
 
@@ -147,9 +142,7 @@ public class InvoiceTest extends BaseGuiTest {
             , description = "Delete Account", groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
     public void deleteAccountAsPostCondition() {
         new UserManagementAPI()
-                .deleteUserAccount(testData.getJsonData("email") + timestamp + "@gmail.com",
-                        testData.getJsonData("password"
-                        ))
+                .deleteUserAccount(userData.get("email"), userData.get("password"))
                 .verifyUserDeletedSuccessfully();
     }
 

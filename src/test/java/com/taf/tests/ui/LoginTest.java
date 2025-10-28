@@ -1,9 +1,8 @@
 package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
-import com.taf.drivers.GUIWebDriver;
+import com.taf.builders.UserDataBuilder;
 import com.taf.drivers.UITest;
-import com.taf.pages.components.NavBarComponent;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
@@ -18,6 +17,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Map;
+
 @Epic("Automation Exercise")
 @Feature("UI User Management")
 @Story("User Login")
@@ -28,32 +29,34 @@ import org.testng.annotations.Test;
 public class LoginTest extends BaseGuiTest {
 
 
-
     @Description("Verify user can login with valid credentials")
     @Test(description = "Valid Login Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
     public void validLoginTC()
     {
         String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Valid-Login Test Started ...");
-        new UserManagementAPI().createRegisterUserAccount(
-                testData.getJsonData("name"),
-                testData.getJsonData("email") + timestamp + "@gmail.com",
-                testData.getJsonData("password"),
-                testData.getJsonData("firstName"),
-                testData.getJsonData("lastName"))
+
+        // Build user data using UserDataBuilder with minimal defaults
+        Map<String, String> userData = UserDataBuilder.withRandomData()
+                .name(testData.getJsonData("name"))
+                .email(testData.getJsonData("email") + timestamp + "@gmail.com")
+                .password(testData.getJsonData("password"))
+                .firstName(testData.getJsonData("firstName"))
+                .lastName(testData.getJsonData("lastName"))
+                .buildAsMap();
+
+        new UserManagementAPI().createRegisterUserAccount(userData)
                 .verifyUserCreatedSuccessfully();
 
         new SignUpAndLoginPage(driver)
                 .navigate()
-                .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
-                .enterLoginPassword(testData.getJsonData("password"))
+                .enterLoginEmail(userData.get("email"))
+                .enterLoginPassword(userData.get("password"))
                 .clickLoginButton()
                 .getNavigationBar()
                 .verifyUserLabel(testData.getJsonData("name"));
 
-        new UserManagementAPI().deleteUserAccount(
-                testData.getJsonData("email") + timestamp + "@gmail.com",
-                testData.getJsonData("password"))
+        new UserManagementAPI().deleteUserAccount(userData.get("email"), userData.get("password"))
                 .verifyUserDeletedSuccessfully();
 
         LogsManager.info("Valid-Login Test Finished ...");
@@ -65,23 +68,26 @@ public class LoginTest extends BaseGuiTest {
     {
         String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Invalid-Login (Invalid Email) Test Started ...");
-        new UserManagementAPI().createRegisterUserAccount(
-                        testData.getJsonData("name"),
-                        testData.getJsonData("email") + timestamp + "@gmail.com",
-                        testData.getJsonData("password"),
-                        testData.getJsonData("firstName"),
-                        testData.getJsonData("lastName"))
+
+        // Build user data using UserDataBuilder with minimal defaults
+        Map<String, String> userData = UserDataBuilder.withRandomData()
+                .name(testData.getJsonData("name"))
+                .email(testData.getJsonData("email") + timestamp + "@gmail.com")
+                .password(testData.getJsonData("password"))
+                .firstName(testData.getJsonData("firstName"))
+                .lastName(testData.getJsonData("lastName"))
+                .buildAsMap();
+
+        new UserManagementAPI().createRegisterUserAccount(userData)
                 .verifyUserCreatedSuccessfully();
 
         new SignUpAndLoginPage(driver).navigate()
                 .enterLoginEmail(testData.getJsonData("email")  + "wrong@gmail.com")
-                .enterLoginPassword(testData.getJsonData("password"))
+                .enterLoginPassword(userData.get("password"))
                 .clickLoginButton()
                 .verifyLoginErrorMessage(testData.getJsonData("messages.error"));
 
-        new UserManagementAPI().deleteUserAccount(
-                        testData.getJsonData("email") + timestamp + "@gmail.com",
-                        testData.getJsonData("password"))
+        new UserManagementAPI().deleteUserAccount(userData.get("email"), userData.get("password"))
                 .verifyUserDeletedSuccessfully();
         LogsManager.info("Invalid-Login Test Finished ...");
     }
@@ -92,23 +98,26 @@ public class LoginTest extends BaseGuiTest {
     {
         String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Invalid-Login (Invalid Password) Test Started ...");
-        new UserManagementAPI().createRegisterUserAccount(
-                        testData.getJsonData("name"),
-                        testData.getJsonData("email") + timestamp + "@gmail.com",
-                        testData.getJsonData("password"),
-                        testData.getJsonData("firstName"),
-                        testData.getJsonData("lastName"))
+
+        // Build user data using UserDataBuilder with minimal defaults
+        Map<String, String> userData = UserDataBuilder.withRandomData()
+                .name(testData.getJsonData("name"))
+                .email(testData.getJsonData("email") + timestamp + "@gmail.com")
+                .password(testData.getJsonData("password"))
+                .firstName(testData.getJsonData("firstName"))
+                .lastName(testData.getJsonData("lastName"))
+                .buildAsMap();
+
+        new UserManagementAPI().createRegisterUserAccount(userData)
                 .verifyUserCreatedSuccessfully();
 
         new SignUpAndLoginPage(driver).navigate()
-                .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
-                .enterLoginPassword(testData.getJsonData("password")+timestamp)
+                .enterLoginEmail(userData.get("email"))
+                .enterLoginPassword(userData.get("password")+timestamp)
                 .clickLoginButton()
                 .verifyLoginErrorMessage(testData.getJsonData("messages.error"));
 
-        new UserManagementAPI().deleteUserAccount(
-                        testData.getJsonData("email") + timestamp + "@gmail.com",
-                        testData.getJsonData("password"))
+        new UserManagementAPI().deleteUserAccount(userData.get("email"), userData.get("password"))
                 .verifyUserDeletedSuccessfully();
         LogsManager.info("Invalid-Login Test (Invalid Password) Finished ...");
     }

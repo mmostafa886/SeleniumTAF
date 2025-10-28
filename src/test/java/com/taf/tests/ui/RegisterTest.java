@@ -1,6 +1,7 @@
 package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
+import com.taf.builders.UserDataBuilder;
 import com.taf.drivers.GUIWebDriver;
 import com.taf.drivers.UITest;
 import com.taf.pages.SignUpAndLoginPage;
@@ -19,6 +20,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Map;
+
 @Epic("Automation Exercise")
 @Feature("UI User Management")
 @Story("User Registration")
@@ -35,35 +38,27 @@ public class RegisterTest extends BaseGuiTest {
     public void signUpTest() {
         LogsManager.info("Starting sign up test...");
         registerTimeStamp = TimeManager.getCompactTimeStamp();
+
+        // Build user data using UserDataBuilder
+        UserDataBuilder.UserData userData = UserDataBuilder.withRandomData()
+                .name(testData.getJsonData("name") + registerTimeStamp)
+                .email(testData.getJsonData("email") + registerTimeStamp + "@gmail.com")
+                .password(testData.getJsonData("password"))
+                .build();
+
         new SignUpAndLoginPage(driver)
                 .navigate()
-                .enterSignUpEmail(testData.getJsonData("email") + registerTimeStamp + "@gmail.com")
-                .enterSignUpName(testData.getJsonData("name") + registerTimeStamp)
+                .enterSignUpEmail(userData.getEmail())
+                .enterSignUpName(userData.getName())
                 .clickSignUpButton();
-                new SignupPage(driver).fillRegistrationForm(
-                        testData.getJsonData("titleMale")
-                        , testData.getJsonData("password")
-                        , testData.getJsonData("day")
-                        , testData.getJsonData("month")
-                        , testData.getJsonData("year")
-                        , testData.getJsonData("firstName")
-                        , testData.getJsonData("lastName")
-                        , testData.getJsonData("company")
-                        , testData.getJsonData("address1")
-                        , testData.getJsonData("address2")
-                        , testData.getJsonData("country")
-                        , testData.getJsonData("state")
-                        , testData.getJsonData("city")
-                        , testData.getJsonData("zipCode")
-                        , testData.getJsonData("phone"))
+
+        new SignupPage(driver).fillRegistrationForm(userData)
                 .clickCreateAccountButton()
                 .verifyAccountCreated()
                 .clickContinueButton()
                 .verifyHomePageIsDisplayed();
 
-        new UserManagementAPI().deleteUserAccount(
-                        testData.getJsonData("email") + registerTimeStamp + "@gmail.com",
-                        testData.getJsonData("password"))
+        new UserManagementAPI().deleteUserAccount(userData.getEmail(), userData.getPassword())
                 .verifyUserDeletedSuccessfully();
     }
 
@@ -74,38 +69,26 @@ public class RegisterTest extends BaseGuiTest {
     {
         LogsManager.info("Starting invalid sign up test...");
         registerTimeStamp = TimeManager.getCompactTimeStamp();
+
+        // Build user data using UserDataBuilder
+        Map<String, String> userData = UserDataBuilder.withRandomData()
+                .name(testData.getJsonData("name"))
+                .email(testData.getJsonData("email") + registerTimeStamp + "@gmail.com")
+                .password(testData.getJsonData("password"))
+                .buildAsMap();
+
         //precondition > create a user account
-        new UserManagementAPI().createRegisterUserAccount(
-                        testData.getJsonData("name"),
-                        testData.getJsonData("email") + registerTimeStamp  + "@gmail.com",
-                        testData.getJsonData("password"),
-                        testData.getJsonData("titleMale"),
-                        testData.getJsonData("day"),
-                        testData.getJsonData("month"),
-                        testData.getJsonData("year"),
-                        testData.getJsonData("firstName"),
-                        testData.getJsonData("lastName"),
-                        testData.getJsonData("company"),
-                        testData.getJsonData("address1"),
-                        testData.getJsonData("address2"),
-                        testData.getJsonData("country"),
-                        testData.getJsonData("state"),
-                        testData.getJsonData("city"),
-                        testData.getJsonData("zipCode"),
-                        testData.getJsonData("phone")
-                )
+        new UserManagementAPI().createRegisterUserAccount(userData)
                 .verifyUserCreatedSuccessfully();
 
         new SignUpAndLoginPage(driver)
                 .navigate()
-                .enterSignUpName(testData.getJsonData("name"))
-                .enterSignUpEmail(testData.getJsonData("email") + registerTimeStamp  + "@gmail.com")
+                .enterSignUpName(userData.get("name"))
+                .enterSignUpEmail(userData.get("email"))
                 .clickSignUpButton()
                 .verifySignUpErrorMessage(testData.getJsonData("messages.error"));
 
-        new UserManagementAPI().deleteUserAccount(
-                        testData.getJsonData("email") + registerTimeStamp + "@gmail.com",
-                        testData.getJsonData("password"))
+        new UserManagementAPI().deleteUserAccount(userData.get("email"), userData.get("password"))
                 .verifyUserDeletedSuccessfully();
     }
 

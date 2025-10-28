@@ -1,6 +1,7 @@
 package com.taf.tests.api;
 
 import com.taf.apis.UserManagementAPI;
+import com.taf.builders.UserDataBuilder;
 import com.taf.tests.BaseApiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
@@ -10,6 +11,8 @@ import io.qameta.allure.testng.Tag;
 import io.qameta.allure.testng.Tags;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.Map;
 
 @Epic("Automation Exercise")
 @Feature("UI User Management")
@@ -25,25 +28,14 @@ public class RegisterTestAPI extends BaseApiTest {
     @Test(description = "Register a user account through API"
             , groups = {Groups.REGISTRATION, Groups.REGRESSION, Groups.SMOKE})
     public void registerTest() {
-        new UserManagementAPI().createRegisterUserAccount(
-                        testData.getJsonData("name"),
-                        testData.getJsonData("email") + timestamp + "@gmail.com",
-                        testData.getJsonData("password"),
-                        testData.getJsonData("titleMale"),
-                        testData.getJsonData("day"),
-                        testData.getJsonData("month"),
-                        testData.getJsonData("year"),
-                        testData.getJsonData("firstName"),
-                        testData.getJsonData("lastName"),
-                        testData.getJsonData("company"),
-                        testData.getJsonData("address1"),
-                        testData.getJsonData("address2"),
-                        testData.getJsonData("country"),
-                        testData.getJsonData("state"),
-                        testData.getJsonData("city"),
-                        testData.getJsonData("zipCode"),
-                        testData.getJsonData("phone")
-                )
+        // Using UserDataBuilder for cleaner test data creation
+        Map<String, String> userData = UserDataBuilder.withRandomData()
+                .name(testData.getJsonData("name"))
+                .email(testData.getJsonData("email") + timestamp + "@gmail.com")
+                .password(testData.getJsonData("password"))
+                .buildAsMap();
+
+        new UserManagementAPI().createRegisterUserAccount(userData)
                 .verifyUserCreatedSuccessfully();
     }
 

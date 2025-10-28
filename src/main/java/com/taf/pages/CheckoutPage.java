@@ -81,7 +81,7 @@ public class CheckoutPage {
                                               String address1, String address2, String city, String state, 
                                               String zip, String country, String phone) {
         String expectedName = title + ". " + fName + " " + lName;
-        String expectedCityStateZip = zip + " " + city + " " + state;
+        String expectedCityStateZip = city + " " + state + " " + zip;
         
         driver.validation()
             .Equals(driver.element().getText(deliveryName), expectedName, "Delivery Name is not matched")
@@ -99,7 +99,7 @@ public class CheckoutPage {
                                              String address1, String address2, String city, String state, 
                                              String zip, String country, String phone) {
         String expectedName = title + ". " + fName + " " + lName;
-        String expectedCityStateZip = zip + " " + city + " " + state;
+        String expectedCityStateZip = city + " " + state + " " + zip;
         
         driver.validation()
             .Equals(driver.element().getText(billingName), expectedName, "Billing Name is not matched")

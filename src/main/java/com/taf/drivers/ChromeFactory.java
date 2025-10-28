@@ -28,7 +28,6 @@ public class ChromeFactory extends AbstractDriver {
      */
     private ChromeOptions options() {
         LogsManager.debug("Building Chrome options using DriverOptionsBuilder");
-        
         return DriverOptionsBuilder.forChrome()
                 .withDefaultConfiguration(isRemote)
                 .build();

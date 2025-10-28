@@ -1,6 +1,7 @@
 package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
+import com.taf.builders.UserDataBuilder;
 import com.taf.drivers.GUIWebDriver;
 import com.taf.drivers.UITest;
 import com.taf.pages.CartPage;
@@ -18,6 +19,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.util.Map;
+
 @Epic("Checkout Management")
 @Feature("UI Checkout Management")
 @Story("Checkout Management")
@@ -28,30 +31,25 @@ import org.testng.annotations.Test;
 public class CheckoutTest extends BaseGuiTest {
 
     String timestamp;
+    Map<String, String> userData;
 
     @Description("Register a new account")
     @Test(description = "Account Registration", groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
     public void registerNewAccount() {
         timestamp = TimeManager.getCompactTimeStamp();
-        new UserManagementAPI().createRegisterUserAccount(
-                        testData.getJsonData("name"),
-                        testData.getJsonData("email") + timestamp  + "@gmail.com",
-                        testData.getJsonData("password"),
-                        testData.getJsonData("titleMale"),
-                        testData.getJsonData("day"),
-                        testData.getJsonData("month"),
-                        testData.getJsonData("year"),
-                        testData.getJsonData("firstName"),
-                        testData.getJsonData("lastName"),
-                        testData.getJsonData("companyName"),
-                        testData.getJsonData("address1"),
-                        testData.getJsonData("address2"),
-                        testData.getJsonData("country"),
-                        testData.getJsonData("state"),
-                        testData.getJsonData("city"),
-                        testData.getJsonData("zipcode"),
-                        testData.getJsonData("mobileNumber")
-                )
+
+        // Build user data using UserDataBuilder
+        userData = UserDataBuilder.withRandomData()
+                .name(testData.getJsonData("name"))
+                .email(testData.getJsonData("email") + timestamp + "@gmail.com")
+                .password(testData.getJsonData("password"))
+                .firstName(testData.getJsonData("firstName"))
+                .state(testData.getJsonData("state"))
+                .city(testData.getJsonData("city"))
+                .zipcode(testData.getJsonData("zipcode"))
+                .buildAsMap();
+
+        new UserManagementAPI().createRegisterUserAccount(userData)
                 .verifyUserCreatedSuccessfully();
     }
 
@@ -61,8 +59,8 @@ public class CheckoutTest extends BaseGuiTest {
     public void loginToAccount() {
         new SignUpAndLoginPage(driver)
                 .navigate()
-                .enterLoginEmail(testData.getJsonData("email") + timestamp + "@gmail.com")
-                .enterLoginPassword(testData.getJsonData("password"))
+                .enterLoginEmail(userData.get("email"))
+                .enterLoginPassword(userData.get("password"))
                 .clickLoginButton()
                 .getNavigationBar()
                 .verifyUserLabel(testData.getJsonData("name"));
@@ -92,30 +90,30 @@ public class CheckoutTest extends BaseGuiTest {
         new CartPage(driver)
                 .clickOnProceedToCheckout()
                 .verifyDeliveryAddress(
-                        testData.getJsonData("titleMale"),
-                        testData.getJsonData("firstName"),
-                        testData.getJsonData("lastName"),
-                        testData.getJsonData("companyName"),
-                        testData.getJsonData("address1"),
-                        testData.getJsonData("address2"),
-                        testData.getJsonData("city"),
-                        testData.getJsonData("state"),
-                        testData.getJsonData("zipcode"),
-                        testData.getJsonData("country"),
-                        testData.getJsonData("mobileNumber")
+                        userData.get("title"),
+                        userData.get("firstname"),
+                        userData.get("lastname"),
+                        userData.get("company"),
+                        userData.get("address1"),
+                        userData.get("address2"),
+                        userData.get("city"),
+                        userData.get("state"),
+                        userData.get("zipcode"),
+                        userData.get("country"),
+                        userData.get("mobile_number")
                 )
                 .verifyBillingAddress(
-                        testData.getJsonData("titleMale"),
-                        testData.getJsonData("firstName"),
-                        testData.getJsonData("lastName"),
-                        testData.getJsonData("companyName"),
-                        testData.getJsonData("address1"),
-                        testData.getJsonData("address2"),
-                        testData.getJsonData("city"),
-                        testData.getJsonData("state"),
-                        testData.getJsonData("zipcode"),
-                        testData.getJsonData("country"),
-                        testData.getJsonData("mobileNumber")
+                        userData.get("title"),
+                        userData.get("firstname"),
+                        userData.get("lastname"),
+                        userData.get("company"),
+                        userData.get("address1"),
+                        userData.get("address2"),
+                        userData.get("city"),
+                        userData.get("state"),
+                        userData.get("zipcode"),
+                        userData.get("country"),
+                        userData.get("mobile_number")
                 );
     }
 
@@ -124,9 +122,7 @@ public class CheckoutTest extends BaseGuiTest {
     , groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
     public void deleteAccountAsPostCondition() {
         new UserManagementAPI()
-                .deleteUserAccount( testData.getJsonData("email") + timestamp + "@gmail.com",
-                        testData.getJsonData("password"
-                        ))
+                .deleteUserAccount(userData.get("email"), userData.get("password"))
                 .verifyUserDeletedSuccessfully();
     }
 

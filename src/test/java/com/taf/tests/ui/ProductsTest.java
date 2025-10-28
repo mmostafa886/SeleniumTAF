@@ -42,7 +42,6 @@ public class ProductsTest extends BaseGuiTest {
     @Test(description = "Search for a product without login"
     , groups = {Groups.PRODUCTS, Groups.REGRESSION, Groups.SMOKE})
     public void addProductToCartWithoutLogin() {
-
         new ProductsPage(driver)
                 .navigate()
                 .clickOnAddToCart(testData.getJsonData("product1.name"))

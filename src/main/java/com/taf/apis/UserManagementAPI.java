@@ -1,5 +1,6 @@
 package com.taf.apis;
 
+import com.taf.builders.Builder;
 import com.taf.utils.logs.LogsManager;
 import com.taf.validations.Verification;
 import io.qameta.allure.Step;
@@ -26,7 +27,17 @@ public class UserManagementAPI {
     private static final String deleteAccount_endpoint = "/deleteAccount";
 
     //api methods
+    @Step("Create a new user account using UserDataBuilder")
+    public UserManagementAPI createRegisterUserAccount(Map<String, String> userData) {
+        LogsManager.info("Creating user account through API using UserDataBuilder...");
+        response = requestSpecification.spec(Builder.getUserManagementRequestSpecification(userData))
+                .post(createAccount_endpoint);
+        LogsManager.info(response.asPrettyString());
+        return this;
+    }
+
     @Step("Create a new user account with full details")
+    @Deprecated
     public UserManagementAPI createRegisterUserAccount(String name, String email, String pass,String title,String birth_date, String birth_month,String birth_year, String firstName, String lastName
     , String company,String address1, String address2,String country,String zipcode,String state,String city,String mobile_number)
     {
@@ -56,6 +67,7 @@ public class UserManagementAPI {
     }
 
     @Step("Create a new user account with minimal details")
+    @Deprecated
     public UserManagementAPI createRegisterUserAccount(String name, String email, String pass, String firstName, String lastName)
     {
         LogsManager.info("Creating Minimal-details user account through API...");
@@ -103,6 +115,7 @@ public class UserManagementAPI {
                 "User is not created successfully");
         return this;
     }
+
     @Step("Verify that user is deleted successfully")
     public UserManagementAPI verifyUserDeletedSuccessfully() {
         verification.Equals(response.jsonPath().get("message"), "Account deleted!",

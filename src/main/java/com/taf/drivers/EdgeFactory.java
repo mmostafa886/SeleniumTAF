@@ -34,11 +34,12 @@ public class EdgeFactory extends AbstractDriver {
      * @return Configured EdgeOptions
      */
     private EdgeOptions options() {
-   /*     LogsManager.debug("Building Edge options using DriverOptionsBuilder");
-        
+/*        LogsManager.debug("Building Edge options using DriverOptionsBuilder");
         return DriverOptionsBuilder.forEdge()
                 .withDefaultConfiguration(isRemote)
                 .build();*/
+
+        LogsManager.debug("Building Edge options directly using DriverOptions");
         EdgeOptions options = new EdgeOptions();
         options.addArguments("--start-maximized"); // Example option to start Chrome maximized
         options.addArguments("--disable-infobars"); // Example option to disable infobars
