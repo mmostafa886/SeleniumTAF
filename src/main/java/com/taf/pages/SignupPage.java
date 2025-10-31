@@ -1,5 +1,6 @@
 package com.taf.pages;
 
+import com.taf.builders.LombokUserData;
 import com.taf.builders.UserDataBuilder;
 import com.taf.drivers.GUIWebDriver;
 import com.taf.pages.components.NavBarComponent;
@@ -13,12 +14,10 @@ import org.openqa.selenium.By;
  * SignupPage handles user registration form
  */
 public class SignupPage {
-
     @Getter
     protected final GUIWebDriver driver;
     protected final WaitManager waitManager;
     private NavBarComponent navigationBar;
-
     // Page URL
     private static final String SIGNUP_URL = "/signup";
 
@@ -81,6 +80,29 @@ public class SignupPage {
     @Step("Fill registration form using UserData object")
     public SignupPage fillRegistrationForm(UserDataBuilder.UserData userData) {
         LogsManager.info("[" + this.getClass().getSimpleName() + "] Filling registration form using UserData");
+        selectTitle(userData.getTitle());
+        driver.element().type(passwordInput, userData.getPassword());
+        driver.element().selectFromDropdown(daySelect, userData.getBirthDate());
+        driver.element().selectFromDropdown(monthSelect, userData.getBirthMonth());
+        driver.element().selectFromDropdown(yearSelect, userData.getBirthYear());
+        driver.element().click(newsletterCheckbox);
+        driver.element().click(specialOffersCheckbox);
+        driver.element().type(firstNameInputAddress, userData.getFirstName());
+        driver.element().type(lastNameInputAddress, userData.getLastName());
+        driver.element().type(companyInput, userData.getCompany());
+        driver.element().type(address1Input, userData.getAddress1());
+        driver.element().type(address2Input, userData.getAddress2());
+        driver.element().selectFromDropdown(countrySelect, userData.getCountry());
+        driver.element().type(stateInput, userData.getState());
+        driver.element().type(cityInput, userData.getCity());
+        driver.element().type(zipcodeInput, userData.getZipcode());
+        driver.element().type(mobileNumberInput, userData.getMobileNumber());
+        return this;
+    }
+
+    @Step("Fill registration form using LombokUserData object")
+    public SignupPage fillRegistrationForm(LombokUserData userData) {
+        LogsManager.info("[" + this.getClass().getSimpleName() + "] Filling registration form using LombokUserData");
         selectTitle(userData.getTitle());
         driver.element().type(passwordInput, userData.getPassword());
         driver.element().selectFromDropdown(daySelect, userData.getBirthDate());

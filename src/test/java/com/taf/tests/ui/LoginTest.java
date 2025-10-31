@@ -1,7 +1,7 @@
 package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
-import com.taf.builders.UserDataBuilder;
+import com.taf.builders.LombokUserData;
 import com.taf.drivers.UITest;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.tests.BaseGuiTest;
@@ -16,8 +16,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.Map;
 
 @Epic("Automation Exercise")
 @Feature("UI User Management")
@@ -36,27 +34,26 @@ public class LoginTest extends BaseGuiTest {
         String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Valid-Login Test Started ...");
 
-        // Build user data using UserDataBuilder with minimal defaults
-        Map<String, String> userData = UserDataBuilder.withRandomData()
-                .name(testData.getJsonData("name"))
-                .email(testData.getJsonData("email") + timestamp + "@gmail.com")
-                .password(testData.getJsonData("password"))
-                .firstName(testData.getJsonData("firstName"))
-                .lastName(testData.getJsonData("lastName"))
-                .buildAsMap();
+        // Build user data using LombokUserData (Lombok @Builder)
+        LombokUserData userData = LombokUserData.withRandomData();
+        userData.setName(testData.getJsonData("name"));
+        userData.setEmail(testData.getJsonData("email") + timestamp + "@gmail.com");
+        userData.setPassword(testData.getJsonData("password"));
+        userData.setFirstName(testData.getJsonData("firstName"));
+        userData.setLastName(testData.getJsonData("lastName"));
 
-        new UserManagementAPI().createRegisterUserAccount(userData)
+        new UserManagementAPI().createRegisterUserAccount(userData.toMap())
                 .verifyUserCreatedSuccessfully();
 
         new SignUpAndLoginPage(driver)
                 .navigate()
-                .enterLoginEmail(userData.get("email"))
-                .enterLoginPassword(userData.get("password"))
+                .enterLoginEmail(userData.getEmail())
+                .enterLoginPassword(userData.getPassword())
                 .clickLoginButton()
                 .getNavigationBar()
                 .verifyUserLabel(testData.getJsonData("name"));
 
-        new UserManagementAPI().deleteUserAccount(userData.get("email"), userData.get("password"))
+        new UserManagementAPI().deleteUserAccount(userData.getEmail(), userData.getPassword())
                 .verifyUserDeletedSuccessfully();
 
         LogsManager.info("Valid-Login Test Finished ...");
@@ -69,25 +66,24 @@ public class LoginTest extends BaseGuiTest {
         String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Invalid-Login (Invalid Email) Test Started ...");
 
-        // Build user data using UserDataBuilder with minimal defaults
-        Map<String, String> userData = UserDataBuilder.withRandomData()
-                .name(testData.getJsonData("name"))
-                .email(testData.getJsonData("email") + timestamp + "@gmail.com")
-                .password(testData.getJsonData("password"))
-                .firstName(testData.getJsonData("firstName"))
-                .lastName(testData.getJsonData("lastName"))
-                .buildAsMap();
+        // Build user data using LombokUserData (Lombok @Builder)
+        LombokUserData userData = LombokUserData.withRandomData();
+        userData.setName(testData.getJsonData("name"));
+        userData.setEmail(testData.getJsonData("email") + timestamp + "@gmail.com");
+        userData.setPassword(testData.getJsonData("password"));
+        userData.setFirstName(testData.getJsonData("firstName"));
+        userData.setLastName(testData.getJsonData("lastName"));
 
-        new UserManagementAPI().createRegisterUserAccount(userData)
+        new UserManagementAPI().createRegisterUserAccount(userData.toMap())
                 .verifyUserCreatedSuccessfully();
 
         new SignUpAndLoginPage(driver).navigate()
                 .enterLoginEmail(testData.getJsonData("email")  + "wrong@gmail.com")
-                .enterLoginPassword(userData.get("password"))
+                .enterLoginPassword(userData.getPassword())
                 .clickLoginButton()
                 .verifyLoginErrorMessage(testData.getJsonData("messages.error"));
 
-        new UserManagementAPI().deleteUserAccount(userData.get("email"), userData.get("password"))
+        new UserManagementAPI().deleteUserAccount(userData.getEmail(), userData.getPassword())
                 .verifyUserDeletedSuccessfully();
         LogsManager.info("Invalid-Login Test Finished ...");
     }
@@ -99,25 +95,24 @@ public class LoginTest extends BaseGuiTest {
         String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Invalid-Login (Invalid Password) Test Started ...");
 
-        // Build user data using UserDataBuilder with minimal defaults
-        Map<String, String> userData = UserDataBuilder.withRandomData()
-                .name(testData.getJsonData("name"))
-                .email(testData.getJsonData("email") + timestamp + "@gmail.com")
-                .password(testData.getJsonData("password"))
-                .firstName(testData.getJsonData("firstName"))
-                .lastName(testData.getJsonData("lastName"))
-                .buildAsMap();
+        // Build user data using LombokUserData (Lombok @Builder)
+        LombokUserData userData = LombokUserData.withRandomData();
+        userData.setName(testData.getJsonData("name"));
+        userData.setEmail(testData.getJsonData("email") + timestamp + "@gmail.com");
+        userData.setPassword(testData.getJsonData("password"));
+        userData.setFirstName(testData.getJsonData("firstName"));
+        userData.setLastName(testData.getJsonData("lastName"));
 
-        new UserManagementAPI().createRegisterUserAccount(userData)
+        new UserManagementAPI().createRegisterUserAccount(userData.toMap())
                 .verifyUserCreatedSuccessfully();
 
         new SignUpAndLoginPage(driver).navigate()
-                .enterLoginEmail(userData.get("email"))
-                .enterLoginPassword(userData.get("password")+timestamp)
+                .enterLoginEmail(userData.getEmail())
+                .enterLoginPassword(userData.getPassword()+timestamp)
                 .clickLoginButton()
                 .verifyLoginErrorMessage(testData.getJsonData("messages.error"));
 
-        new UserManagementAPI().deleteUserAccount(userData.get("email"), userData.get("password"))
+        new UserManagementAPI().deleteUserAccount(userData.getEmail(), userData.getPassword())
                 .verifyUserDeletedSuccessfully();
         LogsManager.info("Invalid-Login Test (Invalid Password) Finished ...");
     }

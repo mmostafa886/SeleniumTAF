@@ -11,12 +11,7 @@ import org.openqa.selenium.By;
 /**
  * CartPage handles shopping cart operations
  */
-public class CartPage {
-
-    @Getter
-    protected final GUIWebDriver driver;
-    protected final WaitManager waitManager;
-    private NavBarComponent navigationBar;
+public class CartPage extends BasePage {
 
     // Page URL
     private static final String CART_ENDPOINT = "/view_cart";
@@ -29,23 +24,8 @@ public class CartPage {
      * @param driver The GUIWebDriver instance
      */
     public CartPage(GUIWebDriver driver) {
-        if (driver == null) {
-            throw new IllegalArgumentException("Driver cannot be null");
-        }
-        this.driver = driver;
-        this.waitManager = new WaitManager(driver.get());
-        LogsManager.info("Initialized " + this.getClass().getSimpleName());
-    }
-
-    /**
-     * Get navigation bar component with lazy initialization
-     * @return NavBarComponent instance
-     */
-    public NavBarComponent getNavigationBar() {
-        if (navigationBar == null) {
-            navigationBar = new NavBarComponent(driver);
-        }
-        return navigationBar;
+      super(driver);
+      LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
 
     // Dynamic locators

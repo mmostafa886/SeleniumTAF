@@ -1,7 +1,7 @@
 package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
-import com.taf.builders.UserDataBuilder;
+import com.taf.builders.LombokUserData;
 import com.taf.drivers.GUIWebDriver;
 import com.taf.drivers.UITest;
 import com.taf.pages.CartPage;
@@ -19,8 +19,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.Map;
-
 @Epic("Checkout Management")
 @Feature("UI Checkout Management")
 @Story("Checkout Management")
@@ -31,25 +29,24 @@ import java.util.Map;
 public class CheckoutTest extends BaseGuiTest {
 
     String timestamp;
-    Map<String, String> userData;
+    LombokUserData userData;
 
     @Description("Register a new account")
     @Test(description = "Account Registration", groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
     public void registerNewAccount() {
         timestamp = TimeManager.getCompactTimeStamp();
 
-        // Build user data using UserDataBuilder
-        userData = UserDataBuilder.withRandomData()
-                .name(testData.getJsonData("name"))
-                .email(testData.getJsonData("email") + timestamp + "@gmail.com")
-                .password(testData.getJsonData("password"))
-                .firstName(testData.getJsonData("firstName"))
-                .state(testData.getJsonData("state"))
-                .city(testData.getJsonData("city"))
-                .zipcode(testData.getJsonData("zipcode"))
-                .buildAsMap();
+        // Build user data using LombokUserData (Lombok @Builder)
+        userData = LombokUserData.withRandomData();
+        userData.setName(testData.getJsonData("name"));
+        userData.setEmail(testData.getJsonData("email") + timestamp + "@gmail.com");
+        userData.setPassword(testData.getJsonData("password"));
+        userData.setFirstName(testData.getJsonData("firstName"));
+        userData.setState(testData.getJsonData("state"));
+        userData.setCity(testData.getJsonData("city"));
+        userData.setZipcode(testData.getJsonData("zipcode"));
 
-        new UserManagementAPI().createRegisterUserAccount(userData)
+        new UserManagementAPI().createRegisterUserAccount(userData.toMap())
                 .verifyUserCreatedSuccessfully();
     }
 
@@ -59,8 +56,8 @@ public class CheckoutTest extends BaseGuiTest {
     public void loginToAccount() {
         new SignUpAndLoginPage(driver)
                 .navigate()
-                .enterLoginEmail(userData.get("email"))
-                .enterLoginPassword(userData.get("password"))
+                .enterLoginEmail(userData.getEmail())
+                .enterLoginPassword(userData.getPassword())
                 .clickLoginButton()
                 .getNavigationBar()
                 .verifyUserLabel(testData.getJsonData("name"));
@@ -90,30 +87,30 @@ public class CheckoutTest extends BaseGuiTest {
         new CartPage(driver)
                 .clickOnProceedToCheckout()
                 .verifyDeliveryAddress(
-                        userData.get("title"),
-                        userData.get("firstname"),
-                        userData.get("lastname"),
-                        userData.get("company"),
-                        userData.get("address1"),
-                        userData.get("address2"),
-                        userData.get("city"),
-                        userData.get("state"),
-                        userData.get("zipcode"),
-                        userData.get("country"),
-                        userData.get("mobile_number")
+                        userData.getTitle(),
+                        userData.getFirstName(),
+                        userData.getLastName(),
+                        userData.getCompany(),
+                        userData.getAddress1(),
+                        userData.getAddress2(),
+                        userData.getCity(),
+                        userData.getState(),
+                        userData.getZipcode(),
+                        userData.getCountry(),
+                        userData.getMobileNumber()
                 )
                 .verifyBillingAddress(
-                        userData.get("title"),
-                        userData.get("firstname"),
-                        userData.get("lastname"),
-                        userData.get("company"),
-                        userData.get("address1"),
-                        userData.get("address2"),
-                        userData.get("city"),
-                        userData.get("state"),
-                        userData.get("zipcode"),
-                        userData.get("country"),
-                        userData.get("mobile_number")
+                        userData.getTitle(),
+                        userData.getFirstName(),
+                        userData.getLastName(),
+                        userData.getCompany(),
+                        userData.getAddress1(),
+                        userData.getAddress2(),
+                        userData.getCity(),
+                        userData.getState(),
+                        userData.getZipcode(),
+                        userData.getCountry(),
+                        userData.getMobileNumber()
                 );
     }
 
@@ -122,7 +119,7 @@ public class CheckoutTest extends BaseGuiTest {
     , groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
     public void deleteAccountAsPostCondition() {
         new UserManagementAPI()
-                .deleteUserAccount(userData.get("email"), userData.get("password"))
+                .deleteUserAccount(userData.getEmail(), userData.getPassword())
                 .verifyUserDeletedSuccessfully();
     }
 
