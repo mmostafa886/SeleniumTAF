@@ -1,5 +1,7 @@
 package com.taf.drivers;
 
+import com.taf.drivers.decorators.LoggingWebDriverDecorator;
+import com.taf.drivers.decorators.ScreenshotWebDriverDecorator;
 import com.taf.utils.actions.AlertActions;
 import com.taf.utils.actions.BrowserActions;
 import com.taf.utils.actions.ElementActions;
@@ -15,6 +17,9 @@ import com.taf.utils.dataReader.PropertyReader;
  * GUIWebDriver is a wrapper class that manages the lifecycle and access to a Selenium WebDriver instance
  * in a thread-safe manner. It initializes the WebDriver based on the configured browser type and ensures
  * that each thread has its own isolated WebDriver instance.
+ *
+ * This class delegates WebDriver storage and lifecycle management to ThreadLocalDriverManager,
+ * which provides enhanced thread-safe management with metadata tracking and cleanup mechanisms.
  */
 public class GUIWebDriver {
     /**
@@ -26,27 +31,28 @@ public class GUIWebDriver {
             ? System.getProperty("browser") : PropertyReader.getProperty("browser");
 
     /**
-     * ThreadLocal container to hold the WebDriver instance for each thread separately.
-     * This ensures thread safety by providing each thread its own WebDriver instance,
-     * preventing concurrency issues when running tests in parallel.
-     */
-    private final ThreadLocal<WebDriver> driverThreadLocal = new ThreadLocal<>();
-
-    /**
      * Constructor for GUIWebDriver.
      * This constructor performs the following steps:
      *     <li>Logs the initialization event along with the browser type.</li>
      *     <li>Retrieves the appropriate AbstractDriver implementation based on the browser type.</li>
      *     <li>Creates a new WebDriver instance using the AbstractDriver factory method.</li>
+     *     <li>Applies configured decorators (logging, screenshots) based on properties.</li>
      *     <li>Wraps the WebDriver instance with ThreadGuard to detect illegal cross-thread usage.</li>
-     *     <li>Stores the protected WebDriver instance in the ThreadLocal variable for thread-safe access.</li>
+     *     <li>Stores the driver in ThreadLocalDriverManager for centralized thread-safe management.</li>
      * This setup allows multiple threads to run tests concurrently without interfering with each other's WebDriver instances.
      */
     public GUIWebDriver() {
         LogsManager.info("Initializing GUIWebDriver with browser: ", browser);
         AbstractDriver abstractDriver = Browser.getBrowserFromString(browser).getDriverFactory();
-        WebDriver driver = ThreadGuard.protect(abstractDriver.createDriver());
-        driverThreadLocal.set(driver);
+        WebDriver driver = abstractDriver.createDriver();
+
+        // Apply configured decorators before ThreadGuard
+        driver = applyConfiguredDecorators(driver);
+
+        driver = ThreadGuard.protect(driver);
+
+        // Store driver in ThreadLocalDriverManager for centralized management
+        ThreadLocalDriverManager.setDriver(driver);
     }
 
     /**     * Provides access to element-related actions using the current WebDriver instance.
@@ -110,28 +116,64 @@ public class GUIWebDriver {
 
     /**
      * Retrieves the WebDriver instance associated with the current thread.
-     * This method returns the WebDriver stored in the ThreadLocal variable, allowing thread-safe access
-     * to the browser driver for the current thread.
+     * This method delegates to ThreadLocalDriverManager to get the driver for the current thread,
+     * allowing thread-safe access to the browser driver.
      * @return the WebDriver instance for the current thread, or null if none has been initialized.
      */
     public WebDriver get() {
-        return driverThreadLocal.get();
+        return ThreadLocalDriverManager.getDriver();
     }
 
     /**
      * Quits the WebDriver instance associated with the current thread.
-     * This method performs the following:
+     * This method delegates to ThreadLocalDriverManager which performs the following:
      *     <li>Checks if the current thread has a WebDriver instance.</li>
-     *     <li>If present, logs the quitting event with the browser type.</li>
-     *     <li>Calls the quit() method on the WebDriver to close the browser and release resources.</li>
-     *     <li>Removes the WebDriver instance from the ThreadLocal storage to prevent memory leaks.</li>
+     *     <li>If present, logs the quitting event and quits the browser.</li>
+     *     <li>Removes the WebDriver from ThreadLocal storage and active drivers map.</li>
+     *     <li>Cleans up metadata to prevent memory leaks.</li>
      * It is important to call this method after test execution to properly clean up WebDriver instances.
      */
-    public  void quitDriver() {
-        if (driverThreadLocal.get() != null) {
+    public void quitDriver() {
+        if (ThreadLocalDriverManager.hasDriver()) {
             LogsManager.info("Quitting WebDriver for browser: ", browser);
-            driverThreadLocal.get().quit();
-            driverThreadLocal.remove();
+            ThreadLocalDriverManager.removeDriver();
         }
+    }
+
+    /**
+     * Applies configured decorators to the WebDriver instance based on property settings.
+     * Decorators are applied in the following order:
+     *     <li>LoggingWebDriverDecorator (if enableDriverLevelLogging=true)</li>
+     *     <li>ScreenshotWebDriverDecorator (if enableDriverScreenshots=true)</li>
+     * This method reads configuration from properties and applies decorators only when enabled.
+     * By default, all decorators are disabled to maintain optimal performance.
+     *
+     * @param driver the base WebDriver instance to decorate
+     * @return the decorated WebDriver instance, or the original if no decorators are enabled
+     */
+    private WebDriver applyConfiguredDecorators(WebDriver driver) {
+        // Apply logging decorator (optional - based on configuration)
+        String enableLoggingProperty = PropertyReader.getProperty("enableDriverLevelLogging");
+        boolean enableLogging = enableLoggingProperty != null && Boolean.parseBoolean(enableLoggingProperty);
+        if (enableLogging) {
+            driver = new LoggingWebDriverDecorator(driver);
+            LogsManager.info("✓ LoggingWebDriverDecorator applied - All WebDriver operations will be logged with timing");
+        }
+
+        // Apply screenshot decorator (optional - based on configuration)
+        String enableScreenshotsProperty = PropertyReader.getProperty("enableDriverScreenshots");
+        boolean enableScreenshots = enableScreenshotsProperty != null && Boolean.parseBoolean(enableScreenshotsProperty);
+        if (enableScreenshots) {
+            String screenshotOnNavProperty = PropertyReader.getProperty("screenshotOnNavigation");
+            boolean screenshotOnNav = screenshotOnNavProperty != null && Boolean.parseBoolean(screenshotOnNavProperty);
+
+            String screenshotOnErrorProperty = PropertyReader.getProperty("screenshotOnError");
+            boolean screenshotOnError = screenshotOnErrorProperty == null || Boolean.parseBoolean(screenshotOnErrorProperty);
+
+            driver = new ScreenshotWebDriverDecorator(driver, screenshotOnNav, screenshotOnError);
+            LogsManager.info("✓ ScreenshotWebDriverDecorator applied - Screenshots will be captured based on configuration");
+        }
+
+        return driver;
     }
 }
