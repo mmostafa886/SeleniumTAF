@@ -17,7 +17,7 @@ import com.taf.utils.dataReader.PropertyReader;
  * GUIWebDriver is a wrapper class that manages the lifecycle and access to a Selenium WebDriver instance
  * in a thread-safe manner. It initializes the WebDriver based on the configured browser type and ensures
  * that each thread has its own isolated WebDriver instance.
- *
+ * =======================================================================
  * This class delegates WebDriver storage and lifecycle management to ThreadLocalDriverManager,
  * which provides enhanced thread-safe management with metadata tracking and cleanup mechanisms.
  */
@@ -119,9 +119,15 @@ public class GUIWebDriver {
      * This method delegates to ThreadLocalDriverManager to get the driver for the current thread,
      * allowing thread-safe access to the browser driver.
      * @return the WebDriver instance for the current thread, or null if none has been initialized.
+     * @throws IllegalStateException if driver was closed prematurely
      */
     public WebDriver get() {
-        return ThreadLocalDriverManager.getDriver();
+        WebDriver driver = ThreadLocalDriverManager.getDriver();
+        if (driver == null) {
+            LogsManager.warn("No WebDriver found for thread: " + Thread.currentThread().threadId() +
+                           ". Driver may have been closed prematurely.");
+        }
+        return driver;
     }
 
     /**

@@ -56,14 +56,28 @@ public class TestNGListeners implements
         LogsManager.info("Test Execution Finished");
     }
 
+    // Synchronization lock for log file operations in parallel execution
+    private static final Object LOG_FILE_LOCK = new Object();
+
     public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
         String testMethodName = testResult.getName();
         String testDescription = testResult.getMethod().getDescription();
         if (method.isTestMethod()) {
-            FileUtils.clearFileContents(LogsManager.LOGS_PATH + "logs.log");
-            LogsManager.info("Logs cleared for test:", testMethodName + "/" + testDescription);
+            // Synchronize log file clearing to prevent race conditions in parallel execution
+            synchronized (LOG_FILE_LOCK) {
+                try {
+                    FileUtils.clearFileContents(LogsManager.LOGS_PATH + "logs.log");
+                    LogsManager.info("Logs cleared for test:", testMethodName + "/" + testDescription);
+                } catch (Exception e) {
+                    LogsManager.warn("Could not clear log file (may be locked by another thread):", e.getMessage());
+                }
+            }
             if (testResult.getInstance() instanceof UITest) {
-                ScreenRecordManager.startRecording();
+                try {
+                    ScreenRecordManager.startRecording();
+                } catch (Exception e) {
+                    LogsManager.warn("Could not start screen recording:", e.getMessage());
+                }
             }
             LogsManager.info("Test Case:", testMethodName + "/" + testDescription, "starting ....");
         }
@@ -75,30 +89,55 @@ public class TestNGListeners implements
         String fullTestName = testMethodName + "_" + testDescription;
         WebDriver driver = null;
         if (method.isTestMethod()) {
-            if (testResult.getInstance() instanceof UITest)
-                ScreenRecordManager.stopRecording(testResult.getName());
+            if (testResult.getInstance() instanceof UITest) {
+                try {
+                    ScreenRecordManager.stopRecording(testResult.getName());
+                } catch (Exception e) {
+                    LogsManager.warn("Could not stop screen recording:", e.getMessage());
+                }
+            }
 
             try {
-            if (testResult.getInstance() instanceof WebDriverProvider provider) {
-                driver = provider.getWebDriver();//initialize driver from WebDriverProvider
-                switch (testResult.getStatus()) {
-/*                    case ITestResult.SUCCESS ->
-                            ScreenshotsManager.takeFullPageScreenshot(driver, "passed-" + fullTestName);*/
-                    case ITestResult.FAILURE ->
-                            ScreenshotsManager.takeFullPageScreenshot(driver, "failed-" + fullTestName);
-/*                    case ITestResult.SKIP ->
-                            ScreenshotsManager.takeFullPageScreenshot(driver, "skipped-" + fullTestName);*/
+                if (testResult.getInstance() instanceof WebDriverProvider provider) {
+                    driver = provider.getWebDriver();//initialize driver from WebDriverProvider
+                    // Check if driver is still valid before taking screenshot
+                    if (driver != null) {
+                        try {
+                            // Verify driver session is still active
+                            driver.getTitle(); // Will throw exception if session is closed
+                            switch (testResult.getStatus()) {
+/*                              case ITestResult.SUCCESS ->
+                                        ScreenshotsManager.takeFullPageScreenshot(driver, "passed-" + fullTestName);*/
+                                case ITestResult.FAILURE ->
+                                        ScreenshotsManager.takeFullPageScreenshot(driver, "failed-" + fullTestName);
+/*                              case ITestResult.SKIP ->
+                                        ScreenshotsManager.takeFullPageScreenshot(driver, "skipped-" + fullTestName);*/
+                            }
+                        } catch (org.openqa.selenium.NoSuchSessionException e) {
+                            LogsManager.warn("WebDriver session already closed for thread " +
+                                           Thread.currentThread().threadId() + ", skipping screenshot");
+                        }
+                    } else {
+                        LogsManager.debug("Driver is null, skipping screenshot");
+                    }
                 }
-            } } catch (Exception e) {
+            } catch (Exception e) {
                 LogsManager.error("Error taking screenshot:", e.getMessage());
-                LogsManager.info("Driver not initialized or the Test is an API test.");
-            }
-                AllureAttachmentManager.attachRecords(testResult.getName());
+                LogsManager.debug("Driver not initialized or the Test is an API test.");
             }
 
-            Validation.assertAll(testResult);
-            LogsManager.info("Test Case:", fullTestName, "finished.");
-            //attach logs to allure report
+            try {
+                AllureAttachmentManager.attachRecords(testResult.getName());
+            } catch (Exception e) {
+                LogsManager.warn("Could not attach records:", e.getMessage());
+            }
+        }
+
+        Validation.assertAll(testResult);
+        LogsManager.info("Test Case:", fullTestName, "finished.");
+
+        //attach logs to allure report
+        synchronized (LOG_FILE_LOCK) {
             try {
                 File logFile = new File(LogsManager.LOGS_PATH + "logs.log");
                 if (logFile.exists()) {
@@ -108,6 +147,7 @@ public class TestNGListeners implements
                 LogsManager.error("Error attaching logs", e.getMessage());
             }
         }
+    }
 
 
     public void onTestSuccess(ITestResult result) {

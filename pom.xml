@@ -26,6 +26,9 @@
         <jsoup.version>1.21.1</jsoup.version>
         <poi.version>5.4.1</poi.version>
         <restassured.version>5.5.5</restassured.version>
+        <!-- Parallel Execution Configuration -->
+        <parallel>none</parallel>
+        <threadcount>1</threadcount>
     </properties>
 
     <build>
@@ -37,9 +40,31 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.version}</version>
                 <configuration>
+                    <!-- TestNG XML Suite Configuration -->
+                    <!-- Uncomment the suite you want to use, or specify via command line: -DsuiteXmlFile=testng.xml -->
+                    <!--
+                    <suiteXmlFiles>
+                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                    -->
                     <argLine>
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
                     </argLine>
+                    <!-- Thread-safe parallel execution properties -->
+                    <properties>
+                        <property>
+                            <name>usedefaultlisteners</name>
+                            <value>true</value>
+                        </property>
+                        <property>
+                            <name>parallel</name>
+                            <value>${parallel}</value>
+                        </property>
+                        <property>
+                            <name>threadcount</name>
+                            <value>${threadcount}</value>
+                        </property>
+                    </properties>
                 </configuration>
                 <dependencies>
                     <dependency>

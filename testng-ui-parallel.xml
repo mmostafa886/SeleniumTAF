@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+    UI Tests - Parallel Execution
+    - parallel="classes": Runs test classes in parallel (safer than methods)
+    - thread-count="2": Number of parallel threads (conservative for UI tests)
+    - Uses ThreadLocalDriverManager for thread-safe WebDriver instances
+-->
+<suite name="Selenium TAF - UI Tests Parallel" parallel="classes" thread-count="2" verbose="1">
+
+    <!-- Listeners for test execution -->
+    <listeners>
+        <listener class-name="com.taf.customListeners.TestNGListeners"/>
+    </listeners>
+
+    <!-- UI Tests Only -->
+    <test name="UI Tests">
+        <classes>
+            <class name="com.taf.tests.ui.LoginTest"/>
+            <class name="com.taf.tests.ui.RegisterTest"/>
+            <class name="com.taf.tests.ui.CartTest"/>
+            <class name="com.taf.tests.ui.CheckoutTest"/>
+            <class name="com.taf.tests.ui.PaymentTest"/>
+            <class name="com.taf.tests.ui.InvoiceTest"/>
+            <class name="com.taf.tests.ui.ProductsTest"/>
+            <class name="com.taf.tests.ui.ProductDetailsTest"/>
+        </classes>
+    </test>
+
+</suite>

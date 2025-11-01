@@ -93,24 +93,33 @@ public class ThreadLocalDriverManager {
     /**
      * Remove and quit the WebDriver instance for the current thread
      * Ensures proper cleanup and prevents memory leaks
+     * Thread-safe with synchronized cleanup to prevent race conditions
      */
     public static void removeDriver() {
         WebDriver driver = driverThreadLocal.get();
         long threadId = Thread.currentThread().threadId();
-        
+
         if (driver != null) {
-            try {
-                LogsManager.info("Removing WebDriver for thread: " + threadId);
-                driver.quit();
-                LogsManager.debug("WebDriver quit successfully for thread: " + threadId);
-            } catch (Exception e) {
-                LogsManager.error("Error quitting WebDriver for thread " + threadId + ": " + e.getMessage());
-            } finally {
-                // Always clean up ThreadLocal and active drivers map
-                driverThreadLocal.remove();
-                metadataThreadLocal.remove();
-                activeDrivers.remove(threadId);
-                LogsManager.debug("Active drivers count: " + activeDrivers.size());
+            // Synchronize on the driver instance to prevent concurrent cleanup
+            synchronized (driver) {
+                try {
+                    // Double-check driver is still valid after acquiring lock
+                    if (driverThreadLocal.get() != null) {
+                        LogsManager.info("Removing WebDriver for thread: " + threadId);
+                        driver.quit();
+                        LogsManager.debug("WebDriver quit successfully for thread: " + threadId);
+                    }
+                } catch (org.openqa.selenium.NoSuchSessionException e) {
+                    LogsManager.warn("WebDriver session already closed for thread " + threadId);
+                } catch (Exception e) {
+                    LogsManager.error("Error quitting WebDriver for thread " + threadId + ": " + e.getMessage());
+                } finally {
+                    // Always clean up ThreadLocal and active drivers map
+                    driverThreadLocal.remove();
+                    metadataThreadLocal.remove();
+                    activeDrivers.remove(threadId);
+                    LogsManager.debug("Active drivers count: " + activeDrivers.size());
+                }
             }
         } else {
             LogsManager.debug("No WebDriver to remove for thread: " + threadId);
