@@ -1085,40 +1085,64 @@ public void quitDriver() {
 **Priority:** ~~MEDIUM~~ **DONE**
 **Effort:** Low
 **Impact:** Medium
-**Status:** ✅ **Completed on 2025-10-29**
+**Status:** ✅ **Completed on 2025-11-01**
 
 **Problem:** ~~Decorators defined but not used~~
 - ✅ **SOLVED:** Decorators now fully integrated in GUIWebDriver
 
 **Implementation:**
 ```java
-// GUIWebDriver.java:73 - applyConfiguredDecorators()
+// GUIWebDriver.java - Constructor now applies decorators
+public GUIWebDriver() {
+    AbstractDriver abstractDriver = Browser.getBrowserFromString(browser).getDriverFactory();
+    WebDriver driver = abstractDriver.createDriver();
+
+    // Apply configured decorators before ThreadGuard
+    driver = applyConfiguredDecorators(driver);  // ✅ Integrated
+
+    driver = ThreadGuard.protect(driver);
+    ThreadLocalDriverManager.setDriver(driver);
+}
+
+// GUIWebDriver.java:157 - applyConfiguredDecorators()
 private WebDriver applyConfiguredDecorators(WebDriver driver) {
-    boolean enableLogging = Boolean.parseBoolean(
-        PropertyReader.getProperty("enableDriverLevelLogging", "false")
-    );
+    String enableLoggingProperty = PropertyReader.getProperty("enableDriverLevelLogging");
+    boolean enableLogging = enableLoggingProperty != null && Boolean.parseBoolean(enableLoggingProperty);
     if (enableLogging) {
         driver = new LoggingWebDriverDecorator(driver);
+        LogsManager.info("✓ LoggingWebDriverDecorator applied");
     }
 
-    boolean enableScreenshots = Boolean.parseBoolean(
-        PropertyReader.getProperty("enableDriverScreenshots", "false")
-    );
+    String enableScreenshotsProperty = PropertyReader.getProperty("enableDriverScreenshots");
+    boolean enableScreenshots = enableScreenshotsProperty != null && Boolean.parseBoolean(enableScreenshotsProperty);
     if (enableScreenshots) {
-        driver = new ScreenshotWebDriverDecorator(driver, ...);
+        boolean screenshotOnNav = ...;
+        boolean screenshotOnError = ...;
+        driver = new ScreenshotWebDriverDecorator(driver, screenshotOnNav, screenshotOnError);
+        LogsManager.info("✓ ScreenshotWebDriverDecorator applied");
     }
 
     return driver;
 }
 ```
 
+**Configuration (webApp.properties):**
+```properties
+# Disabled by default for optimal performance
+enableDriverLevelLogging=false
+enableDriverScreenshots=false
+screenshotOnNavigation=false
+screenshotOnError=true
+```
+
 **Achieved Benefits:**
 - ✅ Automatic logging of driver operations (when enabled)
+- ✅ Automatic screenshots during test execution (when enabled)
 - ✅ Configurable behavior via properties
 - ✅ Better debugging capabilities
 - ✅ Follows decorator pattern fully
 - ✅ Opt-in design (no performance impact when disabled)
-- ✅ Command-line overrides supported
+- ✅ Visible confirmation logs when decorators are applied
 - ✅ Complete documentation in DECORATOR-USAGE-GUIDE.md
 
 ---

@@ -1,16 +1,27 @@
 # WebDriver Decorators - Usage Guide
 
 **Feature:** Optional WebDriver Decorators
-**Status:** ✅ Implemented and Ready to Use
-**Version:** 1.0
-**Date:** 2025-10-28
+**Status:** ✅ **INTEGRATED & PRODUCTION-READY**
+**Version:** 1.1
+**Last Updated:** 2025-11-01
+**Integration Date:** November 1, 2025
+
+---
+
+## ⚠️ INTEGRATION STATUS
+
+✅ **The decorators are now FULLY INTEGRATED in GUIWebDriver!**
+
+As of November 1, 2025, LoggingWebDriverDecorator and ScreenshotWebDriverDecorator are fully integrated into the framework via `GUIWebDriver.java`. They are **disabled by default** to maintain optimal performance, but can be enabled instantly via configuration.
+
+**Implementation Location:** `GUIWebDriver.java:44-55` (constructor) and `GUIWebDriver.java:157-181` (applyConfiguredDecorators)
 
 ---
 
 ## 🎯 Quick Start
 
 ### Default Behavior (No Changes Needed)
-By default, decorators are **DISABLED**. Your tests run as they always have with clean, action-level logging only.
+By default, decorators are **DISABLED**. Your tests run as they always have with clean, action-level logging only and optimal performance.
 
 ### Enable for Debugging
 To enable detailed WebDriver operation logging for a specific test run:

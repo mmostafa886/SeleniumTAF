@@ -1,13 +1,30 @@
 # Logging Approaches: Action Classes vs Decorators
 
-**Analysis Date:** 2025-10-28
+**Analysis Date:** 2025-10-28 (Initial) | **Last Updated:** 2025-11-01
 **Topic:** Comparing action-level logging vs decorator-level logging
+**Status:** ✅ **Both Approaches Available**
+
+---
+
+## ⚠️ UPDATE (November 1, 2025)
+
+**Decorator logging is NOW AVAILABLE!**
+
+As of November 1, 2025, `LoggingWebDriverDecorator` is fully integrated into GUIWebDriver. You can now use BOTH approaches:
+- ✅ **Action-level logging** (always enabled - clean, test-focused logs)
+- ✅ **Decorator-level logging** (opt-in - detailed WebDriver operations)
+
+**Enable decorator logging:**
+```properties
+# In webApp.properties or via command line
+enableDriverLevelLogging=true
+```
 
 ---
 
 ## Executive Summary
 
-Your framework currently uses **action-level logging** (implemented in action classes like `ElementActions`, `BrowserActions`). The **decorator-level logging** (`LoggingWebDriverDecorator`) exists but is not used. This document explains the key differences, trade-offs, and when to use each approach.
+Your framework uses **action-level logging** (implemented in action classes like `ElementActions`, `BrowserActions`) by default for clean, test-focused logs. The **decorator-level logging** (`LoggingWebDriverDecorator`) is now **integrated and available as an opt-in feature** for detailed debugging. This document explains the key differences, trade-offs, and when to use each approach.
 
 ---
 
@@ -44,21 +61,23 @@ Your framework currently uses **action-level logging** (implemented in action cl
 │  Logs: "Navigated to URL: https://example.com"             │
 └──────────────────────┬──────────────────────────────────────┘
                        │
-                       │ Calls WebDriver directly
+                       │ May go through decorator (if enabled)
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│      LoggingWebDriverDecorator (NOT USED) ❌                │
+│  LoggingWebDriverDecorator (AVAILABLE - Opt-in) ✅          │
 │                                                             │
-│  Could intercept:                                           │
+│  When enabled, intercepts:                                  │
 │  • driver.findElement()                                     │
 │  • driver.get()                                             │
 │  • driver.getCurrentUrl()                                   │
 │  • driver.quit()                                            │
 │                                                             │
-│  Would log: "Finding element: By.id: loginBtn"             │
-│  Would log: "Element found in 45ms"                         │
-│  Would log: "Navigating to URL: https://example.com"        │
-│  Would log: "Navigation completed in 1234ms"                │
+│  Logs: "Finding element: By.id: loginBtn"                  │
+│  Logs: "Element found in 45ms"                              │
+│  Logs: "Navigating to URL: https://example.com"             │
+│  Logs: "Navigation completed in 1234ms"                     │
+│                                                             │
+│  Enable via: enableDriverLevelLogging=true                  │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
@@ -448,10 +467,10 @@ INFO: Clicked on element: By.id: loginButton
 INFO: Retrieved text from element with locator: By.class: welcome-message - Text: Welcome, Admin!
 ```
 
-**Lines:** 10
-**Readability:** ⭐⭐⭐⭐⭐ Excellent
-**Context:** ⭐⭐⭐⭐⭐ High-level, clear intent
-**Debugging Power:** ⭐⭐⭐ Good for most issues
+- **Lines:** 10
+- **Readability:** ⭐⭐⭐⭐⭐ Excellent
+- **Context:** ⭐⭐⭐⭐⭐ High-level, clear intent
+- **Debugging Power:** ⭐⭐⭐ Good for most issues
 
 ---
 
@@ -493,10 +512,10 @@ DEBUG: Element found in 18ms: By.class: welcome-message
 DEBUG: Getting text from element
 ```
 
-**Lines:** 27+
-**Readability:** ⭐⭐⭐ Good (but verbose)
-**Context:** ⭐⭐⭐⭐⭐ Both high-level + low-level
-**Debugging Power:** ⭐⭐⭐⭐⭐ Excellent (complete trace + timing)
+- **Lines:** 27+
+- **Readability:** ⭐⭐⭐ Good (but verbose)
+- **Context:** ⭐⭐⭐⭐⭐ Both high-level + low-level
+- **Debugging Power:** ⭐⭐⭐⭐⭐ Excellent (complete trace + timing)
 
 ---
 

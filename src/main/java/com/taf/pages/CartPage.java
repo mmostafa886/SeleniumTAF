@@ -2,18 +2,19 @@ package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
 import com.taf.utils.dataReader.PropertyReader;
+import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
-public class CartPage {
-    private GUIWebDriver driver;
-
-    public CartPage(GUIWebDriver driver) {
-        this.driver = driver;
-    }
+public class CartPage  extends BasePage{
 
     //vars
-    private String cartEndpoint = "/view_cart";
+    private static final String CART_URL = "/view_cart";
+
+    public CartPage(GUIWebDriver driver) {
+        super(driver);
+        LogsManager.info("Initialized " + this.getClass().getSimpleName());
+    }
 
     //locators
     private final By proceedToCheckoutButton = By.xpath("//a[.='Proceed To Checkout']");
@@ -41,24 +42,23 @@ public class CartPage {
 
     //actions
     @Step("Navigate To Cart Page")
-    public CartPage navigate()
-    {
-        driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb")+cartEndpoint);
-        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
-        return this;
+    public CartPage navigate() {
+        return super.navigate(CartPage.class, PropertyReader.getProperty("baseUrl")+ CART_URL);
     }
+
     @Step("Click On Proceed To Checkout Button")
-    public CheckoutPage clickOnProceedToCheckout()
-    {
+    public CheckoutPage clickOnProceedToCheckout() {
         driver.element().click(proceedToCheckoutButton);
         return new CheckoutPage(driver);
     }
+
     @Step("Remove Product From Cart")
-    public CartPage removeProduct(String pName)
-    {
+    public CartPage removeProduct(String pName){
         driver.element().click(removeProductDL(pName));
         return this;
     }
+
+
     //validations
     @Step("Verify Product Details On Cart")
     public CartPage verifyProductDetailsOnCart (String productName, String productPrice, String productQuantity, String productTotal)

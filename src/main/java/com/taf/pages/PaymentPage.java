@@ -1,22 +1,14 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
-import com.taf.pages.components.NavBarComponent;
-import com.taf.utils.WaitManager;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
-import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * PaymentPage handles payment processing and invoice download
  */
-public class PaymentPage {
-
-    @Getter
-    protected final GUIWebDriver driver;
-    protected final WaitManager waitManager;
-    private NavBarComponent navigationBar;
+public class PaymentPage extends BasePage {
 
     // Page URL
     private static final String PAYMENT_ENDPOINT = "/payment";
@@ -33,39 +25,25 @@ public class PaymentPage {
 
     /**
      * Constructor
+     *
      * @param driver The GUIWebDriver instance
      */
     public PaymentPage(GUIWebDriver driver) {
-        if (driver == null) {
-            throw new IllegalArgumentException("Driver cannot be null");
-        }
-        this.driver = driver;
-        this.waitManager = new WaitManager(driver.get());
+        super(driver);
         LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
 
-    /**
-     * Get navigation bar component with lazy initialization
-     * @return NavBarComponent instance
-     */
-    public NavBarComponent getNavigationBar() {
-        if (navigationBar == null) {
-            navigationBar = new NavBarComponent(driver);
-        }
-        return navigationBar;
-    }
-
     // Actions
-
     @Step("Fill card info")
-    public PaymentPage fillCardInfo(String nameOnCard, String cardNumber, String cardCvc, 
-                                     String cardMonthExpiration, String cardYearExpiration) {
-        driver.element().type(this.nameOnCard, nameOnCard);
-        driver.element().type(this.cardNumber, cardNumber);
-        driver.element().type(this.cardCvc, cardCvc);
-        driver.element().type(this.cardMonthExpiration, cardMonthExpiration);
-        driver.element().type(this.cardYearExpiration, cardYearExpiration);
-        driver.element().click(payButton);
+    public PaymentPage fillCardInfo(String nameOnCard, String cardNumber, String cardCvc,
+                                    String cardMonthExpiration, String cardYearExpiration) {
+        driver.element()
+                .type(this.nameOnCard, nameOnCard)
+                .type(this.cardNumber, cardNumber)
+                .type(this.cardCvc, cardCvc)
+                .type(this.cardMonthExpiration, cardMonthExpiration)
+                .type(this.cardYearExpiration, cardYearExpiration)
+                .click(payButton);
         return this;
     }
 
@@ -80,8 +58,8 @@ public class PaymentPage {
     @Step("Verify payment success message")
     public PaymentPage verifyPaymentSuccessMessage(String expectedMessage) {
         String actualText = driver.element().getText(paymentSuccessMessage);
-        driver.verification().Equals(actualText, expectedMessage, 
-            "Element text does not match. Expected: " + expectedMessage + ", Actual: " + actualText);
+        driver.verification().Equals(actualText, expectedMessage,
+                "Element text does not match. Expected: " + expectedMessage + ", Actual: " + actualText);
         return this;
     }
 

@@ -1,22 +1,14 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
-import com.taf.pages.components.NavBarComponent;
-import com.taf.utils.WaitManager;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
-import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * CheckoutPage handles order review and address verification
  */
-public class CheckoutPage {
-
-    @Getter
-    protected final GUIWebDriver driver;
-    protected final WaitManager waitManager;
-    private NavBarComponent navigationBar;
+public class CheckoutPage extends BasePage {
 
     // Page URL
     private static final String CHECKOUT_ENDPOINT = "/checkout";
@@ -47,27 +39,11 @@ public class CheckoutPage {
      * @param driver The GUIWebDriver instance
      */
     public CheckoutPage(GUIWebDriver driver) {
-        if (driver == null) {
-            throw new IllegalArgumentException("Driver cannot be null");
-        }
-        this.driver = driver;
-        this.waitManager = new WaitManager(driver.get());
+        super(driver);
         LogsManager.info("Initialized " + this.getClass().getSimpleName());
     }
 
-    /**
-     * Get navigation bar component with lazy initialization
-     * @return NavBarComponent instance
-     */
-    public NavBarComponent getNavigationBar() {
-        if (navigationBar == null) {
-            navigationBar = new NavBarComponent(driver);
-        }
-        return navigationBar;
-    }
-
     // Actions
-
     @Step("Click On Place Order Button")
     public PaymentPage clickOnPlaceOrder() {
         driver.element().click(placeOrderButton);
@@ -75,7 +51,6 @@ public class CheckoutPage {
     }
 
     // Validations
-
     @Step("Verify Delivery Address")
     public CheckoutPage verifyDeliveryAddress(String title, String fName, String lName, String company, 
                                               String address1, String address2, String city, String state, 

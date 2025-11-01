@@ -1,22 +1,14 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
-import com.taf.pages.components.NavBarComponent;
-import com.taf.utils.WaitManager;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
-import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * ProductDetailsPage handles product details display and reviews
  */
-public class ProductDetailsPage {
-
-    @Getter
-    protected final GUIWebDriver driver;
-    protected final WaitManager waitManager;
-    private NavBarComponent navigationBar;
+public class ProductDetailsPage extends BasePage {
 
     // Page URL
     private static final String PRODUCT_DETAILS_ENDPOINT = "/product-details/2";
@@ -32,36 +24,23 @@ public class ProductDetailsPage {
 
     /**
      * Constructor
+     *
      * @param driver The GUIWebDriver instance
      */
     public ProductDetailsPage(GUIWebDriver driver) {
-        if (driver == null) {
-            throw new IllegalArgumentException("Driver cannot be null");
-        }
-        this.driver = driver;
-        this.waitManager = new WaitManager(driver.get());
+        super(driver);
         LogsManager.info("Initialized " + this.getClass().getSimpleName());
-    }
-
-    /**
-     * Get navigation bar component with lazy initialization
-     * @return NavBarComponent instance
-     */
-    public NavBarComponent getNavigationBar() {
-        if (navigationBar == null) {
-            navigationBar = new NavBarComponent(driver);
-        }
-        return navigationBar;
     }
 
     // Actions
 
     @Step("Write review on product")
     public ProductDetailsPage addReview(String name, String email, String review) {
-        driver.element().type(this.name, name);
-        driver.element().type(this.email, email);
-        driver.element().type(reviewTextArea, review);
-        driver.element().click(reviewButton);
+        driver.element()
+                .type(this.name, name)
+                .type(this.email, email)
+                .type(reviewTextArea, review)
+                .click(reviewButton);
         return this;
     }
 
@@ -71,19 +50,21 @@ public class ProductDetailsPage {
     public ProductDetailsPage verifyProductDetails(String pName, String pPrice) {
         String actualProductName = driver.element().getText(productName);
         String actualProductPrice = driver.element().getText(productPrice);
-        
-        LogsManager.info("[" + this.getClass().getSimpleName() + "] Verifying product - Name: " + actualProductName + ", Price: " + actualProductPrice);
-        
-        driver.validation().Equals(actualProductName, pName, "Product Name Verification Failed");
-        driver.validation().Equals(actualProductPrice, pPrice, "Product Price Verification Failed");
+
+        LogsManager.info("[" + this.getClass().getSimpleName()
+                + "] Verifying product - Name: " + actualProductName + ", Price: " + actualProductPrice);
+
+        driver.validation()
+                .Equals(actualProductName, pName, "Product Name Verification Failed")
+                .Equals(actualProductPrice, pPrice, "Product Price Verification Failed");
         return this;
     }
 
     @Step("Verify review message")
     public ProductDetailsPage verifyReviewMsg(String msg) {
         String actualText = driver.element().getText(reviewMsg);
-        driver.verification().Equals(actualText, msg, 
-            "Element text does not match. Expected: " + msg + ", Actual: " + actualText);
+        driver.verification().Equals(actualText, msg,
+                "Element text does not match. Expected: " + msg + ", Actual: " + actualText);
         return this;
     }
 }

@@ -4,20 +4,15 @@ import com.taf.builders.LombokUserData;
 import com.taf.builders.UserDataBuilder;
 import com.taf.drivers.GUIWebDriver;
 import com.taf.pages.components.NavBarComponent;
-import com.taf.utils.WaitManager;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
-import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * SignupPage handles user registration form
  */
-public class SignupPage {
-    @Getter
-    protected final GUIWebDriver driver;
-    protected final WaitManager waitManager;
-    private NavBarComponent navigationBar;
+public class SignupPage extends BasePage {
+
     // Page URL
     private static final String SIGNUP_URL = "/signup";
 
@@ -46,26 +41,12 @@ public class SignupPage {
 
     /**
      * Constructor
+     *
      * @param driver The GUIWebDriver instance
      */
     public SignupPage(GUIWebDriver driver) {
-        if (driver == null) {
-            throw new IllegalArgumentException("Driver cannot be null");
-        }
-        this.driver = driver;
-        this.waitManager = new WaitManager(driver.get());
+        super(driver);
         LogsManager.info("Initialized " + this.getClass().getSimpleName());
-    }
-
-    /**
-     * Get navigation bar component with lazy initialization
-     * @return NavBarComponent instance
-     */
-    public NavBarComponent getNavigationBar() {
-        if (navigationBar == null) {
-            navigationBar = new NavBarComponent(driver);
-        }
-        return navigationBar;
     }
 
     // Actions
@@ -81,22 +62,23 @@ public class SignupPage {
     public SignupPage fillRegistrationForm(UserDataBuilder.UserData userData) {
         LogsManager.info("[" + this.getClass().getSimpleName() + "] Filling registration form using UserData");
         selectTitle(userData.getTitle());
-        driver.element().type(passwordInput, userData.getPassword());
-        driver.element().selectFromDropdown(daySelect, userData.getBirthDate());
-        driver.element().selectFromDropdown(monthSelect, userData.getBirthMonth());
-        driver.element().selectFromDropdown(yearSelect, userData.getBirthYear());
-        driver.element().click(newsletterCheckbox);
-        driver.element().click(specialOffersCheckbox);
-        driver.element().type(firstNameInputAddress, userData.getFirstName());
-        driver.element().type(lastNameInputAddress, userData.getLastName());
-        driver.element().type(companyInput, userData.getCompany());
-        driver.element().type(address1Input, userData.getAddress1());
-        driver.element().type(address2Input, userData.getAddress2());
-        driver.element().selectFromDropdown(countrySelect, userData.getCountry());
-        driver.element().type(stateInput, userData.getState());
-        driver.element().type(cityInput, userData.getCity());
-        driver.element().type(zipcodeInput, userData.getZipcode());
-        driver.element().type(mobileNumberInput, userData.getMobileNumber());
+        driver.element()
+                .type(passwordInput, userData.getPassword())
+                .selectFromDropdown(daySelect, userData.getBirthDate())
+                .selectFromDropdown(monthSelect, userData.getBirthMonth())
+                .selectFromDropdown(yearSelect, userData.getBirthYear())
+                .click(newsletterCheckbox)
+                .click(specialOffersCheckbox)
+                .type(firstNameInputAddress, userData.getFirstName())
+                .type(lastNameInputAddress, userData.getLastName())
+                .type(companyInput, userData.getCompany())
+                .type(address1Input, userData.getAddress1())
+                .type(address2Input, userData.getAddress2())
+                .selectFromDropdown(countrySelect, userData.getCountry())
+                .type(stateInput, userData.getState())
+                .type(cityInput, userData.getCity())
+                .type(zipcodeInput, userData.getZipcode())
+                .type(mobileNumberInput, userData.getMobileNumber());
         return this;
     }
 
@@ -104,22 +86,23 @@ public class SignupPage {
     public SignupPage fillRegistrationForm(LombokUserData userData) {
         LogsManager.info("[" + this.getClass().getSimpleName() + "] Filling registration form using LombokUserData");
         selectTitle(userData.getTitle());
-        driver.element().type(passwordInput, userData.getPassword());
-        driver.element().selectFromDropdown(daySelect, userData.getBirthDate());
-        driver.element().selectFromDropdown(monthSelect, userData.getBirthMonth());
-        driver.element().selectFromDropdown(yearSelect, userData.getBirthYear());
-        driver.element().click(newsletterCheckbox);
-        driver.element().click(specialOffersCheckbox);
-        driver.element().type(firstNameInputAddress, userData.getFirstName());
-        driver.element().type(lastNameInputAddress, userData.getLastName());
-        driver.element().type(companyInput, userData.getCompany());
-        driver.element().type(address1Input, userData.getAddress1());
-        driver.element().type(address2Input, userData.getAddress2());
-        driver.element().selectFromDropdown(countrySelect, userData.getCountry());
-        driver.element().type(stateInput, userData.getState());
-        driver.element().type(cityInput, userData.getCity());
-        driver.element().type(zipcodeInput, userData.getZipcode());
-        driver.element().type(mobileNumberInput, userData.getMobileNumber());
+        driver.element()
+                .type(passwordInput, userData.getPassword())
+                .selectFromDropdown(daySelect, userData.getBirthDate())
+                .selectFromDropdown(monthSelect, userData.getBirthMonth())
+                .selectFromDropdown(yearSelect, userData.getBirthYear())
+                .click(newsletterCheckbox)
+                .click(specialOffersCheckbox)
+                .type(firstNameInputAddress, userData.getFirstName())
+                .type(lastNameInputAddress, userData.getLastName())
+                .type(companyInput, userData.getCompany())
+                .type(address1Input, userData.getAddress1())
+                .type(address2Input, userData.getAddress2())
+                .selectFromDropdown(countrySelect, userData.getCountry())
+                .type(stateInput, userData.getState())
+                .type(cityInput, userData.getCity())
+                .type(zipcodeInput, userData.getZipcode())
+                .type(mobileNumberInput, userData.getMobileNumber());
         return this;
     }
 
@@ -132,22 +115,23 @@ public class SignupPage {
                                            String state, String city, String zipcode, String mobileNumber) {
         LogsManager.info("[" + this.getClass().getSimpleName() + "] Filling registration form");
         selectTitle(title);
-        driver.element().type(passwordInput, password);
-        driver.element().selectFromDropdown(daySelect, day);
-        driver.element().selectFromDropdown(monthSelect, month);
-        driver.element().selectFromDropdown(yearSelect, year);
-        driver.element().click(newsletterCheckbox);
-        driver.element().click(specialOffersCheckbox);
-        driver.element().type(firstNameInputAddress, firstName);
-        driver.element().type(lastNameInputAddress, lastName);
-        driver.element().type(companyInput, company);
-        driver.element().type(address1Input, address1);
-        driver.element().type(address2Input, address2);
-        driver.element().selectFromDropdown(countrySelect, country);
-        driver.element().type(stateInput, state);
-        driver.element().type(cityInput, city);
-        driver.element().type(zipcodeInput, zipcode);
-        driver.element().type(mobileNumberInput, mobileNumber);
+        driver.element()
+                .type(passwordInput, password)
+                .selectFromDropdown(daySelect, day)
+                .selectFromDropdown(monthSelect, month)
+                .selectFromDropdown(yearSelect, year)
+                .click(newsletterCheckbox)
+                .click(specialOffersCheckbox)
+                .type(firstNameInputAddress, firstName)
+                .type(lastNameInputAddress, lastName)
+                .type(companyInput, company)
+                .type(address1Input, address1)
+                .type(address2Input, address2)
+                .selectFromDropdown(countrySelect, country)
+                .type(stateInput, state)
+                .type(cityInput, city)
+                .type(zipcodeInput, zipcode)
+                .type(mobileNumberInput, mobileNumber);
         return this;
     }
 
@@ -169,8 +153,8 @@ public class SignupPage {
     public SignupPage verifyAccountCreated() {
         driver.verification().isElementVisible(accountCreatedSuccessMessage);
         String actualText = driver.element().getText(accountCreatedSuccessMessage);
-        driver.verification().Equals(actualText, "Account Created!", 
-            "Element text does not match. Expected: Account Created!, Actual: " + actualText);
+        driver.verification().Equals(actualText, "Account Created!",
+                "Element text does not match. Expected: Account Created!, Actual: " + actualText);
         return this;
     }
 }

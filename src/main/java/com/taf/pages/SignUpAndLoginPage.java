@@ -36,8 +36,8 @@ public class SignUpAndLoginPage extends BasePage {
     //Actions
     @Step("Navigate to SignUp/Login page")
     public SignUpAndLoginPage navigate() {
-        super.navigate(SignUpAndLoginPage.class, SIGN_UP_LOGIN_URL);
-        return this;
+        return super.navigate(SignUpAndLoginPage.class, SIGN_UP_LOGIN_URL);
+
     }
 
     @Step("Enter SignUp Name {name} and Email {email} in the SignUp form")

@@ -1,8 +1,8 @@
 # Builder Pattern Implementations - Comparison Guide
 
-**Feature:** Two Builder Pattern Implementations for User Data
-**Status:** ✅ Both Implementations Available
-**Version:** 1.0
+**Feature:** Two Builder Pattern Implementations for User Data\
+**Status:** ✅ Both Implementations Available\
+**Version:** 1.0\
 **Date:** 2025-10-29
 
 ---
