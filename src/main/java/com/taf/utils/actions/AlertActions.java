@@ -93,29 +93,45 @@ public class AlertActions {
 
     @Step("Dismiss consent popup if present")
     public AlertActions dismissConsentPopupIfPresent() {
-            try {
-                new ElementActions(driver).clickWithCustomWait(consentButton);
-                LogsManager.info("Consent popup dismissed successfully.");
-            } catch (Exception e) {
-                LogsManager.warn("Consent popup not found or not dismissed. Continue ");
-            }
-            return this;
+        try {
+            new ElementActions(driver).clickWithCustomWait(consentButton);
+            LogsManager.info("Consent popup dismissed successfully.");
+        } catch (Exception e) {
+            LogsManager.warn("Consent popup not found or not dismissed. Continue ");
+        }
+        return this;
+
     }
 
     @Step("Dismiss footer commercial if present")
     public AlertActions dismissCommercialsIfPresent() {
-        waitManager.fluentWait(3).until(d -> {
-            try {
-                ((JavascriptExecutor) driver).executeScript(
-                        "document.querySelectorAll('ins.adsbygoogle').forEach(el => el.remove());"
-                );
-                LogsManager.info("Commercials hidden successfully.");
-                return true; // Footer commercial is hidden.
-            } catch (Exception e) {
-                LogsManager.warn("Commercials not found or was not hidden. Continue......");
-                return true;
+        try {
+            // Check if any commercial elements are present
+            Long adCount = (Long) ((JavascriptExecutor) driver).executeScript(
+                    "return document.querySelectorAll('ins.adsbygoogle').length;");
+
+            if (adCount != null && adCount > 0) {
+                LogsManager.info("Detected " + adCount + " commercial(s). Attempting to hide...");
+
+                // Wait briefly for stability, then remove them
+                waitManager.fluentWait(3).until(d -> {
+                    try {
+                        ((JavascriptExecutor) driver).executeScript(
+                                "document.querySelectorAll('ins.adsbygoogle').forEach(el => el.remove());");
+                        LogsManager.info("Commercials hidden successfully.");
+                        return true;
+                    } catch (Exception e) {
+                        LogsManager.warn("Failed to hide commercials. Retrying...");
+                        return false;
+                    }
+                });
+            } else {
+                LogsManager.debug("No commercials found on the page.");
             }
-        });
+        } catch (Exception e) {
+            LogsManager.warn("Error while checking or removing commercials: " + e.getMessage());
+        }
+
         return this;
     }
 

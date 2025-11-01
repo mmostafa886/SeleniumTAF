@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * for managing WebDriver instances across multiple threads.
  * It provides thread-safe WebDriver management with proper cleanup mechanisms
  * to prevent memory leaks.
- * 
+ * ===========================================================
  * Design Patterns Applied:
  * - ThreadLocal Singleton: One instance per thread
  * - Factory Pattern: Creates driver instances via factory

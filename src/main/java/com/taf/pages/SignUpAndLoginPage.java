@@ -1,21 +1,14 @@
 package com.taf.pages;
 
 import com.taf.drivers.GUIWebDriver;
-import com.taf.pages.components.NavBarComponent;
-import com.taf.utils.WaitManager;
-import com.taf.utils.dataReader.PropertyReader;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.Step;
-import lombok.Getter;
 import org.openqa.selenium.By;
 
 /**
  * SignUpAndLoginPage handles user authentication and registration
  */
-public class SignUpAndLoginPage {
-
-    protected final GUIWebDriver driver;
-    private NavBarComponent navigationBar;
+public class SignUpAndLoginPage extends BasePage {
 
     // Page URL
     private static final String SIGN_UP_LOGIN_URL = "/login";
@@ -36,29 +29,14 @@ public class SignUpAndLoginPage {
      * @param driver The GUIWebDriver instance
      */
     public SignUpAndLoginPage(GUIWebDriver driver) {
-        if (driver == null) {
-            throw new IllegalArgumentException("Driver cannot be null");
-        }
-        this.driver = driver;
+       super(driver);
         LogsManager.info("Initialized " + this.getClass().getSimpleName());
-    }
-
-    /**
-     * Get navigation bar component with lazy initialization
-     * @return NavBarComponent instance
-     */
-    public NavBarComponent getNavigationBar() {
-        if (navigationBar == null) {
-            navigationBar = new NavBarComponent(driver);
-        }
-        return navigationBar;
     }
 
     //Actions
     @Step("Navigate to SignUp/Login page")
     public SignUpAndLoginPage navigate() {
-        driver.browser().navigateTo(PropertyReader.getProperty("baseUrlWeb") + SIGN_UP_LOGIN_URL);
-        driver.alert().dismissCommercialsIfPresent().dismissConsentPopupIfPresent();
+        super.navigate(SignUpAndLoginPage.class, SIGN_UP_LOGIN_URL);
         return this;
     }
 

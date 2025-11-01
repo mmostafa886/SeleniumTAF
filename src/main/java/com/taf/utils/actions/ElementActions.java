@@ -29,7 +29,7 @@ public class ElementActions {
     @Step("Click on element with locator: {0}")
     public void clickWithCustomWait(By locator) {
         LogsManager.info("Attempting to click on element with locator:", locator.toString());
-        waitManager.fluentWait(5).until(driver1 -> clickOperation(locator));
+        waitManager.fluentWait(3).until(driver1 -> clickOperation(locator));
     }
 
      public boolean clickOperation(By locator) {
