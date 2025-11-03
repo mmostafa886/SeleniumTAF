@@ -1,19 +1,14 @@
 package com.taf.tests.ui;
 
-import com.taf.drivers.GUIWebDriver;
+import com.taf.customListeners.JUnit5TestListener;
 import com.taf.drivers.UITest;
 import com.taf.pages.ProductsPage;
-import com.taf.pages.components.NavBarComponent;
 import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.dataReader.JsonReader;
 import io.qameta.allure.*;
-import io.qameta.allure.testng.Tag;
-import io.qameta.allure.testng.Tags;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Epic("Cart Management")
 @Feature("UI Cart Details")
@@ -21,13 +16,19 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
-@Tags({@Tag(Groups.CART), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
+@ExtendWith(JUnit5TestListener.class)
+@Tag(Groups.CART)
+@Tag(Groups.REGRESSION)
+@Tag(Groups.SMOKE)
 public class CartTest extends BaseGuiTest {
 
 
     @Description("Verify product details on cart without login")
-    @Test(description = "Verify product details on cart without login"
-    , groups = {Groups.CART, Groups.REGRESSION, Groups.SMOKE})
+    @Test
+    @DisplayName("Verify product details on cart without login")
+    @Tag(Groups.CART)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
     public void verifyProductDetailsOnCartWithoutLogin() {
         new ProductsPage(driver)
                 .navigate()
@@ -43,17 +44,15 @@ public class CartTest extends BaseGuiTest {
     }
 
     //Configurations
-    @BeforeClass(alwaysRun = true)
-    protected void preCondition() {
-        testData = new JsonReader("cart-data");
-    }
-
-    @BeforeMethod(alwaysRun = true)
+    @BeforeEach
     public void setUp() {
+        if (testData == null) {
+            testData = new JsonReader("cart-data");
+        }
         super.setUp();
     }
 
-    @AfterMethod(alwaysRun = true)
+    @AfterEach
     public void tearDown() {
         super.tearDown();
     }

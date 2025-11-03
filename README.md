@@ -4,9 +4,9 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 
 ## Components
 - <font size=3>**Selenium**:</font> <font size=2>The main component that provides the <u> **WebDriver, Grid** </u> and GUI functionalities.
-- <font size=3>**TestNG**:</font> <font size=2>The testing framework used to organize and run tests, providing features like parallel execution, data-driven testing, and reporting.
+- <font size=3>**JUnit 5 (Jupiter)**:</font> <font size=2>The modern testing framework used to organize and run tests, providing features like parallel execution, extensions, tags, and powerful assertions.
 - <font size=3>**Log4j**:</font> <font size=2>A logging framework that captures detailed logs of test execution, aiding in debugging and analysis.
-- <font size=3>**Allure**:</font> <font size=2>A reporting tool that generates detailed and visually appealing test reports, integrating seamlessly with TestNG.
+- <font size=3>**Allure**:</font> <font size=2>A reporting tool that generates detailed and visually appealing test reports, integrating seamlessly with JUnit 5.
 - <font size=3>**Docker**:</font> <font size=2>A platform for containerizing applications, allowing for consistent test environments across different machines and configurations.
 - <font size=3>**Data Driven**:</font> <font size=2>Support for data-driven testing, enabling tests to run with multiple sets of data for comprehensive coverage using different data sources (Properties files, JSON files,........).
 - <font size=3>**Design Patterns**</font>
@@ -22,8 +22,9 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
   - <font size=2>**Interface Segregation Principle (ISP)**:</font> <font size=2>A design principle that promotes modularity and maintainability by ensuring that interfaces are small and focused.
   - <font size=2>**Dependency Inversion Principle (DIP)**:</font> <font size=2>A design principle that promotes decoupling by ensuring that high-level modules do not depend on low-level modules, but both depend on abstractions.</font>
 - <font size=3>**Test Execution**</font>
-  - <font size=2>**TestNG**: By clicking on Play/Run button (green arrow beside the <u>**test method signature or the test class name**</u>), in theIDE, the tests will be executed.</font>
+  - <font size=2>**JUnit 5**: By clicking on Play/Run button (green arrow beside the <u>**test method signature or the test class name**</u>), in the IDE, the tests will be executed.</font>
   - <font size=2>**Maven Execution Command**: by executing a maven command like: `mvn clean test -Dtest=[TestClassName] -Dbrowser=chrome -Dheadless=true`</font>
+  - <font size=2>**Parallel Execution**: Enable parallel execution with: `mvn test -Dparallel=true -Dthreadcount=3`</font>
   - <font size=2>**Notes:**</font>
     - The TAF takes the configuration parameters from the properties files located in `src/main/resources/` directory.
     - These parameters can also be overridden by passing them in the command line when executing the tests.
@@ -63,11 +64,13 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
     - In this case the `test-runner` container is not used at all and can be completely removed from the `docker-compose` file.
 ### WaitManager:
 - The default wait time is provided in the `waits.properties` instead of hard-coded in the `WaitManager` class.
-### TestNGListener:
-- The `TestNGListener` was modified to:
-  - Clean the log file before executing each Test (without deleting the folder/file itself).
-  - Attach the log file of each Test separately to the Allure report.
-  - Attaching the screenshots of each Test separately to the Allure report.
+### JUnit5TestListener (JUnit 5 Extension):
+- The `JUnit5TestListener` (formerly TestNGListener) was migrated to JUnit 5 and implements:
+  - `BeforeAllCallback` - Suite initialization
+  - `AfterAllCallback` - Suite cleanup
+  - `BeforeEachCallback` - Test setup (cleans log file before each test)
+  - `AfterEachCallback` - Test teardown (attaches logs and screenshots to Allure report)
+  - `TestWatcher` - Test result tracking and reporting
 ### AlertAction:
 - Modify the `AlertAction` class to:
   - To handle the GDPR consent displayed on some WebSites browsed from inside the EU & is not displayed when browsed from other countries.
@@ -75,19 +78,25 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 ### Handling API Requests:
 - Add RestAssured dependency to the `pom.xml` file to handle the APIs requests.
 - Add `apis` package & `Builder` class to handle the APIs requests.
-### Retry on Failure:
-- Add `RetryAnalyzer` class to retry the failed tests.
-- The retry Analyzer is used inside the `TestNGListener` class to retry the failed tests.
+### Retry on Failure (JUnit 5 Extension):
+- The `RetryAnalyzer` class (JUnit 5 extension) automatically retries failed tests.
+- Implements `InvocationInterceptor` for modern JUnit 5 retry mechanism.
+- Retry count is configurable via properties file.
+- Automatically applied to all tests via `@ExtendWith(RetryAnalyzer.class)` annotation.
 ### Allure Report:
 - The `AllureReportGenerator >>openReport()` method is modified to open the Allure report automatically after the execution ends.
-### Using Groups for Test Execution:
-- Add `groups` attribute to the `@Test` annotation to group the tests.
-- The `groups` attribute can be used to group the tests by their functionality or targeted testing type (like: `cart`, `login`, `smoke`, `regression`, etc.).
-- This attribute can be used later for executing specific set of tests (by executing the command `mvn clean test -Dgroups=[groupName]`).
-- Example command `mvn clean test -Dgroups=cart` will execute all the tests that are grouped with `cart` group in the whole script.
-- The groups were added as constants in the `Groups` class under the `utils` package.
-- The test inside a specific test package can be triggered by executing the command `mvn clean test -Dtest="com.taf.tests.ui.*Test"`.
-- To execute all the tests (especially inside a CI/CD pipeline), execute a command with regex, Ex. `mvn clean test -Dtest="regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"`
+### Using Tags for Test Execution (JUnit 5):
+- Use `@Tag` annotation to tag/group tests by functionality or testing type (like: `cart`, `login`, `smoke`, `regression`, etc.).
+- Tags can be used to execute specific sets of tests using the command `mvn clean test -Dgroups=[tagName]`.
+- Example commands:
+  - `mvn clean test -Dgroups=smoke` - Execute all smoke tests
+  - `mvn clean test -Dgroups=regression` - Execute all regression tests
+  - `mvn clean test -Dgroups="smoke | login"` - Execute smoke OR login tests
+  - `mvn clean test -Dgroups="smoke & regression"` - Execute tests tagged with BOTH smoke AND regression
+  - `mvn clean test -DexcludedGroups=login` - Execute all tests EXCEPT login tests
+- Tag constants are defined in the `Groups` class under the `utils` package.
+- Execute tests from a specific package: `mvn clean test -Dtest="com.taf.tests.ui.*Test"`
+- Execute all tests (CI/CD): `mvn clean test -Dtest="regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**"`
 ## CI/CD
 ### GitHub_Actions
 - A `GitHub Actions Workflow` file `E2E_Tests.yml` was created under the directory `.github/workflows`.
@@ -131,7 +140,7 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 │   │       ├── apis
 │   │           └── Builder.java
 │   │       ├── customListeners
-│   │           └── TestNGListeners.java
+│   │           └── JUnit5TestListener.java
 │   │       ├── drivers
 │   │           ├── AbstractDriver.java
 │   │           ├── Browser.java
@@ -176,9 +185,6 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 │   │           ├── Validation.java
 │   │           └── Verification.java
 └── resources
-│   ├── META-INF
-│       └── services
-│       │   └── org.testng.ITestNGListener
 │   ├── allure.properties
 │   ├── db.properties
 │   ├── environment.properties
@@ -191,8 +197,9 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 │   └── webApp.properties
 └── test
 └── resources
+├── junit-platform.properties
 └── test-data
-├── data.properties
-├── test-data.json
-└── webApp.properties
+    ├── data.properties
+    ├── test-data.json
+    └── webApp.properties
 ```

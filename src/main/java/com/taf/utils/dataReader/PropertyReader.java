@@ -86,4 +86,42 @@ public class PropertyReader {
         return value;
     }
 
+    /**
+     * Retrieves the value of a property by its key with a default value fallback.
+     * Checks system properties first, then properties loaded from files, then uses the default.
+     *
+     * @param key The key of the property to retrieve.
+     * @param defaultValue The default value to return if the property is not found.
+     * @return The value of the property, or the default value if not found.
+     */
+    public static String getProperty(String key, String defaultValue) {
+        // Check system properties first (e.g., command-line overrides).
+        String sysValue = System.getProperty(key);
+
+        // Check properties loaded from files.
+        String fileValue = fileProperties.getProperty(key);
+
+        // Determine the value and its source.
+        String value;
+        String source;
+
+        if (sysValue != null) {
+            // Use the system property value if it exists.
+            value = sysValue;
+            source = "system properties (explicit override)";
+        } else if (fileValue != null) {
+            // Use the file property value if no system property exists.
+            value = fileValue;
+            source = "properties file";
+        } else {
+            // Use the default value if neither system nor file property exists.
+            value = defaultValue;
+            source = "default value";
+        }
+
+        // Log the property value and its source (only in debug mode to avoid noise).
+        LogsManager.debug("Property: " + key.toUpperCase() + " = {" + value + "} loaded from " + source);
+        return value;
+    }
+
 }

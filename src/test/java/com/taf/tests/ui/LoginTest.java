@@ -2,6 +2,7 @@ package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
 import com.taf.builders.LombokUserData;
+import com.taf.customListeners.JUnit5TestListener;
 import com.taf.drivers.UITest;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.tests.BaseGuiTest;
@@ -10,12 +11,8 @@ import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.*;
-import io.qameta.allure.testng.Tag;
-import io.qameta.allure.testng.Tags;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Epic("Automation Exercise")
 @Feature("UI User Management")
@@ -23,14 +20,20 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
-@Tags({@Tag(Groups.LOGIN), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class LoginTest extends BaseGuiTest {
+@Tag(Groups.LOGIN)
+@Tag(Groups.REGRESSION)
+@Tag(Groups.SMOKE)
+@ExtendWith(JUnit5TestListener.class)
+class LoginTest extends BaseGuiTest {
 
 
     @Description("Verify user can login with valid credentials")
-    @Test(description = "Valid Login Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
-    public void validLoginTC()
-    {
+    @DisplayName("Valid Login Test")
+    @Test
+    @Tag(Groups.LOGIN)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void validLoginTC() {
         String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Valid-Login Test Started ...");
 
@@ -60,9 +63,12 @@ public class LoginTest extends BaseGuiTest {
     }
 
     @Description("Verify user cannot login with invalid email")
-    @Test(description = "Invalid Login (Invalid Email) Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
-    public void inValidLoginUsingInvalidEmailTC()
-    {
+    @DisplayName("Invalid Login (Invalid Email) Test")
+    @Test
+    @Tag(Groups.LOGIN)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void inValidLoginUsingInvalidEmailTC() {
         String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Invalid-Login (Invalid Email) Test Started ...");
 
@@ -78,7 +84,7 @@ public class LoginTest extends BaseGuiTest {
                 .verifyUserCreatedSuccessfully();
 
         new SignUpAndLoginPage(driver).navigate()
-                .enterLoginEmail(testData.getJsonData("email")  + "wrong@gmail.com")
+                .enterLoginEmail(testData.getJsonData("email") + "wrong@gmail.com")
                 .enterLoginPassword(userData.getPassword())
                 .clickLoginButton()
                 .verifyLoginErrorMessage(testData.getJsonData("messages.error"));
@@ -89,9 +95,12 @@ public class LoginTest extends BaseGuiTest {
     }
 
     @Description("Verify user cannot login with invalid password")
-    @Test(description = "Invalid Login (Invalid Password) Test", groups = {Groups.LOGIN, Groups.REGRESSION, Groups.SMOKE})
-    public void inValidLoginUsingInvalidPasswordTC()
-    {
+    @DisplayName("Invalid Login (Invalid Password) Test")
+    @Test
+    @Tag(Groups.LOGIN)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void inValidLoginUsingInvalidPasswordTC() {
         String timestamp = TimeManager.getCompactTimeStamp();
         LogsManager.info("Invalid-Login (Invalid Password) Test Started ...");
 
@@ -108,7 +117,7 @@ public class LoginTest extends BaseGuiTest {
 
         new SignUpAndLoginPage(driver).navigate()
                 .enterLoginEmail(userData.getEmail())
-                .enterLoginPassword(userData.getPassword()+timestamp)
+                .enterLoginPassword(userData.getPassword() + timestamp)
                 .clickLoginButton()
                 .verifyLoginErrorMessage(testData.getJsonData("messages.error"));
 
@@ -119,19 +128,17 @@ public class LoginTest extends BaseGuiTest {
 
 
     //Configurations
-    @BeforeClass(alwaysRun = true)
-    protected void preCondition() {
-        testData = new JsonReader("login-data");
-    }
-
     @Override
-    @BeforeMethod(alwaysRun = true)
+    @BeforeEach
     public void setUp() {
+        if (testData == null) {
+            testData = new JsonReader("login-data");
+        }
         super.setUp();
     }
 
     @Override
-    @AfterMethod(alwaysRun = true)
+    @AfterEach
     public void tearDown() {
         super.tearDown();
     }

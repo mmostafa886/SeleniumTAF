@@ -2,6 +2,7 @@ package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
 import com.taf.builders.LombokUserData;
+import com.taf.customListeners.JUnit5TestListener;
 import com.taf.drivers.UITest;
 import com.taf.pages.SignUpAndLoginPage;
 import com.taf.pages.SignupPage;
@@ -11,12 +12,8 @@ import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.*;
-import io.qameta.allure.testng.Tag;
-import io.qameta.allure.testng.Tags;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Epic("Automation Exercise")
 @Feature("UI User Management")
@@ -24,14 +21,21 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
-@Tags({@Tag(Groups.REGISTRATION), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class RegisterTest extends BaseGuiTest {
+@ExtendWith(JUnit5TestListener.class)
+@Tag(Groups.REGISTRATION)
+@Tag(Groups.REGRESSION)
+@Tag(Groups.SMOKE)
+class RegisterTest extends BaseGuiTest {
 
-     String registerTimeStamp;
+    private String registerTimeStamp;
 
     @Description("Verify user can sign up with valid data")
-    @Test (description = "Valid Sign Up Test", groups = {Groups.REGISTRATION, Groups.REGRESSION, Groups.SMOKE})
-    public void signUpTest() {
+    @Test
+    @DisplayName("Valid Sign Up Test")
+    @Tag(Groups.REGISTRATION)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void signUpTest() {
         LogsManager.info("Starting sign up test...");
         registerTimeStamp = TimeManager.getCompactTimeStamp();
 
@@ -58,10 +62,12 @@ public class RegisterTest extends BaseGuiTest {
     }
 
     @Description("Verify user cannot sign up with invalid data")
-    @Test(description = "Signup with Existing Account Test"
-            , groups = {Groups.REGISTRATION, Groups.REGRESSION, Groups.SMOKE})
-    public void verifyErrorMessageWhenAccountCreatedBefore()
-    {
+    @Test
+    @DisplayName("Signup with Existing Account Test")
+    @Tag(Groups.REGISTRATION)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void verifyErrorMessageWhenAccountCreatedBefore() {
         LogsManager.info("Starting invalid sign up test...");
         registerTimeStamp = TimeManager.getCompactTimeStamp();
 
@@ -87,19 +93,17 @@ public class RegisterTest extends BaseGuiTest {
     }
 
 
-    @BeforeClass(alwaysRun = true)
-    protected void preCondition() {
-        testData = new JsonReader("register-data");
-    }
-
     //Configuration Methods.
-    @BeforeMethod(alwaysRun = true)
-    public void setUp() {
-     super.setUp();
+    @BeforeEach
+    void TestSetUp() {
+        if (testData == null) {
+            testData = new JsonReader("register-data");
+        }
+        super.setUp();
     }
 
-    @AfterMethod(alwaysRun = true)
-    public void tearDown() {
+    @AfterEach
+    void TestTearDown() {
         driver.quitDriver();
     }
 }

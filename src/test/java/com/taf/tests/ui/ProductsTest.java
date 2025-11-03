@@ -1,17 +1,14 @@
 package com.taf.tests.ui;
 
+import com.taf.customListeners.JUnit5TestListener;
 import com.taf.drivers.UITest;
 import com.taf.pages.ProductsPage;
 import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.dataReader.JsonReader;
 import io.qameta.allure.*;
-import io.qameta.allure.testng.Tag;
-import io.qameta.allure.testng.Tags;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Epic("Automation Exercise")
 @Feature("UI Products Management")
@@ -19,13 +16,19 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
-@Tags({@Tag(Groups.PRODUCTS), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class ProductsTest extends BaseGuiTest {
+@ExtendWith(JUnit5TestListener.class)
+@Tag(Groups.PRODUCTS)
+@Tag(Groups.REGRESSION)
+@Tag(Groups.SMOKE)
+class ProductsTest extends BaseGuiTest {
 
     @Description("Search for a product and validate its details")
-    @Test(description = "Search for a product without login and validate its details"
-    , groups = {Groups.PRODUCTS, Groups.REGRESSION, Groups.SMOKE})
-    public void searchForProductWithoutLogin() {
+    @Test
+    @DisplayName("Search for a product without login and validate its details")
+    @Tag(Groups.PRODUCTS)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void searchForProductWithoutLogin() {
         new ProductsPage(driver)
                 .navigate()
                 .searchProduct(testData.getJsonData("searchedProduct.name"))
@@ -37,9 +40,12 @@ public class ProductsTest extends BaseGuiTest {
     }
 
     @Description("Add a product to the cart without logging in")
-    @Test(description = "Search for a product without login"
-    , groups = {Groups.PRODUCTS, Groups.REGRESSION, Groups.SMOKE})
-    public void addProductToCartWithoutLogin() {
+    @Test
+    @DisplayName("Search for a product without login")
+    @Tag(Groups.PRODUCTS)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void addProductToCartWithoutLogin() {
         new ProductsPage(driver)
                 .navigate()
                 .clickOnAddToCart(testData.getJsonData("product1.name"))
@@ -49,18 +55,16 @@ public class ProductsTest extends BaseGuiTest {
     }
 
     //Configurations
-    @BeforeClass(alwaysRun = true)
-    protected void preCondition() {
-        testData = new JsonReader("products-data");
+    @BeforeEach
+    void testSetUp() {
+        if (testData == null) {
+            testData = new JsonReader("products-data");
+        }
+        super.setUp();
     }
 
-    @BeforeMethod(alwaysRun = true)
-    public void setUp() {
-       super.setUp();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown() {
+    @AfterEach
+    void testTearDown() {
         driver.quitDriver();
     }
 }

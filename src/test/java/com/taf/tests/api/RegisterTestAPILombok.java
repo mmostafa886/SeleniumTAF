@@ -2,27 +2,26 @@ package com.taf.tests.api;
 
 import com.taf.apis.UserManagementAPI;
 import com.taf.builders.LombokUserData;
+import com.taf.customListeners.JUnit5TestListener;
 import com.taf.tests.BaseApiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
 import io.qameta.allure.*;
-import io.qameta.allure.testng.Tag;
-import io.qameta.allure.testng.Tags;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * RegisterTestAPILombok demonstrates user registration tests using LombokUserData builder.
  * This is an alternative implementation to RegisterTestAPI that uses Lombok's @Builder
  * annotation for creating test data objects.
- *
+ * ===================================
  * Key Differences from RegisterTestAPI:
  * - Uses LombokUserData instead of UserDataBuilder
  * - Leverages Lombok's auto-generated builder methods
  * - Demonstrates mutability with setters after object creation
  * - Uses toMap() instead of buildAsMap()
- *
+ * ===================================
  * Both implementations provide the same functionality with different approaches.
  */
 @Epic("Automation Exercise")
@@ -30,13 +29,19 @@ import org.testng.annotations.Test;
 @Story("User Registration with Lombok Builder")
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
-@Tags({@Tag(Groups.REGISTRATION), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
+@ExtendWith(JUnit5TestListener.class)
+@Tag(Groups.REGISTRATION)
+@Tag(Groups.REGRESSION)
+@Tag(Groups.SMOKE)
 public class RegisterTestAPILombok extends BaseApiTest {
 
 
     @Description("Register a user account through API using Lombok builder")
-    @Test(description = "Register a user account through API using Lombok builder"
-            , groups = {Groups.REGISTRATION, Groups.REGRESSION, Groups.SMOKE})
+    @Test
+    @DisplayName("Register a user account through API using Lombok builder")
+    @Tag(Groups.REGISTRATION)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
     public void registerTestWithLombok() {
         String timestamp = TimeManager.getSimpleTimeStamp();
         // Using LombokUserData (Lombok @Builder) for cleaner test data creation
@@ -51,8 +56,10 @@ public class RegisterTestAPILombok extends BaseApiTest {
     }
 
     @Description("Register a user account using Lombok builder with fluent chaining")
-    @Test(description = "Register a user account using Lombok builder with fluent chaining"
-            , groups = {Groups.REGISTRATION, Groups.REGRESSION})
+    @Test
+    @DisplayName("Register a user account using Lombok builder with fluent chaining")
+    @Tag(Groups.REGISTRATION)
+    @Tag(Groups.REGRESSION)
     public void registerTestWithFluentChaining() {
         String timestamp = TimeManager.getSimpleTimeStamp();
         // Alternative approach: Using Lombok's builder() method with fluent chaining
@@ -78,8 +85,10 @@ public class RegisterTestAPILombok extends BaseApiTest {
     }
 
     @Description("Register a user with complete defaults using Lombok builder")
-    @Test(description = "Register a user with complete defaults using Lombok builder"
-            , groups = {Groups.REGISTRATION, Groups.REGRESSION})
+    @Test
+    @DisplayName("Register a user with complete defaults using Lombok builder")
+    @Tag(Groups.REGISTRATION)
+    @Tag(Groups.REGRESSION)
     public void registerTestWithCompleteDefaults() {
         String timestamp = TimeManager.getSimpleTimeStamp();
         // Using static factory method for complete defaults, then modifying specific fields
@@ -94,9 +103,11 @@ public class RegisterTestAPILombok extends BaseApiTest {
     }
 
     //Configurations
-    @BeforeClass(alwaysRun = true)
+    @BeforeEach
     protected void setUp() {
-        testData = new JsonReader("register-data");
+        if (testData == null) {
+            testData = new JsonReader("register-data");
+        }
     }
 
 }

@@ -9,7 +9,7 @@ import org.openqa.selenium.WebDriver;
 public class BaseGuiTest implements WebDriverProvider {
 
     protected GUIWebDriver driver;
-    protected JsonReader testData;
+    protected JsonReader testData;  // Changed from static to instance variable
 
     @Override
     public WebDriver getWebDriver() {

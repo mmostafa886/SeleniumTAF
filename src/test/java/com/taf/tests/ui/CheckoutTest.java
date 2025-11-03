@@ -2,22 +2,18 @@ package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
 import com.taf.builders.LombokUserData;
-import com.taf.drivers.GUIWebDriver;
+import com.taf.customListeners.JUnit5TestListener;
 import com.taf.drivers.UITest;
 import com.taf.pages.CartPage;
 import com.taf.pages.ProductsPage;
 import com.taf.pages.SignUpAndLoginPage;
-import com.taf.pages.components.NavBarComponent;
 import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
 import io.qameta.allure.*;
-import io.qameta.allure.testng.Tag;
-import io.qameta.allure.testng.Tags;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Epic("Checkout Management")
 @Feature("UI Checkout Management")
@@ -25,15 +21,25 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
-@Tags({@Tag(Groups.CHECKOUT), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class CheckoutTest extends BaseGuiTest {
+@ExtendWith(JUnit5TestListener.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Tag(Groups.CHECKOUT)
+@Tag(Groups.REGRESSION)
+@Tag(Groups.SMOKE)
+class CheckoutTest extends BaseGuiTest {
 
     String timestamp;
     LombokUserData userData;
 
     @Description("Register a new account")
-    @Test(description = "Account Registration", groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
-    public void registerNewAccount() {
+    @Test
+    @Order(1)
+    @DisplayName("Account Registration")
+    @Tag(Groups.CHECKOUT)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void registerNewAccount() {
         timestamp = TimeManager.getCompactTimeStamp();
 
         // Build user data using LombokUserData (Lombok @Builder)
@@ -51,9 +57,13 @@ public class CheckoutTest extends BaseGuiTest {
     }
 
     @Description("Login to account")
-    @Test(dependsOnMethods = "registerNewAccount", description = "Login"
-    , groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
-    public void loginToAccount() {
+    @Test
+    @Order(2)
+    @DisplayName("Login")
+    @Tag(Groups.CHECKOUT)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void loginToAccount() {
         new SignUpAndLoginPage(driver)
                 .navigate()
                 .enterLoginEmail(userData.getEmail())
@@ -64,9 +74,13 @@ public class CheckoutTest extends BaseGuiTest {
     }
 
     @Description("Add product to cart")
-    @Test(dependsOnMethods = {"loginToAccount","registerNewAccount"}, description = "Add product to cart"
-    , groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
-    public void addProductToCart() {
+    @Test
+    @Order(3)
+    @DisplayName("Add product to cart")
+    @Tag(Groups.CHECKOUT)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void addProductToCart() {
         new ProductsPage(driver)
                 .navigate()
                 .clickOnAddToCart(testData.getJsonData("product.name"))
@@ -81,9 +95,13 @@ public class CheckoutTest extends BaseGuiTest {
     }
 
     @Description("Checkout the item from cart")
-    @Test(dependsOnMethods ={"addProductToCart","loginToAccount","registerNewAccount"}, description = "Checkout"
-    , groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
-    public void checkout() {
+    @Test
+    @Order(4)
+    @DisplayName("Checkout")
+    @Tag(Groups.CHECKOUT)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void checkout() {
         new CartPage(driver)
                 .clickOnProceedToCheckout()
                 .verifyDeliveryAddress(
@@ -115,26 +133,30 @@ public class CheckoutTest extends BaseGuiTest {
     }
 
     @Description("Delete account through API as post condition")
-    @Test(dependsOnMethods = {"checkout","loginToAccount","registerNewAccount"}, description = "Delete account"
-    , groups = {Groups.CHECKOUT, Groups.REGRESSION, Groups.SMOKE})
-    public void deleteAccountAsPostCondition() {
+    @Test
+    @Order(5)
+    @DisplayName("Delete account")
+    @Tag(Groups.CHECKOUT)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void deleteAccountAsPostCondition() {
         new UserManagementAPI()
                 .deleteUserAccount(userData.getEmail(), userData.getPassword())
                 .verifyUserDeletedSuccessfully();
     }
 
     //Configurations
-    @BeforeClass(alwaysRun = true)
-    public void setUp() {
-        testData = new JsonReader("checkout-data");
-        driver = new GUIWebDriver();
-        new NavBarComponent(driver).navigate();
-        driver.browser().closeExtensionTab();
+    @BeforeAll
+    void TestSetUp() {
+        if (testData == null) {
+            testData = new JsonReader("checkout-data");
+            super.setUp();
+        }
     }
 
-
-    @AfterClass(alwaysRun = true)
-    public void tearDown() {
-        driver.quitDriver();
+    @AfterAll
+    void tearDownClass() {
+        super.tearDown();
     }
+
 }

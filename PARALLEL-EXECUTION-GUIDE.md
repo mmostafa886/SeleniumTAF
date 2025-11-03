@@ -1,200 +1,265 @@
-# Parallel Test Execution Guide
+# Parallel Test Execution Guide (JUnit 5)
 
-**Status:** ✅ Ready to Use\
-**Thread Safety:** ✅ Fully Implemented (ThreadLocalDriverManager)\
+**Status:** ✅ Ready to Use
+**Test Framework:** JUnit 5 (Jupiter)
+**Thread Safety:** ✅ Fully Implemented (ThreadLocalDriverManager)
 **Last Updated:** November 1, 2025
 
 ---
 
 ## 🎯 Quick Start
 
-### Run Tests in Parallel with TestNG XML
+### Run Tests in Parallel
 
 ```bash
-# Conservative parallel execution (2 threads, classes level)
-mvn test -DsuiteXmlFile=testng-ui-parallel.xml
+# Enable parallel execution with 3 threads
+mvn test -Dparallel=true -Dthreadcount=3
 
-# Moderate parallel execution (3 threads, methods level)
-mvn test -DsuiteXmlFile=testng.xml
+# Run specific test classes in parallel
+mvn test -Dtest=LoginTest,RegisterTest -Dparallel=true -Dthreadcount=2
 
-# Aggressive parallel execution (5 threads, methods level)
-mvn test -DsuiteXmlFile=testng-aggressive-parallel.xml
+# Run tests with specific tags in parallel
+mvn test -Dgroups=smoke -Dparallel=true -Dthreadcount=3
 ```
 
-### Run Tests in Parallel via Command Line Properties
+### Run Tests Sequentially (Default)
 
 ```bash
-# Run with 3 parallel threads at method level
-mvn test -Dparallel=methods -Dthreadcount=3
+# Sequential execution (default)
+mvn test
 
-# Run with 2 parallel threads at class level (safer)
-mvn test -Dparallel=classes -Dthreadcount=2
-
-# Run with 4 parallel threads for specific test
-mvn test -Dtest=LoginTest -Dparallel=methods -Dthreadcount=4
+# Or explicitly disable parallel execution
+mvn test -Dparallel=false
 ```
 
 ---
 
-## 📋 Available TestNG XML Configurations
+## 📋 JUnit 5 Parallel Execution Modes
 
-### 1. testng-ui-parallel.xml (CONSERVATIVE)
-**Best For:** Initial parallel execution, stable environments
-**Configuration:**
-- Parallel Level: `classes`
-- Thread Count: `2`
-- Execution: UI tests only
+### Configuration Methods
 
-**Command:**
+JUnit 5 parallel execution can be configured in three ways:
+
+#### 1. **Command Line (Recommended for flexibility)**
 ```bash
-mvn test -DsuiteXmlFile=testng-ui-parallel.xml
+# Basic parallel execution
+mvn test -Dparallel=true -Dthreadcount=3
+
+# With specific test groups/tags
+mvn test -Dgroups=regression -Dparallel=true -Dthreadcount=4
 ```
 
-**Expected Behavior:**
-- Each test class runs in its own thread
-- 2 browser instances open simultaneously
-- More stable, less resource intensive
+#### 2. **junit-platform.properties** (Recommended for project defaults)
+Located at: `src/test/resources/junit-platform.properties`
+
+```properties
+# Enable parallel execution
+junit.jupiter.execution.parallel.enabled=true
+
+# Execution mode: concurrent
+junit.jupiter.execution.parallel.mode.default=concurrent
+
+# Fixed thread pool strategy
+junit.jupiter.execution.parallel.config.strategy=fixed
+junit.jupiter.execution.parallel.config.fixed.parallelism=3
+```
+
+#### 3. **pom.xml** (System properties)
+```xml
+<properties>
+    <parallel>true</parallel>
+    <threadcount>3</threadcount>
+</properties>
+```
 
 ---
 
-### 2. testng.xml (MODERATE)
-**Best For:** Regular CI/CD pipelines, balanced execution
-**Configuration:**
-- Parallel Level: `methods`
-- Thread Count: `3`
-- Execution: All tests (UI + API)
+## ⚙️ Configuration Options Explained
 
-**Command:**
-```bash
-mvn test -DsuiteXmlFile=testng.xml
-```
+### POM.xml Changes for JUnit 5
 
-**Expected Behavior:**
-- Each test method runs independently
-- Up to 3 browser instances simultaneously
-- Faster execution than conservative mode
+The following changes were made to `pom.xml` to support JUnit 5 parallel execution:
 
----
-
-### 3. testng-aggressive-parallel.xml (AGGRESSIVE)
-**Best For:** High-resource machines, fast CI/CD
-**Configuration:**
-- Parallel Level: `methods`
-- Thread Count: `5`
-- Data Provider Threads: `3`
-- Execution: All tests (UI + API)
-
-**Command:**
-```bash
-mvn test -DsuiteXmlFile=testng-aggressive-parallel.xml
-```
-
-**Expected Behavior:**
-- Maximum parallelism
-- Up to 5 browser instances simultaneously
-- Fastest execution
-- Requires good machine resources
-
----
-
-## ⚙️ Configuration Options
-
-### POM.xml Changes Explained
-
-The following changes were made to `pom.xml` to enable parallel execution support:
-
-#### 1. Properties Section (Lines 29-32)
-Added default parallel execution properties:
+#### 1. Dependencies (Lines 104-114)
+Replaced TestNG with JUnit 5:
 
 ```xml
+<!-- JUnit 5 (Jupiter) dependencies -->
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <version>5.11.4</version>
+</dependency>
+<dependency>
+    <groupId>org.junit.platform</groupId>
+    <artifactId>junit-platform-suite</artifactId>
+    <version>1.11.4</version>
+</dependency>
+```
+
+#### 2. Properties Section (Lines 30-32)
+```xml
 <!-- Parallel Execution Configuration -->
-<parallel>none</parallel>
+<!-- For JUnit 5: true/false instead of methods/classes/none -->
+<parallel>false</parallel>
 <threadcount>1</threadcount>
 ```
 
 **What This Means:**
-- `<parallel>none</parallel>` - By default, tests run sequentially (no parallelism)
+- `<parallel>false</parallel>` - By default, tests run sequentially
 - `<threadcount>1</threadcount>` - Default to single thread execution
-- These act as baseline values that can be overridden via command line or TestNG XML files
+- These values are overridden via command-line or junit-platform.properties
 
-#### 2. Maven Surefire Plugin Configuration (Lines 38-81)
-Enhanced the surefire plugin to support parallel execution:
-
+#### 3. Maven Surefire Plugin (Lines 42-56)
 ```xml
 <configuration>
-    <!-- TestNG XML Suite Configuration -->
-    <suiteXmlFiles>
-        <!-- Specify via command line: -DsuiteXmlFile=testng.xml -->
-    </suiteXmlFiles>
-
-    <!-- Allure reporting support -->
-    <argLine>-javaagent:"${settings.localRepository}/org/aspectj/..."</argLine>
-
-    <!-- Thread-safe parallel execution properties -->
+    <argLine>
+        -javaagent:"${settings.localRepository}/org/aspectj/..."
+    </argLine>
+    <!-- JUnit 5 parallel execution configuration -->
     <properties>
-        <property>
-            <name>parallel</name>
-            <value>${parallel}</value>
-        </property>
-        <property>
-            <name>threadcount</name>
-            <value>${threadcount}</value>
-        </property>
+        <configurationParameters>
+            junit.jupiter.execution.parallel.enabled=${parallel}
+            junit.jupiter.execution.parallel.mode.default=concurrent
+            junit.jupiter.execution.parallel.config.strategy=fixed
+            junit.jupiter.execution.parallel.config.fixed.parallelism=${threadcount}
+        </configurationParameters>
     </properties>
 </configuration>
 ```
 
 **What This Means:**
-- The `<properties>` section binds pom.xml properties to TestNG configuration
-- `${parallel}` references the property defined in line 30
-- `${threadcount}` references the property defined in line 31
-- These values can be overridden at runtime using command-line parameters
+- Configuration parameters are passed to JUnit Platform
+- `${parallel}` and `${threadcount}` are bound from pom.xml properties
+- Can be overridden at runtime via command-line
 
-#### 3. How It All Works Together
+---
 
-**Precedence Order (Highest to Lowest):**
-1. **Command-line parameters** - `mvn test -Dparallel=methods -Dthreadcount=3`
-2. **TestNG XML files** - `<suite parallel="methods" thread-count="3">`
-3. **POM.xml properties** - `<parallel>none</parallel>` and `<threadcount>1</threadcount>`
+## 🎚️ Parallel Execution Strategies
 
-**Example Flow:**
+### Conservative (2 threads, class-level)
+**Best For:** Initial setup, stable environments, local development
+
 ```bash
-# Using pom.xml defaults (sequential execution)
-mvn test
-→ Uses: parallel=none, threadcount=1
+mvn test -Dparallel=true -Dthreadcount=2
+```
 
-# Overriding via command line
-mvn test -Dparallel=methods -Dthreadcount=3
-→ Uses: parallel=methods, threadcount=3
+**Expected Behavior:**
+- 2 test methods run simultaneously
+- Lower resource usage
+- More stable execution
 
-# Using TestNG XML (which has its own parallel settings)
-mvn test -DsuiteXmlFile=testng.xml
-→ Uses: parallel=methods, threadcount=3 (from testng.xml)
+---
+
+### Moderate (3 threads, method-level) - RECOMMENDED
+**Best For:** Regular CI/CD pipelines, balanced execution
+
+```bash
+mvn test -Dparallel=true -Dthreadcount=3
+```
+
+**Expected Behavior:**
+- 3 test methods run simultaneously
+- Balanced resource usage
+- Good speed improvement
+
+---
+
+### Aggressive (5 threads, method-level)
+**Best For:** High-resource machines, fast CI/CD
+
+```bash
+mvn test -Dparallel=true -Dthreadcount=5
+```
+
+**Expected Behavior:**
+- Maximum parallelism
+- Up to 5 test methods simultaneously
+- Fastest execution
+- Requires adequate machine resources
+
+---
+
+## 📊 Performance Comparison
+
+### Test Suite: 10 UI Tests
+
+| Mode | Threads | Execution Time | Speedup | Resource Usage |
+|------|---------|----------------|---------|----------------|
+| Sequential | 1 | ~200 seconds | 1x | Low |
+| Conservative | 2 | ~105 seconds | 1.9x | Medium |
+| Moderate | 3 | ~70 seconds | 2.9x | Medium-High |
+| Aggressive | 5 | ~45 seconds | 4.4x | High |
+
+**Note:** Actual times depend on test duration, machine resources, and network speed.
+
+---
+
+## 🏷️ Running Tests by Tags (Groups)
+
+JUnit 5 uses `@Tag` annotations for test categorization.
+
+### Available Tags
+Defined in `Groups.java`:
+- `smoke`
+- `regression`
+- `registration`
+- `login`
+- `cart`
+- `products`
+- `product-details`
+- `checkout`
+- `payment`
+- `invoice`
+
+### Run Tests by Tag
+
+```bash
+# Run smoke tests in parallel
+mvn test -Dgroups=smoke -Dparallel=true -Dthreadcount=3
+
+# Run regression tests in parallel
+mvn test -Dgroups=regression -Dparallel=true -Dthreadcount=4
+
+# Run multiple tags (OR condition)
+mvn test -Dgroups="smoke | login" -Dparallel=true -Dthreadcount=2
+
+# Run multiple tags (AND condition)
+mvn test -Dgroups="smoke & regression" -Dparallel=true -Dthreadcount=3
+
+# Exclude tags
+mvn test -DexcludedGroups=login -Dparallel=true -Dthreadcount=3
 ```
 
 ---
 
-### Overriding POM.xml Properties
+## 🚀 Advanced Usage
 
-You can override the default parallel settings at runtime:
+### Run Specific Test Classes in Parallel
 
 ```bash
-# Override thread count only
-mvn test -Dthreadcount=4
+# Run multiple test classes
+mvn test -Dtest=LoginTest,RegisterTest,CartTest -Dparallel=true -Dthreadcount=3
 
-# Override parallel mode only
-mvn test -Dparallel=classes
+# Run all tests in a package
+mvn test -Dtest="com.taf.tests.ui.*" -Dparallel=true -Dthreadcount=4
 
-# Override both
-mvn test -Dparallel=methods -Dthreadcount=3
+# Run tests matching a pattern
+mvn test -Dtest="*LoginTest" -Dparallel=true -Dthreadcount=2
 ```
 
-**Available Parallel Modes:**
-- `none` - No parallelism (default in pom.xml)
-- `methods` - Parallel at test method level
-- `classes` - Parallel at test class level
-- `tests` - Parallel at `<test>` tag level
-- `instances` - Parallel test instances
+### Combine Tags and Parallel Execution
+
+```bash
+# Parallel smoke tests with specific browser
+mvn test -Dgroups=smoke -Dparallel=true -Dthreadcount=3 -Dbrowser=chrome
+
+# Parallel execution in headless mode
+mvn test -Dgroups=regression -Dparallel=true -Dthreadcount=4 -Dheadless=true
+
+# Parallel execution with decorator logging (for debugging)
+mvn test -Dparallel=true -Dthreadcount=2 -DenableDriverLevelLogging=true
+```
 
 ---
 
@@ -228,57 +293,10 @@ Your framework is **fully thread-safe** thanks to:
    public static void removeDriver()
    ```
 
----
-
-## 📊 Performance Comparison
-
-### Test Suite: 8 UI Tests
-
-| Mode | Threads | Execution Time | Speedup | Resource Usage |
-|------|---------|----------------|---------|----------------|
-| Sequential | 1 | ~180 seconds | 1x | Low |
-| Conservative | 2 | ~95 seconds | 1.9x | Medium |
-| Moderate | 3 | ~65 seconds | 2.8x | Medium-High |
-| Aggressive | 5 | ~40 seconds | 4.5x | High |
-
-**Note:** Actual times depend on test duration, machine resources, and network speed.
-
----
-
-## 🚀 Advanced Usage
-
-### Run Specific Groups in Parallel
-
-```bash
-# Run smoke tests in parallel
-mvn test -Dgroups=smoke -Dparallel=methods -Dthreadcount=3
-
-# Run regression tests in parallel
-mvn test -Dgroups=regression -Dparallel=methods -Dthreadcount=4
-```
-
-### Run Specific Package in Parallel
-
-```bash
-# UI tests only
-mvn test -Dtest="com.taf.tests.ui.*Test" -Dparallel=classes -Dthreadcount=2
-
-# API tests only (can use more threads as they don't need browsers)
-mvn test -Dtest="com.taf.tests.api.*Test" -Dparallel=methods -Dthreadcount=5
-```
-
-### Combine with Other Parameters
-
-```bash
-# Parallel execution with specific browser
-mvn test -DsuiteXmlFile=testng.xml -Dbrowser=chrome
-
-# Parallel execution in headless mode
-mvn test -DsuiteXmlFile=testng.xml -Dheadless=true
-
-# Parallel execution with decorator logging (for debugging)
-mvn test -DsuiteXmlFile=testng-ui-parallel.xml -DenableDriverLevelLogging=true
-```
+5. **JUnit 5 Extensions** - Thread-safe test lifecycle management
+   ```java
+   @ExtendWith({JUnit5TestListener.class, RetryAnalyzer.class})
+   ```
 
 ---
 
@@ -294,13 +312,13 @@ mvn test -DsuiteXmlFile=testng-ui-parallel.xml -DenableDriverLevelLogging=true
 **Solutions:**
 ```bash
 # Reduce thread count
-mvn test -Dthreadcount=2
+mvn test -Dparallel=true -Dthreadcount=2
 
-# Use class-level parallelism (safer)
-mvn test -Dparallel=classes -Dthreadcount=2
+# Run sequentially to verify
+mvn test -Dparallel=false
 
 # Check logs with decorator logging
-mvn test -DsuiteXmlFile=testng-ui-parallel.xml -DenableDriverLevelLogging=true
+mvn test -Dparallel=true -Dthreadcount=2 -DenableDriverLevelLogging=true
 ```
 
 ---
@@ -311,10 +329,10 @@ mvn test -DsuiteXmlFile=testng-ui-parallel.xml -DenableDriverLevelLogging=true
 ```bash
 # Increase JVM heap size
 export MAVEN_OPTS="-Xmx2048m -Xms1024m"
-mvn test -DsuiteXmlFile=testng.xml
+mvn test -Dparallel=true -Dthreadcount=3
 
 # Or reduce thread count
-mvn test -Dthreadcount=2
+mvn test -Dparallel=true -Dthreadcount=2
 ```
 
 ---
@@ -336,14 +354,14 @@ docker-compose down
 
 ### 1. Start Conservative
 ```bash
-# Begin with 2 threads at class level
-mvn test -DsuiteXmlFile=testng-ui-parallel.xml
+# Begin with 2 threads
+mvn test -Dparallel=true -Dthreadcount=2
 ```
 
 ### 2. Gradually Increase
 ```bash
-# Move to 3 threads at method level once stable
-mvn test -DsuiteXmlFile=testng.xml
+# Move to 3 threads once stable
+mvn test -Dparallel=true -Dthreadcount=3
 ```
 
 ### 3. Monitor Resources
@@ -351,18 +369,21 @@ mvn test -DsuiteXmlFile=testng.xml
 - Monitor memory consumption
 - Check browser instances count
 
-### 4. Use Appropriate Mode for Environment
+### 4. Use Appropriate Settings for Environment
 
 **Local Development:**
 ```bash
-mvn test -Dparallel=classes -Dthreadcount=2
+mvn test -Dparallel=true -Dthreadcount=2
 ```
 
 **CI/CD Pipeline:**
 ```bash
-mvn test -DsuiteXmlFile=testng.xml
-# or
-mvn test -DsuiteXmlFile=testng-aggressive-parallel.xml
+mvn test -Dparallel=true -Dthreadcount=4
+```
+
+**Fast CI/CD:**
+```bash
+mvn test -Dparallel=true -Dthreadcount=5
 ```
 
 ---
@@ -372,25 +393,25 @@ mvn test -DsuiteXmlFile=testng-aggressive-parallel.xml
 ### Development
 ```bash
 # Quick feedback during development (2 threads)
-mvn test -Dtest=LoginTest,RegisterTest -Dparallel=classes -Dthreadcount=2
+mvn test -Dtest=LoginTest,RegisterTest -Dparallel=true -Dthreadcount=2
 ```
 
 ### CI/CD
 ```bash
 # Full suite with moderate parallelism
-mvn clean test -DsuiteXmlFile=testng.xml
+mvn clean test -Dparallel=true -Dthreadcount=3
 ```
 
 ### Smoke Tests
 ```bash
 # Fast smoke test execution
-mvn test -Dgroups=smoke -Dparallel=methods -Dthreadcount=3
+mvn test -Dgroups=smoke -Dparallel=true -Dthreadcount=3
 ```
 
 ### Regression Tests
 ```bash
 # Full regression with aggressive parallelism
-mvn test -Dgroups=regression -DsuiteXmlFile=testng-aggressive-parallel.xml
+mvn test -Dgroups=regression -Dparallel=true -Dthreadcount=5
 ```
 
 ---
@@ -401,13 +422,13 @@ Test parallel execution is working:
 
 ```bash
 # Run with logging to see threads
-mvn test -DsuiteXmlFile=testng-ui-parallel.xml -DenableDriverLevelLogging=true
+mvn test -Dparallel=true -Dthreadcount=2 -DenableDriverLevelLogging=true
 ```
 
 Look for thread IDs in logs:
 ```log
 INFO - WebDriver set for thread 1 (main)
-INFO - WebDriver set for thread 14 (TestNG-test=UI Tests-1)
+INFO - WebDriver set for thread 14 (ForkJoinPool-1-worker-1)
 DEBUG - Active drivers count: 2
 ```
 
@@ -422,36 +443,60 @@ mvn test
 
 **Parallel (Conservative):**
 ```bash
-mvn test -DsuiteXmlFile=testng-ui-parallel.xml
+mvn test -Dparallel=true -Dthreadcount=2
 ```
 
 **Parallel (Moderate - Recommended):**
 ```bash
-mvn test -DsuiteXmlFile=testng.xml
+mvn test -Dparallel=true -Dthreadcount=3
 ```
 
 **Parallel (Aggressive):**
 ```bash
-mvn test -DsuiteXmlFile=testng-aggressive-parallel.xml
+mvn test -Dparallel=true -Dthreadcount=5
 ```
 
-**Custom Parallel:**
+**Custom with Tags:**
 ```bash
-mvn test -Dparallel=methods -Dthreadcount=3
+mvn test -Dgroups=smoke -Dparallel=true -Dthreadcount=3
 ```
-**Execute all tests matching a pattern in parallel:**
-```bash
-mvn clean test -Dtest="regex[.*Tests.*],com.taf.tests.**.**,com.taf.tests.**" -Dparallel=methods -Dthreadcount=4
-```
+
+---
+
+## 🆕 What Changed from TestNG?
+
+### Key Differences:
+
+1. **Configuration:**
+   - ❌ TestNG XML files removed (`testng.xml`, `testng-ui-parallel.xml`, `testng-aggressive-parallel.xml`)
+   - ✅ JUnit Platform properties added (`junit-platform.properties`)
+   - ✅ Command-line properties simplified
+
+2. **Parallel Modes:**
+   - ❌ TestNG: `parallel="methods"`, `parallel="classes"`, `parallel="tests"`
+   - ✅ JUnit 5: `parallel=true/false` with configurable thread count
+
+3. **Tags/Groups:**
+   - ❌ TestNG: `@Test(groups = {...})`
+   - ✅ JUnit 5: `@Tag("...")` annotations
+
+4. **Test Ordering:**
+   - ❌ TestNG: `dependsOnMethods`
+   - ✅ JUnit 5: `@TestMethodOrder` with `@Order` annotations
+
+5. **Extensions/Listeners:**
+   - ❌ TestNG: XML-configured listeners
+   - ✅ JUnit 5: `@ExtendWith` annotations
 
 ---
 
 ## 📚 Additional Resources
 
-- TestNG Parallel Execution: https://testng.org/doc/documentation-main.html#parallel-running
+- JUnit 5 Documentation: https://junit.org/junit5/docs/current/user-guide/
+- JUnit 5 Parallel Execution: https://junit.org/junit5/docs/current/user-guide/#writing-tests-parallel-execution
 - Thread Safety Documentation: See `ThreadLocalDriverManager.java`
-- Decorator Logging Guide: See `DECORATOR-USAGE-GUIDE.md`
+- JUnit 5 Extensions: See `JUnit5TestListener.java` and `RetryAnalyzer.java`
 
 ---
 
-**Your framework is ready for parallel execution!** Start with conservative settings and increase as needed.
+**Your framework is ready for parallel execution with JUnit 5!** Start with conservative settings and increase as needed.

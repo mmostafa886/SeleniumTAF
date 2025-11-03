@@ -2,6 +2,7 @@ package com.taf.tests.ui;
 
 import com.taf.apis.UserManagementAPI;
 import com.taf.builders.LombokUserData;
+import com.taf.customListeners.JUnit5TestListener;
 import com.taf.drivers.UITest;
 import com.taf.pages.*;
 import com.taf.tests.BaseGuiTest;
@@ -9,11 +10,8 @@ import com.taf.utils.Groups;
 import com.taf.utils.TimeManager;
 import com.taf.utils.dataReader.JsonReader;
 import io.qameta.allure.*;
-import io.qameta.allure.testng.Tag;
-import io.qameta.allure.testng.Tags;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Epic("Automation Exercise")
 @Feature("UI Invoice")
@@ -21,15 +19,25 @@ import org.testng.annotations.Test;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
-@Tags({@Tag(Groups.INVOICE), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
-public class InvoiceTest extends BaseGuiTest {
+@ExtendWith(JUnit5TestListener.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Tag(Groups.INVOICE)
+@Tag(Groups.REGRESSION)
+@Tag(Groups.SMOKE)
+class InvoiceTest extends BaseGuiTest {
 
     String timestamp = TimeManager.getSimpleTimeStamp();
     LombokUserData userData;
 
     @Description("Register a new account")
-    @Test(description = "Account Registration", groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
-    public void registerNewAccount() {
+    @Test
+    @Order(1)
+    @DisplayName("Account Registration")
+    @Tag(Groups.INVOICE)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void registerNewAccount() {
         // Build user data using LombokUserData (Lombok @Builder)
         userData = LombokUserData.withRandomData();
         userData.setName(testData.getJsonData("name"));
@@ -45,9 +53,13 @@ public class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Login to account")
-    @Test(dependsOnMethods = "registerNewAccount", description = "Login"
-            , groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
-    public void loginToAccount() {
+    @Test
+    @Order(2)
+    @DisplayName("Login")
+    @Tag(Groups.INVOICE)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void loginToAccount() {
         new SignUpAndLoginPage(driver)
                 .navigate()
                 .enterLoginEmail(userData.getEmail())
@@ -58,9 +70,13 @@ public class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Add product to cart")
-    @Test(dependsOnMethods = {"loginToAccount", "registerNewAccount"}, description = "Add product to cart"
-            , groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
-    public void addProductToCart() {
+    @Test
+    @Order(3)
+    @DisplayName("Add product to cart")
+    @Tag(Groups.INVOICE)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void addProductToCart() {
         new ProductsPage(driver)
                 .navigate()
                 .clickOnAddToCart(testData.getJsonData("product.name"))
@@ -75,9 +91,13 @@ public class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Checkout the product added to Cart")
-    @Test(dependsOnMethods = {"addProductToCart", "loginToAccount", "registerNewAccount"}, description = "Checkout"
-            , groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
-    public void checkout() {
+    @Test
+    @Order(4)
+    @DisplayName("Checkout")
+    @Tag(Groups.INVOICE)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void checkout() {
         new CartPage(driver)
                 .clickOnProceedToCheckout()
                 .verifyDeliveryAddress(
@@ -109,9 +129,13 @@ public class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Paying for the checked out item")
-    @Test(dependsOnMethods = {"checkout", "addProductToCart", "loginToAccount", "registerNewAccount"}
-            , description = "Payment", groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
-    public void paymentTest() {
+    @Test
+    @Order(5)
+    @DisplayName("Payment")
+    @Tag(Groups.INVOICE)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void paymentTest() {
         new CheckoutPage(driver)
                 .clickOnPlaceOrder()
                 .fillCardInfo(testData.getJsonData("card.cardName")
@@ -125,34 +149,43 @@ public class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Download the order invoice")
-    @Test(dependsOnMethods =
-            {"paymentTest", "checkout", "addProductToCart", "loginToAccount", "registerNewAccount"},
-            description = "Download Invoice", groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
-    public void downloadInvoice() {
+    @Test
+    @Order(6)
+    @DisplayName("Download Invoice")
+    @Tag(Groups.INVOICE)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void downloadInvoice() {
         new PaymentPage(driver)
                 .clickOnDownloadInvoiceButton()
                 .verifyDownloadedFile(testData.getJsonData("invoiceName"));
     }
 
     @Description("Delete account through API as post condition")
-    @Test(dependsOnMethods = {"paymentTest", "checkout", "loginToAccount", "registerNewAccount"}
-            , description = "Delete Account", groups = {Groups.INVOICE, Groups.REGRESSION, Groups.SMOKE})
-    public void deleteAccountAsPostCondition() {
+    @Test
+    @Order(7)
+    @DisplayName("Delete Account")
+    @Tag(Groups.INVOICE)
+    @Tag(Groups.REGRESSION)
+    @Tag(Groups.SMOKE)
+    void deleteAccountAsPostCondition() {
         new UserManagementAPI()
                 .deleteUserAccount(userData.getEmail(), userData.getPassword())
                 .verifyUserDeletedSuccessfully();
     }
 
     //Configurations
-    @BeforeClass(alwaysRun = true)
-    public void setUp() {
-        testData = new JsonReader("checkout-data");
-        super.setUp();
+    @BeforeAll
+    void setUpClass() {
+        if (testData == null) {
+            testData = new JsonReader("checkout-data");
+            super.setUp();
+        }
     }
 
-
-    @AfterClass(alwaysRun = true)
-    public void tearDown() {
-        driver.quitDriver();
+    @AfterAll
+    void tearDownClass() {
+        super.tearDown();
     }
+
 }
