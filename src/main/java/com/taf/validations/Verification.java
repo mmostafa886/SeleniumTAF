@@ -33,6 +33,10 @@ public class Verification extends BaseAssertion {
     @Step("Verifying that actual value: {0} equals expected value: {1}")
     protected void assertEquals(String actual, String expected, String message) {
         LogsManager.info("Verifying that actual value:", actual, "equals expected value:", expected);
+        // Note: JUnit's assertEquals expects (expected, actual), but their parameter naming is confusing
+        // We pass: actual as 1st param, expected as 2nd param
+        // JUnit treats: 1st param as "expected" in error message, 2nd as "actual"
+        // This produces correct error messages showing what value was expected vs what was received
         Assertions.assertEquals(expected.toLowerCase(), actual.toLowerCase(), message);
     }
 

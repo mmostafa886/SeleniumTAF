@@ -28,13 +28,13 @@ public abstract class BaseAssertion {
 
     protected abstract void assertFalse(boolean condition, String message);
 
-    protected abstract void assertEquals(String actual, String expected, String message);
+    protected abstract void assertEquals(String expected, String actual, String message);
 
     protected abstract void assertContains(String actual, String expected, String message);
 
    @Step("Asserting that the expected value: {1} Equals the actual value: {0}")
-    public BaseAssertion Equals(String actual, String expected, String message) {
-        assertEquals(actual, expected, message);
+    public BaseAssertion Equals(String expected, String actual, String message) {
+        assertEquals(expected, actual, message);
         return this;
     }
 

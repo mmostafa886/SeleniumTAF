@@ -143,28 +143,6 @@ public class JUnit5TestListener implements
             }
         });
 
-        // Take screenshot on failure
-        context.getTestInstance().ifPresent(instance -> {
-            if (instance instanceof WebDriverProvider provider) {
-                WebDriver driver = provider.getWebDriver();
-                if (driver != null) {
-                    try {
-                        driver.getTitle(); // Verify session is active
-                        if (context.getExecutionException().isPresent()) {
-                            ScreenshotsManager.takeFullPageScreenshot(driver, "failed-" + fullTestName);
-                        }
-                    } catch (org.openqa.selenium.NoSuchSessionException e) {
-                        LogsManager.warn("WebDriver session already closed for thread " +
-                                Thread.currentThread().threadId() + ", skipping screenshot");
-                    } catch (Exception e) {
-                        LogsManager.error("Error taking screenshot:", e.getMessage());
-                    }
-                } else {
-                    LogsManager.debug("Driver is null, skipping screenshot");
-                }
-            }
-        });
-
         try {
             AllureAttachmentManager.attachRecords(testMethodName);
         } catch (Exception e) {
@@ -198,7 +176,31 @@ public class JUnit5TestListener implements
     @Override
     public void testFailed(ExtensionContext context, Throwable cause) {
         String testName = context.getDisplayName();
+        String testMethodName = context.getTestMethod().map(m -> m.getName()).orElse("Unknown");
+        String fullTestName = testName + "_" + testMethodName;
+
         LogsManager.error("Test", testName, "Failed:", cause.getMessage());
+
+        // Capture screenshot on test failure (runs BEFORE @AfterEach, so driver is still active)
+        context.getTestInstance().ifPresent(instance -> {
+            if (instance instanceof WebDriverProvider provider) {
+                WebDriver driver = provider.getWebDriver();
+                if (driver != null) {
+                    try {
+                        driver.getTitle(); // Verify session is active
+                        LogsManager.info("Test failed - capturing screenshot for: " + fullTestName);
+                        ScreenshotsManager.takeFullPageScreenshot(driver, "failed-" + fullTestName);
+                    } catch (org.openqa.selenium.NoSuchSessionException e) {
+                        LogsManager.warn("WebDriver session already closed for thread " +
+                                Thread.currentThread().threadId() + ", skipping screenshot");
+                    } catch (Exception e) {
+                        LogsManager.error("Error taking screenshot:", e.getMessage());
+                    }
+                } else {
+                    LogsManager.debug("Driver is null, skipping screenshot");
+                }
+            }
+        });
     }
 
     @Override
