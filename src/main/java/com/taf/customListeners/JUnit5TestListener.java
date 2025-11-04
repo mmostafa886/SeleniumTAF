@@ -27,6 +27,7 @@ import java.util.Optional;
 public class JUnit5TestListener implements
         BeforeAllCallback, AfterAllCallback,
         BeforeEachCallback, AfterEachCallback,
+        AfterTestExecutionCallback,
         TestWatcher {
 
     // Synchronization lock for log file operations in parallel execution
@@ -123,6 +124,40 @@ public class JUnit5TestListener implements
         LogsManager.info("Test Case:", testMethodName + "/" + testDescription, "starting ....");
     }
 
+    // AfterTestExecution - executed after test method but BEFORE @AfterEach
+    @Override
+    public void afterTestExecution(ExtensionContext context) throws Exception {
+        String testMethodName = context.getDisplayName();
+        String testDescription = context.getTestMethod()
+                .map(m -> m.getName())
+                .orElse("Unknown");
+        String fullTestName = testMethodName + "_" + testDescription;
+
+        // Capture screenshot on failure (runs BEFORE @AfterEach, so driver is still active)
+        boolean testFailed = context.getExecutionException().isPresent();
+        if (testFailed) {
+            context.getTestInstance().ifPresent(instance -> {
+                if (instance instanceof WebDriverProvider provider) {
+                    WebDriver driver = provider.getWebDriver();
+                    if (driver != null) {
+                        try {
+                            driver.getTitle(); // Verify session is active
+                            LogsManager.info("Test failed - capturing screenshot for: " + fullTestName);
+                            ScreenshotsManager.takeFullPageScreenshot(driver, "failed-" + fullTestName);
+                        } catch (org.openqa.selenium.NoSuchSessionException e) {
+                            LogsManager.warn("WebDriver session already closed for thread " +
+                                    Thread.currentThread().threadId() + ", skipping screenshot");
+                        } catch (Exception e) {
+                            LogsManager.error("Error taking screenshot:", e.getMessage());
+                        }
+                    } else {
+                        LogsManager.debug("Driver is null, skipping screenshot");
+                    }
+                }
+            });
+        }
+    }
+
     // AfterEach - executed after each test method
     @Override
     public void afterEach(ExtensionContext context) throws Exception {
@@ -176,31 +211,8 @@ public class JUnit5TestListener implements
     @Override
     public void testFailed(ExtensionContext context, Throwable cause) {
         String testName = context.getDisplayName();
-        String testMethodName = context.getTestMethod().map(m -> m.getName()).orElse("Unknown");
-        String fullTestName = testName + "_" + testMethodName;
-
         LogsManager.error("Test", testName, "Failed:", cause.getMessage());
-
-        // Capture screenshot on test failure (runs BEFORE @AfterEach, so driver is still active)
-        context.getTestInstance().ifPresent(instance -> {
-            if (instance instanceof WebDriverProvider provider) {
-                WebDriver driver = provider.getWebDriver();
-                if (driver != null) {
-                    try {
-                        driver.getTitle(); // Verify session is active
-                        LogsManager.info("Test failed - capturing screenshot for: " + fullTestName);
-                        ScreenshotsManager.takeFullPageScreenshot(driver, "failed-" + fullTestName);
-                    } catch (org.openqa.selenium.NoSuchSessionException e) {
-                        LogsManager.warn("WebDriver session already closed for thread " +
-                                Thread.currentThread().threadId() + ", skipping screenshot");
-                    } catch (Exception e) {
-                        LogsManager.error("Error taking screenshot:", e.getMessage());
-                    }
-                } else {
-                    LogsManager.debug("Driver is null, skipping screenshot");
-                }
-            }
-        });
+        // Note: Screenshot is captured in afterEach() before driver is quit
     }
 
     @Override

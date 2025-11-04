@@ -121,9 +121,8 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - The `AllureReportGenerator >>openReport()` method is modified not to open the Allure report automatically after the execution ends as it causes an issue with CircleCI.
 
 ## TO-DOs:
-- Generate Allure report on a dockerized container , not on the host machine.
-- Modify the script to open the Allure report automatically after the execution ends whether `Local or Remote` executions (Currently handled for local execution & shell script file `ExecuteAndGenerateReport.sh` is used to open the report automatically after the execution ends).
-- Configure the TAF to log the (Allure Executors) info to the generated `Allure Report`.
+- improve the Verification (Hard Assertion) & Validation (Soft Assertion) classes to provide more robust logging.
+- fix the issue of the message (" expected:  but was:") with verifications.
 
 ## Project Structure
 ```

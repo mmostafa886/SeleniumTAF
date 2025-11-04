@@ -108,7 +108,7 @@ public class NavBarComponent {
         LogsManager.info("Verify User is logged in");
         String actualUserName = driver.element().getText(userLabel);
         LogsManager.info("Actual user name:", actualUserName);
-        driver.verification().Equals(actualUserName, expectedUserName+"222",
+        driver.verification().Equals(actualUserName, expectedUserName,
                 "User name verification failed");
         return this;
     }
