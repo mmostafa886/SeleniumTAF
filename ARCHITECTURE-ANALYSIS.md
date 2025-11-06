@@ -1,17 +1,49 @@
 # Selenium Test Automation Framework - Architecture Analysis
 
-**Branch:** AutomationExercise_Cline
-**Analysis Date:** 2025-11-05 (Updated)
+**Branch:** AutomationExercise_junit
+**Analysis Date:** 2025-11-06 (Updated)
 **Framework Type:** Selenium + JUnit 5 + RestAssured
-**Last Major Update:** JUnit 5 Migration + Automatic Screenshot Capture on Failure
+**Last Major Update:** TCF Consent Injection + Enhanced Popup Handling + TimeManager Enhancements
 
 ---
 
-## What's New in Version 3.1 (2025-11-05) 🆕
+## What's New in Version 3.2 (2025-11-06) 🆕
 
-### Major Updates
+### Latest Updates
 
-1. **🎉 JUnit 5 Migration (COMPLETE)** ⭐ **LATEST**
+1. **🎉 TCF Consent Injection (NEW)** ⭐ **LATEST**
+   - NEW: `injectTCFConsent()` method in `AbstractDriver.java`
+   - Automatically handles GDPR/TCF 2.0 consent popups
+   - Injects consent cookies before test execution
+   - Eliminates popup interference during test runs
+   - Domain-specific consent cookie management
+   - Location: `AbstractDriver.java:49-70`
+
+2. **🎉 CookiesBlocker Extension (NEW)**
+   - NEW: `CookiesBlocker.crx` Chrome extension added
+   - Automatically blocks cookie consent popups
+   - Integrated into driver options builder
+   - Located in: `src/main/resources/extensions/CookiesBlocker.crx`
+   - Complements TCF consent injection for comprehensive popup handling
+
+3. **🎉 TimeManager Enhancement for Parallel Execution (NEW)**
+   - NEW: `getUniqueIdentifier()` method in `TimeManager.java`
+   - Thread-safe unique identifier generation
+   - Combines timestamp with milliseconds and thread ID
+   - Format: `yyyyMMddHHmmssSSS_threadId`
+   - Perfect for parallel test execution without ID collisions
+   - Replaces simple timestamps in tests requiring uniqueness
+   - Location: `TimeManager.java:46-59`
+
+4. **🎉 Enhanced ElementActions**
+   - Improved element stability checking
+   - Better handling of dynamic elements
+   - Optimized click operations
+   - Enhanced scrolling mechanisms
+
+### Previous Updates (Version 3.1 - 2025-11-05)
+
+1. **🎉 JUnit 5 Migration (COMPLETE)**
    - REPLACED TestNG with JUnit 5 (Jupiter) across entire framework
    - Migrated ALL 10 test classes (8 UI + 2 API tests)
    - Converted TestNG listeners to JUnit 5 extensions
@@ -52,7 +84,7 @@
 
 This document provides a comprehensive analysis of the Selenium Test Automation Framework architecture, focusing on design patterns, SOLID principles adherence, scalability considerations, and performance optimizations. The framework demonstrates a well-structured, enterprise-grade architecture with strong foundations in software engineering best practices.
 
-**Version 3.1 Update:** This document has been updated to reflect the complete migration from TestNG to JUnit 5, automatic screenshot capture on test failure, and previous enhancements including Lombok builder integration and decorator pattern activation.
+**Version 3.2 Update:** This document has been updated to reflect the latest enhancements including TCF consent injection for GDPR compliance, CookiesBlocker extension integration, thread-safe TimeManager enhancements for parallel execution, and comprehensive popup handling improvements. Previous updates include JUnit 5 migration, automatic screenshot capture on test failure, Lombok builder integration, and decorator pattern activation.
 
 ### Overall Assessment
 
@@ -390,7 +422,7 @@ driver.alert().accept();
 
 ---
 
-### 1.8 Template Method Pattern ⭐⭐⭐⭐
+### 1.8 Template Method Pattern ⭐⭐⭐⭐⭐
 
 **Implementation:**
 - **Location:** `AbstractDriver` and factory subclasses
@@ -399,12 +431,38 @@ driver.alert().accept();
 - ✅ Defines skeleton of driver creation algorithm
 - ✅ Subclasses override specific steps
 - ✅ Common configuration in base class
+- ✅ **NEW:** TCF consent injection shared across all browser implementations
+- ✅ **NEW:** Extension loading mechanism (HaramBlur, CookiesBlocker)
 
 **Example:**
 ```java
-// AbstractDriver.java:45
+// AbstractDriver.java:47
 public abstract WebDriver createDriver();
+
+// AbstractDriver.java:49 - TCF Consent Injection (NEW)
+public void injectTCFConsent(WebDriver driver, String domain) {
+    // Navigate to domain first
+    driver.get("https://" + domain);
+
+    // TCF 2.0 consent string (accepts all purposes)
+    String tcfConsentString = "CPuQfQAPuQfQAAGABCENDECgAAAAAAAAAAAAAAAAAA";
+
+    // Inject TCF cookies to bypass GDPR popups
+    Cookie euconsent = new Cookie.Builder("euconsent-v2", tcfConsentString)
+            .domain(domain)
+            .path("/")
+            .build();
+
+    driver.manage().addCookie(euconsent);
+    driver.navigate().refresh();
+}
 ```
+
+**Recent Enhancement (2025-11-06):**
+- ✅ Added TCF 2.0 consent injection to eliminate GDPR popup interference
+- ✅ All browser factories inherit this functionality
+- ✅ Domain-specific consent cookie management
+- ✅ Integrated with CookiesBlocker extension for comprehensive popup handling
 
 ---
 
@@ -1678,13 +1736,13 @@ JUnit 5 Extensions: 2 (JUnit5TestListener + RetryAnalyzer)
 
 ---
 
-**Document Version:** 3.1
-**Last Updated:** 2025-11-05
+**Document Version:** 3.2
+**Last Updated:** 2025-11-06
 **Original Analysis:** 2025-10-28
-**Major Updates:** JUnit 5 Migration (Complete), Lombok Builder Integration, Decorator Pattern Activation, Automatic Screenshot Capture on Failure
+**Major Updates:** TCF Consent Injection + TimeManager Enhancements (2025-11-06), JUnit 5 Migration (Complete), Lombok Builder Integration, Decorator Pattern Activation, Automatic Screenshot Capture on Failure
 **Prepared By:** AI Architecture Analyst
 **Review Status:** Updated and Ready for Review
 
 ---
 
-*This analysis was performed on the AutomationExercise_Cline branch. The findings and recommendations are based on code review, pattern recognition, and industry best practices.*
+*This analysis was performed on the AutomationExercise_junit branch. The findings and recommendations are based on code review, pattern recognition, and industry best practices.*
