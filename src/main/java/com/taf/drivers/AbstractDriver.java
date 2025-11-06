@@ -34,6 +34,7 @@ public abstract class AbstractDriver {
     protected String downloadsPath = System.getProperty("user.dir") + "\\src\\test\\resources";
 
     protected File haramBlurExtension = new File("src/main/resources/extensions/HaramBlur.crx");
+    protected File cookiesBlockerExtension = new File("src/main/resources/extensions/CookiesBlocker.crx");
 
     /**
      * Abstract method to create a WebDriver instance.

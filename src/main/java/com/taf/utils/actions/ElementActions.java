@@ -124,7 +124,7 @@ public class ElementActions {
         });
     }
 
-    //A function to scroll to an element using JavaScript
+/*    //A function to scroll to an element using JavaScript
     @Step("Scroll to element with locator: {0}")
     public void scrollToElementJS(By locator) {
         WebElement element = findElement(locator);
@@ -148,7 +148,38 @@ public class ElementActions {
 
         });
 
+    }*/
+
+    //A function to scroll to an element using JavaScript
+    @Step("Scroll to element with locator: {0}")
+    public void scrollToElementJS(By locator) {
+        WebElement element = findElement(locator);
+        waitManager.fluentWait().until(d -> {
+            LogsManager.info("Element:", locator.toString(), "scrolled into view using JavaScript.");
+            try {
+                // scroll if the element is not completely in view
+                if (element.isDisplayed() && element.isEnabled()) {
+                    LogsManager.info("Element is already in view:", locator.toString());
+                } else {
+                    LogsManager.info("Element is not in view after scrolling.", "Attempting to scroll again using actions");
+                    new Actions(d).scrollToElement(element).perform(); // Attempt to scroll again using Actions
+                }
+                ((JavascriptExecutor) d).executeScript(
+                        "const rect = arguments[0].getBoundingClientRect();" +
+                                "window.scrollBy({ " +
+                                "  top: rect.top + window.scrollY - (window.innerHeight / 2) + (rect.height / 2), " +
+                                "  behavior: 'smooth'" +
+                                "});",
+                        element
+                );
+                return true; // Element is already in view
+            } catch (Exception e) {
+                LogsManager.error("Failed to scroll to element with locator:", locator.toString());
+                return false;
+            }
+        });
     }
+
 
     //Find an element using a locator
     @Step("Find element with locator: {0}")
