@@ -124,32 +124,6 @@ public class ElementActions {
         });
     }
 
-/*    //A function to scroll to an element using JavaScript
-    @Step("Scroll to element with locator: {0}")
-    public void scrollToElementJS(By locator) {
-        WebElement element = findElement(locator);
-        waitManager.fluentWait().until(d -> {
-            ((JavascriptExecutor) driver).executeScript("""
-                            arguments[0].scrollIntoView({behavior: "smooth", block: "center",inline: "center"});""", element);
-            try {
-                // scroll if the element is not completely in view
-                if (element.isDisplayed() && element.isEnabled()) {
-                    LogsManager.info("Element is already in view:", locator.toString());
-                }
-                else {
-                    LogsManager.info("Element is not in view after scrolling.", "Attempting to scroll again using actions");
-                    new Actions(d).scrollToElement(element).perform(); // Attempt to scroll again using Actions
-                }
-                return true; // Element is already in view
-            } catch (Exception e) {
-                LogsManager.error("Failed to scroll to element with locator:", locator.toString());
-                return false;
-            }
-
-        });
-
-    }*/
-
     //A function to scroll to an element using JavaScript
     @Step("Scroll to element with locator: {0}")
     public void scrollToElementJS(By locator) {
