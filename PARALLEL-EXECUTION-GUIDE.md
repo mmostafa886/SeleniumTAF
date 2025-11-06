@@ -53,15 +53,20 @@ mvn test -Dgroups=regression -Dparallel=true -Dthreadcount=4
 Located at: `src/test/resources/junit-platform.properties`
 
 ```properties
-# Enable parallel execution
-junit.jupiter.execution.parallel.enabled=true
+# Enable parallel execution (can be overridden with -Dparallel=true)
+junit.jupiter.execution.parallel.enabled=false
 
-# Execution mode: concurrent
+# Execution mode: concurrent (tests can run in parallel)
 junit.jupiter.execution.parallel.mode.default=concurrent
+junit.jupiter.execution.parallel.mode.classes.default=concurrent
 
-# Fixed thread pool strategy
-junit.jupiter.execution.parallel.config.strategy=fixed
-junit.jupiter.execution.parallel.config.fixed.parallelism=3
+# Dynamic thread pool strategy (calculates threads based on CPU cores)
+junit.jupiter.execution.parallel.config.strategy=dynamic
+junit.jupiter.execution.parallel.config.dynamic.factor=1.0
+
+# Fixed strategy - number of parallel threads (used when strategy=fixed)
+# Can be overridden with -Dthreadcount=N
+# junit.jupiter.execution.parallel.config.fixed.parallelism=2
 ```
 
 #### 3. **pom.xml** (System properties)
@@ -132,6 +137,12 @@ Replaced TestNG with JUnit 5:
 - Configuration parameters are passed to JUnit Platform
 - `${parallel}` and `${threadcount}` are bound from pom.xml properties
 - Can be overridden at runtime via command-line
+- **Note:** pom.xml uses `fixed` strategy for explicit thread control, while `junit-platform.properties` defaults to `dynamic` strategy for automatic CPU-based scaling
+
+**Configuration Priority:**
+1. Command-line parameters (highest) - e.g., `-Dparallel=true -Dthreadcount=3`
+2. pom.xml surefire configuration
+3. junit-platform.properties (lowest)
 
 ---
 

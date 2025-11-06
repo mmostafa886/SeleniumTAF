@@ -71,10 +71,12 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
   - `BeforeEachCallback` - Test setup (cleans log file before each test)
   - `AfterEachCallback` - Test teardown (attaches logs and screenshots to Allure report)
   - `TestWatcher` - Test result tracking and reporting
-### AlertAction:
-- Modify the `AlertAction` class to:
-  - To handle the GDPR consent displayed on some WebSites browsed from inside the EU & is not displayed when browsed from other countries.
-  - Remove the commercials present on the Websites.
+### AlertAction & Popup Handling:
+- The framework includes comprehensive popup and consent handling:
+  - **TCF Consent Injection:** `AbstractDriver` automatically injects TCF 2.0 consent cookies before test execution to bypass GDPR popups
+  - **CookiesBlocker Extension:** Chrome extension that blocks cookie consent popups
+  - **AlertAction class:** Handles JavaScript alerts and removes commercials present on websites
+  - Combined approach ensures clean test execution without popup interference
 ### Handling API Requests:
 - Add RestAssured dependency to the `pom.xml` file to handle the APIs requests.
 - Add `apis` package & `Builder` class to handle the APIs requests.
@@ -188,7 +190,8 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 │   ├── db.properties
 │   ├── environment.properties
 │   ├── extensions
-│       └── HaramBlur.crx
+│       ├── HaramBlur.crx
+│       └── CookiesBlocker.crx
 │   ├── log4j2.properties
 │   ├── seleniumGrid.properties
 │   ├── video.properties
