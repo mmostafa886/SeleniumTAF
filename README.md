@@ -103,7 +103,7 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
       -p 8080:8080 -p 50000:50000 \
       --restart=on-failure \
       --network seleniumtaf_grid \
-      jenkins/jenkins:latest-jdk21
+      jenkins/jenkins:latest-jdk25
 ### CircleCI
 - A `CircleCI` configuration file `config.yml` was created under the directory `.circleci` with detailed comments on each part of the configuration.
 - This file contains 2 jobs & both of these jobs execute all the tests but one for `Chrome` & the other for `Edge`.
