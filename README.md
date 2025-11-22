@@ -111,6 +111,30 @@ A simple Test Automation Framework (TAF) built & designed to be easy to use and 
 - The `EnvironmentUtils` class is used to detect if the execution is on a `CI/CD` pipeline or not.
 - The `AllureReportGenerator >>openReport()` method is modified not to open the Allure report automatically after the execution ends as it causes an issue with CircleCI.
 
+## Java 25 & Lombok Compatibility
+- **Important**: Lombok is not fully compatible with Java 25 out of the box. The following POM.xml modifications are required:
+  - **Lombok version**: Use version `1.18.42` or later
+  - **Maven Compiler Plugin**: Version `3.14.1` with explicit annotation processor configuration
+  - **Annotation Processor Paths**: Lombok must be explicitly configured as an annotation processor in the `maven-compiler-plugin`:
+    ```xml
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.14.1</version>
+        <configuration>
+            <annotationProcessorPaths>
+                <path>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                    <version>${lombok.version}</version>
+                </path>
+            </annotationProcessorPaths>
+            <release>25</release>
+        </configuration>
+    </plugin>
+    ```
+- Without these configurations, Lombok annotations will not be processed correctly with Java 25.
+
 ## TO-DOs:
 - Generate Allure report on a dockerized container , not on the host machine.
 - Modify the script to open the Allure report automatically after the execution ends whether `Local or Remote` executions (Currently handled for local execution & shell script file `ExecuteAndGenerateReport.sh` is used to open the report automatically after the execution ends).
