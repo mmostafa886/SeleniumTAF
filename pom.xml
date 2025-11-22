@@ -9,10 +9,10 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <selenium.version>4.37.0</selenium.version>
+        <selenium.version>4.38.0</selenium.version>
         <testng.version>7.11.0</testng.version>
         <surefire.version>3.5.3</surefire.version>
         <log4j.version>2.25.1</log4j.version>
@@ -26,6 +26,7 @@
         <jsoup.version>1.21.1</jsoup.version>
         <poi.version>5.4.1</poi.version>
         <restassured.version>5.5.5</restassured.version>
+        <lombok.version>1.18.42</lombok.version>
         <!-- Parallel Execution Configuration -->
         <parallel>none</parallel>
         <threadcount>1</threadcount>
@@ -78,6 +79,22 @@
                         <version>${surefire.version}</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <!-- Maven Compiler Plugin to set Java version and Lombok annotation processing (Mandatory for Java25)-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.1</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <release>25</release>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -212,7 +229,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

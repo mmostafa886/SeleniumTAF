@@ -37,7 +37,7 @@ public class UserDataBuilder {
     private String mobileNumber;
     
     // Default values
-    private static final String[] DEFAULT_TITLES = {"Mr", "Mrs", "Miss"};
+    private static final String[] DEFAULT_TITLES = {"Mr", "Mrs"};
     private static final String[] DEFAULT_MONTHS = {"January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"};
     private static final String[] DEFAULT_COUNTRIES = {"India", "United States", "Canada", "Singapore", "Australia"};
