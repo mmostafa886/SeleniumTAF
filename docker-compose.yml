@@ -82,7 +82,7 @@ services:
 
   # Test Runner: A service to run end-to-end tests.
   test-runner:
-    image: maven:3.9.11-eclipse-temurin-21
+    image: maven:4.0.0-rc-5-amazoncorretto-25
     working_dir: /e2e # Set the working directory inside the container
     build: . # Build the Docker image from the current directory
     environment:
