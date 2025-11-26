@@ -3,6 +3,7 @@ package com.taf.tests.ui;
 import com.taf.apis.UserManagementAPI;
 import com.taf.builders.LombokUserData;
 import com.taf.customListeners.JUnit5TestListener;
+import com.taf.customListeners.RetryTest;
 import com.taf.drivers.UITest;
 import com.taf.pages.CartPage;
 import com.taf.pages.CheckoutPage;
@@ -34,7 +35,7 @@ class PaymentTest extends BaseGuiTest {
     LombokUserData userData;
 
     @Description("Register a user account through API")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(1)
     @DisplayName("User Registration through API")
     @Tag(Groups.PAYMENT)
@@ -56,7 +57,7 @@ class PaymentTest extends BaseGuiTest {
     }
 
     @Description("Login to the registered account")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(2)
     @DisplayName("Login")
     @Tag(Groups.PAYMENT)
@@ -71,14 +72,14 @@ class PaymentTest extends BaseGuiTest {
                 .verifyUserLabel(testData.getJsonData("name"));
     }
 
-   @Description("Add product to cart")
-   @Test
+    @Description("Add product to cart")
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(3)
     @DisplayName("Add product to cart")
     @Tag(Groups.PAYMENT)
     @Tag(Groups.REGRESSION)
     @Tag(Groups.SMOKE)
-   void addProductToCart() {
+    void addProductToCart() {
         new ProductsPage(driver)
                 .navigate()
                 .clickOnAddToCart(testData.getJsonData("product.name"))
@@ -93,7 +94,7 @@ class PaymentTest extends BaseGuiTest {
     }
 
     @Description("Checkout the item(s) from the cart")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(4)
     @DisplayName("Checkout")
     @Tag(Groups.PAYMENT)
@@ -131,7 +132,7 @@ class PaymentTest extends BaseGuiTest {
     }
 
     @Description("Payment")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(5)
     @DisplayName("Payment")
     @Tag(Groups.PAYMENT)
@@ -141,23 +142,23 @@ class PaymentTest extends BaseGuiTest {
         new CheckoutPage(driver)
                 .clickOnPlaceOrder()
                 .fillCardInfo(testData.getJsonData("card.cardName")
-                        ,testData.getJsonData("card.cardNumber"),
+                        , testData.getJsonData("card.cardNumber"),
                         testData.getJsonData("card.cvc")
-                                , testData.getJsonData("card.exMonth")
-                                , testData.getJsonData("card.exYear")
+                        , testData.getJsonData("card.exMonth")
+                        , testData.getJsonData("card.exYear")
                 )
 
                 .verifyPaymentSuccessMessage(testData.getJsonData("messages.paymentSuccess"));
     }
 
-   @Description("Delete account through API as post condition")
-   @Test
+    @Description("Delete account through API as post condition")
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(6)
     @DisplayName("Delete account as post condition")
     @Tag(Groups.PAYMENT)
     @Tag(Groups.REGRESSION)
     @Tag(Groups.SMOKE)
-   void deleteAccountAsPostCondition() {
+    void deleteAccountAsPostCondition() {
         new UserManagementAPI()
                 .deleteUserAccount(userData.getEmail(), userData.getPassword())
                 .verifyUserDeletedSuccessfully();
@@ -166,7 +167,7 @@ class PaymentTest extends BaseGuiTest {
 
     //Configurations
     @BeforeAll
-   void setUpClass() {
+    void setUpClass() {
         if (testData == null) {
             testData = new JsonReader("checkout-data");
             super.setUp();

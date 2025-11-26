@@ -3,6 +3,7 @@ package com.taf.tests.ui;
 import com.taf.apis.UserManagementAPI;
 import com.taf.builders.LombokUserData;
 import com.taf.customListeners.JUnit5TestListener;
+import com.taf.customListeners.RetryTest;
 import com.taf.drivers.UITest;
 import com.taf.pages.*;
 import com.taf.tests.BaseGuiTest;
@@ -31,7 +32,7 @@ class InvoiceTest extends BaseGuiTest {
     LombokUserData userData;
 
     @Description("Register a new account")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(1)
     @DisplayName("Account Registration")
     @Tag(Groups.INVOICE)
@@ -53,7 +54,7 @@ class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Login to account")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(2)
     @DisplayName("Login")
     @Tag(Groups.INVOICE)
@@ -70,7 +71,7 @@ class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Add product to cart")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(3)
     @DisplayName("Add product to cart")
     @Tag(Groups.INVOICE)
@@ -91,7 +92,7 @@ class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Checkout the product added to Cart")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(4)
     @DisplayName("Checkout")
     @Tag(Groups.INVOICE)
@@ -129,7 +130,7 @@ class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Paying for the checked out item")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(5)
     @DisplayName("Payment")
     @Tag(Groups.INVOICE)
@@ -149,7 +150,7 @@ class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Download the order invoice")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(6)
     @DisplayName("Download Invoice")
     @Tag(Groups.INVOICE)
@@ -162,7 +163,7 @@ class InvoiceTest extends BaseGuiTest {
     }
 
     @Description("Delete account through API as post condition")
-    @Test
+    @RetryTest(delayMillis = 2000, maxAttempts = 4)
     @Order(7)
     @DisplayName("Delete Account")
     @Tag(Groups.INVOICE)

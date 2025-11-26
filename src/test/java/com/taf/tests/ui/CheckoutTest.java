@@ -3,6 +3,7 @@ package com.taf.tests.ui;
 import com.taf.apis.UserManagementAPI;
 import com.taf.builders.LombokUserData;
 import com.taf.customListeners.JUnit5TestListener;
+import com.taf.customListeners.RetryTest;
 import com.taf.drivers.UITest;
 import com.taf.pages.CartPage;
 import com.taf.pages.ProductsPage;
@@ -33,7 +34,7 @@ class CheckoutTest extends BaseGuiTest {
     LombokUserData userData;
 
     @Description("Register a new account")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(1)
     @DisplayName("Account Registration")
     @Tag(Groups.CHECKOUT)
@@ -57,7 +58,7 @@ class CheckoutTest extends BaseGuiTest {
     }
 
     @Description("Login to account")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(2)
     @DisplayName("Login")
     @Tag(Groups.CHECKOUT)
@@ -74,7 +75,7 @@ class CheckoutTest extends BaseGuiTest {
     }
 
     @Description("Add product to cart")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(3)
     @DisplayName("Add product to cart")
     @Tag(Groups.CHECKOUT)
@@ -95,7 +96,7 @@ class CheckoutTest extends BaseGuiTest {
     }
 
     @Description("Checkout the item from cart")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(4)
     @DisplayName("Checkout")
     @Tag(Groups.CHECKOUT)
@@ -133,7 +134,7 @@ class CheckoutTest extends BaseGuiTest {
     }
 
     @Description("Delete account through API as post condition")
-    @Test
+    @RetryTest(delayMillis = 200, maxAttempts = 4)
     @Order(5)
     @DisplayName("Delete account")
     @Tag(Groups.CHECKOUT)

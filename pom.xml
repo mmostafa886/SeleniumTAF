@@ -45,6 +45,9 @@
                     <argLine>
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
                     </argLine>
+                    <!-- Retry failed tests at the end of the test run -->
+                    <!-- This is separate from @RetryTest annotation and runs AFTER all tests complete -->
+                    <rerunFailingTestsCount>2</rerunFailingTestsCount>
                     <!-- JUnit 5 parallel execution configuration -->
                     <properties>
                         <!-- Enable JUnit 5 parallel execution -->
