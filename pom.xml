@@ -9,8 +9,8 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <selenium.version>4.38.0</selenium.version>
         <junit.version>5.11.4</junit.version>
@@ -26,6 +26,7 @@
         <jsoup.version>1.21.1</jsoup.version>
         <poi.version>5.4.1</poi.version>
         <restassured.version>5.5.5</restassured.version>
+        <lombok.version>1.18.42</lombok.version>
         <!-- Parallel Execution Configuration -->
         <!-- For JUnit 5: true/false instead of methods/classes/none -->
         <parallel>false</parallel>
@@ -62,6 +63,22 @@
                         <version>${aspectj.version}</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <!-- Maven Compiler Plugin to set Java version and Lombok annotation processing (Mandatory for Java25)-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.1</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <release>25</release>
+                </configuration>
             </plugin>
         </plugins>
     </build>

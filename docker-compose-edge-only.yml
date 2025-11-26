@@ -1,0 +1,78 @@
+# Optimized Docker Compose - Edge Browser Only
+# Faster startup time by running only the Edge node
+
+services:
+  # Selenium Hub
+  selenium-hub:
+    image: selenium/hub:latest
+    platform: linux/amd64
+    user: root
+    ports:
+      - "4442-4444:4442-4444"
+    networks:
+      - grid
+    shm_size: 3g
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4444/status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Edge Node ONLY (fastest startup)
+  selenium-node-edge:
+    image: selenium/node-edge:latest
+    platform: linux/amd64
+    user: root
+    networks:
+      - grid
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=3          # Increased for aggressive parallelism
+      - SE_NODE_SESSION_TIMEOUT=300
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+    shm_size: 3g
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5555/status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Test Runner
+  test-runner:
+    image: maven:4.0.0-rc-5-amazoncorretto-25
+    working_dir: /e2e
+    build: .
+    environment:
+      MAVEN_OPTS: "-Xmx2048m -Xms512m -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+UseParallelGC"
+    volumes:
+      - .:/e2e:delegated
+      - m2-repo:/root/.m2
+    networks:
+      - grid
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+      selenium-node-edge:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2G
+        reservations:
+          cpus: '2'
+          memory: 1G
+    command: >
+      sh -c "mvn dependency:go-offline"
+
+volumes:
+  m2-repo:
+
+networks:
+  grid:
+    driver: bridge

@@ -17,6 +17,7 @@ services:
       timeout: 5s # Timeout after 5 seconds
       retries: 5 # Retry up to 5 times before marking as unhealthy
 
+  # Uncomment the following section to enable Chrome node
   # Chrome Node: A Selenium node for running tests in Chrome.
   selenium-node-chrome:
     image: selenium/node-chrome:latest # Official Chrome node image
@@ -28,6 +29,9 @@ services:
       - SE_EVENT_BUS_HOST=selenium-hub # Connect to the Selenium Hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442 # Port for publishing events
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443 # Port for subscribing to events
+      - SE_NODE_MAX_SESSIONS=3          # Maximum concurrent browser sessions
+      - SE_NODE_SESSION_TIMEOUT=300     # Session timeout in seconds (optional)
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true  # Allow override (optional)
     shm_size: 3g # Shared memory size for better performance
     depends_on:
       selenium-hub:
@@ -38,26 +42,30 @@ services:
       timeout: 5s # Timeout after 5 seconds
       retries: 5 # Retry up to 5 times before marking as unhealthy
 
+  #Uncomment the following section to enable Firefox node
   # Firefox Node: A Selenium node for running tests in Firefox.
-  selenium-node-firefox:
-    image: selenium/node-firefox:dev # Official Firefox node image
-    platform: linux/amd64 # Specify the platform to ensure compatibility
-    user: root # Run as root user
-    networks:
-      - grid # Connect to the 'grid' network
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub # Connect to the Selenium Hub
-      - SE_EVENT_BUS_PUBLISH_PORT=4442 # Port for publishing events
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443 # Port for subscribing to events
-    shm_size: 3g # Shared memory size for better performance
-    depends_on:
-      selenium-hub:
-        condition: service_healthy # Start only if the hub is healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:5555/status" ] # Health check to ensure node is running
-      interval: 10s # Check every 10 seconds
-      timeout: 5s # Timeout after 5 seconds
-      retries: 5 # Retry up to 5 times before marking as unhealthy
+  #  selenium-node-firefox:
+  #    image: selenium/node-firefox:dev # Official Firefox node image
+  #    platform: linux/amd64 # Specify the platform to ensure compatibility
+  #    user: root # Run as root user
+  #    networks:
+  #      - grid # Connect to the 'grid' network
+  #    environment:
+  #      - SE_EVENT_BUS_HOST=selenium-hub # Connect to the Selenium Hub
+  #      - SE_EVENT_BUS_PUBLISH_PORT=4442 # Port for publishing events
+  #      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443 # Port for subscribing to events
+  #      - SE_NODE_MAX_SESSIONS=3          # Maximum concurrent browser sessions
+  #      - SE_NODE_SESSION_TIMEOUT=300     # Session timeout in seconds (optional)
+  #      - SE_NODE_OVERRIDE_MAX_SESSIONS=true  # Allow override (optional)
+  #    shm_size: 3g # Shared memory size for better performance
+  #    depends_on:
+  #      selenium-hub:
+  #        condition: service_healthy # Start only if the hub is healthy
+  #    healthcheck:
+  #      test: [ "CMD", "curl", "-f", "http://localhost:5555/status" ] # Health check to ensure node is running
+  #      interval: 10s # Check every 10 seconds
+  #      timeout: 5s # Timeout after 5 seconds
+  #      retries: 5 # Retry up to 5 times before marking as unhealthy
 
   # Edge Node: A Selenium node for running tests in Microsoft Edge.
   selenium-node-edge:
@@ -70,6 +78,9 @@ services:
       - SE_EVENT_BUS_HOST=selenium-hub # Connect to the Selenium Hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442 # Port for publishing events
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443 # Port for subscribing to events
+      - SE_NODE_MAX_SESSIONS=3          # Maximum concurrent browser sessions
+      - SE_NODE_SESSION_TIMEOUT=300     # Session timeout in seconds (optional)
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true  # Allow override (optional)
     shm_size: 3g # Shared memory size for better performance
     depends_on:
       selenium-hub:
@@ -82,25 +93,36 @@ services:
 
   # Test Runner: A service to run end-to-end tests.
   test-runner:
-    image: maven:3.9.11-eclipse-temurin-21
+    image: maven:4.0.0-rc-5-amazoncorretto-25
     working_dir: /e2e # Set the working directory inside the container
     build: . # Build the Docker image from the current directory
     environment:
-      MAVEN_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1" # Reduce memory usage
+      # Optimized Maven settings for faster builds and parallel execution
+      MAVEN_OPTS: "-Xmx2048m -Xms512m -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+UseParallelGC"
     volumes:
-      - .:/e2e # Mount the current directory to /e2e in the container
+      - .:/e2e:delegated # Delegated mount for better performance on macOS (reduces I/O latency)
       - m2-repo:/root/.m2  # Persistent Maven cache
     networks:
       - grid # Connect to the 'grid' network
     depends_on:
       selenium-hub:
         condition: service_healthy # Start only if the hub is healthy
-      selenium-node-chrome:
-        condition: service_healthy # Start only if the Chrome node is healthy
-      selenium-node-firefox:
-        condition: service_healthy # Start only if the Firefox node is healthy
+      # Uncomment the following lines to depend on Chrome and Firefox nodes
+      #      selenium-node-chrome:
+      #        condition: service_healthy # Start only if the Chrome node is healthy
+      #      selenium-node-firefox:
+      #        condition: service_healthy # Start only if the Firefox node is healthy
       selenium-node-edge:
         condition: service_healthy # Start only if the Edge node is healthy
+    # Resource limits to prevent competition with browser nodes
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2G
+        reservations:
+          cpus: '2'
+          memory: 1G
 
     command: >
       sh -c "mvn dependency:go-offline"
