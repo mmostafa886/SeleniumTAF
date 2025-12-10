@@ -4,6 +4,39 @@
 
 The `@UITest` annotation is a custom marker annotation used in the Selenium Test Automation Framework to identify and manage UI/browser-based tests. This guide explains its purpose, definition, and usage.
 
+## Table of Contents
+
+1. [The Need for Custom Annotations in Test Automation](#the-need-for-custom-annotations-in-test-automation)
+   - [Why Create Custom Annotations?](#why-create-custom-annotations)
+     - [Declarative Configuration](#1-declarative-configuration)
+     - [Cross-Cutting Concerns](#2-cross-cutting-concerns)
+     - [Test Discovery and Filtering](#3-test-discovery-and-filtering)
+     - [Self-Documenting Code](#4-self-documenting-code)
+     - [Type Safety and IDE Support](#5-type-safety-and-ide-support)
+   - [When to Create Custom Annotations](#when-to-create-custom-annotations)
+   - [Types of Custom Annotations](#types-of-custom-annotations)
+     - [Marker Annotations (No Properties)](#marker-annotations-no-properties)
+     - [Single-Value Annotations](#single-value-annotations)
+     - [Multi-Value Annotations](#multi-value-annotations)
+   - [Best Practices for Custom Annotations](#best-practices-for-custom-annotations)
+   - [Examples of Useful Custom Annotations in Test Frameworks](#examples-of-useful-custom-annotations-in-test-frameworks)
+   - [Real-World Example: Building a Custom Annotation](#real-world-example-building-a-custom-annotation)
+2. [Why @UITest Is Defined](#1-why-uitest-is-defined)
+   - [Primary Purposes](#primary-purposes)
+3. [How It Is Defined](#2-how-it-is-defined)
+   - [Definition Breakdown](#definition-breakdown)
+4. [How Properties Are Set](#3-how-properties-are-set)
+   - [Usage Example](#usage-example)
+5. [Integration with Test Lifecycle](#4-integration-with-test-lifecycle)
+   - [In BeforeEach (Line 113-122)](#in-beforeeach-line-113-122)
+   - [In AfterEach (Line 170-179)](#in-aftereach-line-170-179)
+6. [Implementation Note](#5-implementation-note)
+7. [Where It's Used](#6-where-its-used)
+8. [Recommendations](#7-recommendations)
+9. [Related Files](#related-files)
+
+---
+
 ## The Need for Custom Annotations in Test Automation
 
 ### Why Create Custom Annotations?
