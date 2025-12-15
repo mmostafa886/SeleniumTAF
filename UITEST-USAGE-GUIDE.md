@@ -1,8 +1,8 @@
-# @UITest Usage Guide
+# @UITest Usage Guide (TestNG)
 
 ## Overview
 
-This guide provides practical instructions for using the `@UITest` annotation in the Selenium Test Automation Framework. It covers the complete annotation stack, test class structure, and integration with framework components on the **AutomationExercise_junit** branch.
+This guide provides practical instructions for using the `@UITest` annotation in the Selenium Test Automation Framework with **TestNG**. It covers the complete annotation stack, test class structure, and integration with framework components.
 
 ## Table of Contents
 
@@ -13,7 +13,9 @@ This guide provides practical instructions for using the `@UITest` annotation in
 5. [Integration with Framework Components](#integration-with-framework-components)
 6. [Best Practices](#best-practices)
 7. [Common Patterns](#common-patterns)
-8. [JUnit 5 Migration Notes](#junit-5-migration-notes)
+8. [TestNG Configuration](#testng-configuration)
+9. [Troubleshooting](#troubleshooting)
+10. [Related Documentation](#related-documentation)
 
 ---
 
@@ -25,9 +27,9 @@ The `@UITest` annotation is applied at the class level to mark a test class as c
 
 ```java
 @UITest
-class MyUITest extends BaseGuiTest {
+public class MyUITest extends BaseGuiTest {
     @Test
-    void testSomething() {
+    public void testSomething() {
         // Your UI test code
     }
 }
@@ -35,35 +37,32 @@ class MyUITest extends BaseGuiTest {
 
 ### Where to Apply
 
-- **Class Level**: Applied to test classes (most common)
+- **Class Level**: Applied to test classes (most common and required for screen recording)
 - **Method Level**: Can be applied to individual test methods (supported but less common)
 
 ### Prerequisites
 
 1. **Extend BaseGuiTest**: Your test class must extend `BaseGuiTest` to access the WebDriver
-2. **Add JUnit 5 Extension**: Include `@ExtendWith(JUnit5TestListener.class)` for lifecycle management
+2. **TestNG Configuration**: Tests run via TestNG with `TestNGListeners` configured
 3. **Import the Annotation**: `import com.taf.drivers.UITest;`
 
 ---
 
 ## Complete Annotation Stack
 
-### Standard UI Test Annotation Stack (JUnit 5)
+### Standard UI Test Annotation Stack (TestNG)
 
 A typical UI test class in this framework uses the following annotation stack:
 
 ```java
-@Epic("Feature Area")                          // Allure: High-level feature grouping
-@Feature("Specific Feature")                   // Allure: Feature being tested
-@Story("User Story")                           // Allure: User story or scenario
-@Severity(SeverityLevel.CRITICAL)             // Allure: Test severity (BLOCKER, CRITICAL, NORMAL, MINOR, TRIVIAL)
-@Owner("Tester Name")                         // Allure: Test owner/author
-@UITest                                        // Framework: Marks as UI test (enables screen recording)
-@Tag(Groups.FEATURE_NAME)                     // JUnit 5: Test categorization for filtering
-@Tag(Groups.REGRESSION)                       // JUnit 5: Test suite grouping
-@Tag(Groups.SMOKE)                            // JUnit 5: Quick validation tests
-@ExtendWith(JUnit5TestListener.class)         // JUnit 5: Custom test lifecycle listener
-class YourTestClass extends BaseGuiTest {
+@Epic("Feature Area")                                  // Allure: High-level feature grouping
+@Feature("Specific Feature")                           // Allure: Feature being tested
+@Story("User Story")                                   // Allure: User story or scenario
+@Severity(SeverityLevel.CRITICAL)                     // Allure: Test severity (BLOCKER, CRITICAL, NORMAL, MINOR, TRIVIAL)
+@Owner("Tester Name")                                 // Allure: Test owner/author
+@UITest                                                // Framework: Marks as UI test (enables screen recording)
+@Tags({@Tag(Groups.FEATURE), @Tag(Groups.REGRESSION)})  // Allure TestNG: Test categorization
+public class YourTestClass extends BaseGuiTest {
     // Test methods...
 }
 ```
@@ -87,17 +86,24 @@ class YourTestClass extends BaseGuiTest {
 @UITest                                // Marks UI tests for screen recording
 ```
 
-#### JUnit 5 Annotations
+#### Allure TestNG Tags
 
 ```java
-@Tag(Groups.LOGIN)                     // Test categorization
-@Tag(Groups.REGRESSION)                // Test suite membership
-@Tag(Groups.SMOKE)                     // Quick validation suite
-@ExtendWith(JUnit5TestListener.class)  // Lifecycle listener
-@Test                                  // Test method marker
-@BeforeEach                           // Setup before each test
-@AfterEach                            // Cleanup after each test
-@DisplayName("Human-readable name")    // Test display name
+@Tags({@Tag(Groups.LOGIN), @Tag(Groups.REGRESSION)})  // Multiple tags
+@Tag(Groups.SMOKE)                                     // Single tag
+```
+
+**Important:** Use `@Tags` from `io.qameta.allure.testng` for Allure reporting, not TestNG groups.
+
+#### TestNG Annotations
+
+```java
+@Test(description = "Test description",              // Test method marker
+      groups = {Groups.LOGIN, Groups.REGRESSION})    // TestNG groups for filtering
+@BeforeClass(alwaysRun = true)                       // Setup before all tests in class
+@BeforeMethod(alwaysRun = true)                      // Setup before each test
+@AfterMethod(alwaysRun = true)                       // Cleanup after each test
+@AfterClass(alwaysRun = true)                        // Cleanup after all tests in class
 ```
 
 ---
@@ -109,15 +115,18 @@ class YourTestClass extends BaseGuiTest {
 ```java
 package com.taf.tests.ui;
 
-import com.taf.customListeners.JUnit5TestListener;
 import com.taf.drivers.UITest;
 import com.taf.tests.BaseGuiTest;
 import com.taf.utils.Groups;
 import com.taf.utils.dataReader.JsonReader;
 import com.taf.utils.logs.LogsManager;
 import io.qameta.allure.*;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
+import io.qameta.allure.testng.Tag;
+import io.qameta.allure.testng.Tags;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 @Epic("Your Epic")
 @Feature("Your Feature")
@@ -125,18 +134,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Your Name")
 @UITest
-@Tag(Groups.YOUR_FEATURE)
-@Tag(Groups.REGRESSION)
-@Tag(Groups.SMOKE)
-@ExtendWith(JUnit5TestListener.class)
-class YourTestClass extends BaseGuiTest {
+@Tags({@Tag(Groups.YOUR_FEATURE), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
+public class YourTestClass extends BaseGuiTest {
 
     // Test methods
     @Description("Test description here")
-    @DisplayName("Human Readable Test Name")
-    @Test
-    @Tag(Groups.YOUR_FEATURE)
-    void yourTestMethod() {
+    @Test(description = "Human Readable Test Name",
+          groups = {Groups.YOUR_FEATURE, Groups.REGRESSION})
+    public void yourTestMethod() {
         LogsManager.info("Test Started...");
 
         // Your test implementation
@@ -147,91 +152,92 @@ class YourTestClass extends BaseGuiTest {
     }
 
     // Configuration methods
-    @Override
-    @BeforeEach
+    @BeforeClass(alwaysRun = true)
+    protected void preCondition() {
+        testData = new JsonReader("your-data-file");
+    }
+
+    @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        if (testData == null) {
-            testData = new JsonReader("your-data-file");
-        }
         super.setUp();
     }
 
-    @Override
-    @AfterEach
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
         super.tearDown();
     }
 }
 ```
 
+### Key Structure Points
+
+1. **Class must be public** for TestNG to discover it
+2. **Methods must be public** for TestNG to invoke them
+3. **Use `alwaysRun = true`** on setup/teardown to ensure they run even if tests are filtered by groups
+4. **`@BeforeClass`** runs once before any test methods
+5. **`@BeforeMethod`** runs before each test method
+6. **`@AfterMethod`** runs after each test method
+
 ---
 
 ## Real-World Examples
 
-### Example 1: Login Test (from LoginTest.java)
+### Example 1: Registration Test (from RegisterTest.java)
 
 ```java
 @Epic("Automation Exercise")
 @Feature("UI User Management")
-@Story("User Login")
+@Story("User Registration")
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
-@Tag(Groups.LOGIN)
-@Tag(Groups.REGRESSION)
-@Tag(Groups.SMOKE)
-@ExtendWith(JUnit5TestListener.class)
-class LoginTest extends BaseGuiTest {
+@Tags({@Tag(Groups.REGISTRATION), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
+public class RegisterTest extends BaseGuiTest {
 
-    @Description("Verify user can login with valid credentials")
-    @DisplayName("Valid Login Test")
-    @Test
-    @Tag(Groups.LOGIN)
-    @Tag(Groups.REGRESSION)
-    @Tag(Groups.SMOKE)
-    void validLoginTC() {
-        String timestamp = TimeManager.getCompactTimeStamp();
-        LogsManager.info("Valid-Login Test Started ...");
+    String registerTimeStamp;
+
+    @Description("Verify user can sign up with valid data")
+    @Test(description = "Valid Sign Up Test",
+          groups = {Groups.REGISTRATION, Groups.REGRESSION, Groups.SMOKE})
+    public void signUpTest() {
+        LogsManager.info("Starting sign up test...");
+        registerTimeStamp = TimeManager.getCompactTimeStamp();
 
         // Build user data using LombokUserData (Lombok @Builder)
         LombokUserData userData = LombokUserData.withRandomData();
-        userData.setName(testData.getJsonData("name"));
-        userData.setEmail(testData.getJsonData("email") + timestamp + "@gmail.com");
+        userData.setName(testData.getJsonData("name") + registerTimeStamp);
+        userData.setEmail(testData.getJsonData("email") + registerTimeStamp + "@gmail.com");
         userData.setPassword(testData.getJsonData("password"));
-        userData.setFirstName(testData.getJsonData("firstName"));
-        userData.setLastName(testData.getJsonData("lastName"));
-
-        // Create user via API (precondition)
-        new UserManagementAPI().createRegisterUserAccount(userData.toMap())
-                .verifyUserCreatedSuccessfully();
 
         // Perform UI test
         new SignUpAndLoginPage(driver)
                 .navigate()
-                .enterLoginEmail(userData.getEmail())
-                .enterLoginPassword(userData.getPassword())
-                .clickLoginButton()
-                .getNavigationBar()
-                .verifyUserLabel(testData.getJsonData("name"));
+                .enterSignUpEmail(userData.getEmail())
+                .enterSignUpName(userData.getName())
+                .clickSignUpButton();
 
-        // Cleanup via API (postcondition)
+        new SignupPage(driver).fillRegistrationForm(userData)
+                .clickCreateAccountButton()
+                .verifyAccountCreated()
+                .clickContinueButton()
+                .verifyHomePageIsDisplayed();
+
+        // Cleanup via API
         new UserManagementAPI().deleteUserAccount(userData.getEmail(), userData.getPassword())
                 .verifyUserDeletedSuccessfully();
-
-        LogsManager.info("Valid-Login Test Finished ...");
     }
 
-    @Override
-    @BeforeEach
+    @BeforeClass(alwaysRun = true)
+    protected void preCondition() {
+        testData = new JsonReader("register-data");
+    }
+
+    @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        if (testData == null) {
-            testData = new JsonReader("login-data");
-        }
         super.setUp();
     }
 
-    @Override
-    @AfterEach
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
         super.tearDown();
     }
@@ -247,18 +253,13 @@ class LoginTest extends BaseGuiTest {
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Ashraf")
 @UITest
-@Tag(Groups.PRODUCTS)
-@Tag(Groups.REGRESSION)
-@Tag(Groups.SMOKE)
-@ExtendWith(JUnit5TestListener.class)
-class ProductsTest extends BaseGuiTest {
+@Tags({@Tag(Groups.PRODUCTS), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
+public class ProductsTest extends BaseGuiTest {
 
     @Description("Search for a product and validate its details")
-    @Test
-    @Tag(Groups.PRODUCTS)
-    @Tag(Groups.REGRESSION)
-    @Tag(Groups.SMOKE)
-    void searchForProductWithoutLogin() {
+    @Test(description = "Search for a product without login and validate its details",
+          groups = {Groups.PRODUCTS, Groups.REGRESSION, Groups.SMOKE})
+    public void searchForProductWithoutLogin() {
         new ProductsPage(driver)
                 .navigate()
                 .searchProduct(testData.getJsonData("searchedProduct.name"))
@@ -268,17 +269,63 @@ class ProductsTest extends BaseGuiTest {
                 );
     }
 
-    @Override
-    @BeforeEach
+    @BeforeClass(alwaysRun = true)
+    protected void preCondition() {
+        testData = new JsonReader("products-data");
+    }
+
+    @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        if (testData == null) {
-            testData = new JsonReader("products-data");
-        }
         super.setUp();
     }
 
-    @Override
-    @AfterEach
+    @AfterMethod(alwaysRun = true)
+    public void tearDown() {
+        super.tearDown();
+    }
+}
+```
+
+### Example 3: Cart Test
+
+```java
+@Epic("Cart Management")
+@Feature("UI Cart Details")
+@Story("Cart Details")
+@Severity(SeverityLevel.CRITICAL)
+@Owner("Ashraf")
+@UITest
+@Tags({@Tag(Groups.CART), @Tag(Groups.REGRESSION), @Tag(Groups.SMOKE)})
+public class CartTest extends BaseGuiTest {
+
+    @Description("Verify product details on cart without login")
+    @Test(description = "Verify product details on cart without login",
+          groups = {Groups.CART, Groups.REGRESSION, Groups.SMOKE})
+    public void verifyProductDetailsOnCartWithoutLogin() {
+        new ProductsPage(driver)
+                .navigate()
+                .clickOnAddToCart(testData.getJsonData("product.name"))
+                .validateItemAddedLabel(testData.getJsonData("messages.cartAdded"))
+                .clickOnViewCart()
+                .verifyProductDetailsOnCart(
+                        testData.getJsonData("product.name"),
+                        testData.getJsonData("product.price"),
+                        testData.getJsonData("product.quantity"),
+                        testData.getJsonData("product.total")
+                );
+    }
+
+    @BeforeClass(alwaysRun = true)
+    protected void preCondition() {
+        testData = new JsonReader("cart-data");
+    }
+
+    @BeforeMethod(alwaysRun = true)
+    public void setUp() {
+        super.setUp();
+    }
+
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
         super.tearDown();
     }
@@ -291,43 +338,43 @@ class ProductsTest extends BaseGuiTest {
 
 ### 1. Screen Recording Integration
 
-When `@UITest` is applied to a test class, the `JUnit5TestListener` automatically:
+When `@UITest` is applied to a test class, the `TestNGListeners` automatically:
 
-- **Starts screen recording** before each test method (in `beforeEach`)
-- **Stops screen recording** after each test method (in `afterEach`)
+- **Starts screen recording** before each test method (in `beforeInvocation`)
+- **Stops screen recording** after each test method (in `afterInvocation`)
 - **Attaches recording** to Allure report
 
-**Implementation in JUnit5TestListener:**
+**Implementation in TestNGListeners:**
 
 ```java
-@Override
-public void beforeEach(ExtensionContext context) throws Exception {
-    // Check if test instance is UITest for screen recording
-    context.getTestInstance().ifPresent(instance -> {
-        if (instance instanceof UITest) {  // Note: This check needs fixing
+public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
+    if (method.isTestMethod()) {
+        if (testResult.getInstance() instanceof UITest) {
             try {
                 ScreenRecordManager.startRecording();
             } catch (Exception e) {
                 LogsManager.warn("Could not start screen recording:", e.getMessage());
             }
         }
-    });
+    }
 }
 
-@Override
-public void afterEach(ExtensionContext context) throws Exception {
-    // Stop recording for UI tests
-    context.getTestInstance().ifPresent(instance -> {
-        if (instance instanceof UITest) {  // Note: This check needs fixing
+public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
+    if (method.isTestMethod()) {
+        if (testResult.getInstance() instanceof UITest) {
             try {
-                ScreenRecordManager.stopRecording(testMethodName);
+                ScreenRecordManager.stopRecording(testResult.getName());
             } catch (Exception e) {
                 LogsManager.warn("Could not stop screen recording:", e.getMessage());
             }
         }
-    });
+    }
 }
 ```
+
+**How It Works:**
+- Tests the class instance using `testResult.getInstance() instanceof UITest`
+- This works because the test class is annotated with `@UITest`, making it implement the UITest marker interface
 
 ### 2. WebDriver Management
 
@@ -363,19 +410,16 @@ public class BaseGuiTest implements WebDriverProvider {
 
 ### 3. Test Data Integration
 
-- Test data is loaded via `JsonReader` in the `setUp()` method
+- Test data is loaded via `JsonReader` in the `@BeforeClass` method
 - Data files are stored in `src/test/resources/testData/`
 - Access test data using: `testData.getJsonData("key.path")`
 
 **Example:**
 
 ```java
-@BeforeEach
-public void setUp() {
-    if (testData == null) {
-        testData = new JsonReader("login-data");  // Loads login-data.json
-    }
-    super.setUp();
+@BeforeClass(alwaysRun = true)
+protected void preCondition() {
+    testData = new JsonReader("login-data");  // Loads login-data.json
 }
 
 // In test method
@@ -394,7 +438,7 @@ Tests with `@UITest` automatically get:
 
 ### 5. Test Grouping and Filtering
 
-Use `@Tag` annotations to filter tests during execution:
+Use TestNG `groups` attribute to filter tests during execution:
 
 ```bash
 # Run only login tests
@@ -406,12 +450,27 @@ mvn test -Dgroups=smoke
 # Run regression tests
 mvn test -Dgroups=regression
 
-# Run multiple groups
-mvn test -Dgroups="smoke | login"
+# Run multiple groups (OR logic)
+mvn test -Dgroups="smoke,login"
 
 # Exclude groups
 mvn test -DexcludedGroups=slow
 ```
+
+### 6. Automatic Retry Mechanism
+
+The `TestNGListeners` implements `IAnnotationTransformer` which automatically adds retry logic to all tests:
+
+```java
+@Override
+public void transform(ITestAnnotation annotation, Class testClass,
+                     Constructor testConstructor, Method testMethod) {
+    // Automatically set RetryAnalyzer for all @Test methods
+    annotation.setRetryAnalyzer(RetryAnalyzer.class);
+}
+```
+
+This means **all tests automatically retry on failure** based on `RetryAnalyzer` configuration.
 
 ---
 
@@ -428,67 +487,79 @@ Don't just use `@UITest` alone. Include the full stack for proper reporting and 
 @Severity(SeverityLevel.CRITICAL)
 @Owner("Your Name")
 @UITest
-@Tag(Groups.FEATURE)
-@Tag(Groups.REGRESSION)
-@ExtendWith(JUnit5TestListener.class)
-class YourTest extends BaseGuiTest { }
+@Tags({@Tag(Groups.FEATURE), @Tag(Groups.REGRESSION)})
+public class YourTest extends BaseGuiTest { }
 ```
 
-### 2. Use Meaningful Tags
+### 2. Use Groups Consistently
 
-Apply tags at both class and method level for fine-grained filtering:
+Apply groups at the test method level for fine-grained filtering:
 
 ```java
 @UITest
-@Tag(Groups.LOGIN)           // Class-level tag
-@Tag(Groups.REGRESSION)
-class LoginTest extends BaseGuiTest {
+@Tags({@Tag(Groups.LOGIN), @Tag(Groups.REGRESSION)})  // Allure tags (class level)
+public class LoginTest extends BaseGuiTest {
 
-    @Test
-    @Tag(Groups.SMOKE)       // Method-level tag (additive)
-    void quickLoginTest() { }
+    @Test(groups = {Groups.SMOKE, Groups.LOGIN})  // TestNG groups (method level)
+    public void quickLoginTest() { }
 
-    @Test
-    @Tag(Groups.REGRESSION)  // Method-level tag
-    void detailedLoginTest() { }
+    @Test(groups = {Groups.REGRESSION, Groups.LOGIN})
+    public void detailedLoginTest() { }
 }
 ```
 
-### 3. Initialize Test Data Correctly
+### 3. Initialize Test Data in @BeforeClass
 
-Always check if `testData` is null before initializing:
+Always initialize test data in `@BeforeClass`, not in `@BeforeMethod`:
 
 ```java
-@Override
-@BeforeEach
+@BeforeClass(alwaysRun = true)
+protected void preCondition() {
+    testData = new JsonReader("your-data");
+}
+
+@BeforeMethod(alwaysRun = true)
 public void setUp() {
-    if (testData == null) {
-        testData = new JsonReader("your-data");
-    }
-    super.setUp();
+    super.setUp();  // Initializes driver
 }
 ```
 
-### 4. Use Descriptive Test Names
+### 4. Use alwaysRun = true
 
-Combine `@DisplayName` and `@Description` for clarity:
+Always use `alwaysRun = true` on setup/teardown methods:
+
+```java
+@BeforeMethod(alwaysRun = true)  // Runs even when groups are filtered
+public void setUp() {
+    super.setUp();
+}
+
+@AfterMethod(alwaysRun = true)   // Always cleanup
+public void tearDown() {
+    super.tearDown();
+}
+```
+
+### 5. Use Descriptive Test Names
+
+Combine `@Description` and test description for clarity:
 
 ```java
 @Description("Verify user cannot login with invalid email format")
-@DisplayName("Invalid Login - Malformed Email Test")
-@Test
-void invalidLoginMalformedEmail() {
+@Test(description = "Invalid Login - Malformed Email Test",
+      groups = {Groups.LOGIN, Groups.REGRESSION})
+public void invalidLoginMalformedEmail() {
     // Test implementation
 }
 ```
 
-### 5. Log Test Progress
+### 6. Log Test Progress
 
 Use `LogsManager` for consistent logging:
 
 ```java
 @Test
-void myTest() {
+public void myTest() {
     LogsManager.info("Test Started...");
 
     // Test steps
@@ -498,33 +569,35 @@ void myTest() {
 }
 ```
 
-### 6. Clean Up Test Data
+### 7. Clean Up Test Data
 
 Always clean up test data (especially in UI tests):
 
 ```java
 @Test
-void testWithDataCleanup() {
-    // Create test data
+public void testWithDataCleanup() {
     LombokUserData userData = LombokUserData.withRandomData();
-    new UserManagementAPI().createRegisterUserAccount(userData.toMap());
 
     try {
+        // Create test data via API
+        new UserManagementAPI().createRegisterUserAccount(userData.toMap());
+
         // Test implementation
     } finally {
         // Cleanup - runs even if test fails
-        new UserManagementAPI().deleteUserAccount(userData.getEmail(), userData.getPassword());
+        new UserManagementAPI().deleteUserAccount(
+            userData.getEmail(), userData.getPassword());
     }
 }
 ```
 
-### 7. Use API Preconditions for Speed
+### 8. Use API Preconditions for Speed
 
 When possible, use API calls for setup/cleanup instead of UI:
 
 ```java
 @Test
-void loginTest() {
+public void loginTest() {
     // API setup (fast)
     new UserManagementAPI().createRegisterUserAccount(userData.toMap());
 
@@ -540,7 +613,7 @@ void loginTest() {
 }
 ```
 
-### 8. Follow the Page Object Pattern
+### 9. Follow the Page Object Pattern
 
 Always use Page Objects for UI interactions:
 
@@ -557,6 +630,26 @@ driver.findElement(By.id("password")).sendKeys(password);
 driver.findElement(By.id("login-btn")).click();
 ```
 
+### 10. Make Test Classes and Methods Public
+
+TestNG requires test classes and methods to be public:
+
+```java
+// Good
+@UITest
+public class LoginTest extends BaseGuiTest {
+    @Test
+    public void testLogin() { }
+}
+
+// Bad - TestNG won't find these
+@UITest
+class LoginTest extends BaseGuiTest {
+    @Test
+    void testLogin() { }
+}
+```
+
 ---
 
 ## Common Patterns
@@ -565,11 +658,11 @@ driver.findElement(By.id("login-btn")).click();
 
 ```java
 @UITest
-@Tag(Groups.FEATURE)
-class FeatureTest extends BaseGuiTest {
+@Tags({@Tag(Groups.FEATURE), @Tag(Groups.REGRESSION)})
+public class FeatureTest extends BaseGuiTest {
 
-    @Test
-    void standardTest() {
+    @Test(groups = {Groups.FEATURE, Groups.REGRESSION})
+    public void standardTest() {
         LogsManager.info("Test Started");
 
         new YourPage(driver)
@@ -580,15 +673,17 @@ class FeatureTest extends BaseGuiTest {
         LogsManager.info("Test Finished");
     }
 
-    @BeforeEach
+    @BeforeClass(alwaysRun = true)
+    protected void preCondition() {
+        testData = new JsonReader("feature-data");
+    }
+
+    @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        if (testData == null) {
-            testData = new JsonReader("feature-data");
-        }
         super.setUp();
     }
 
-    @AfterEach
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
         super.tearDown();
     }
@@ -599,11 +694,11 @@ class FeatureTest extends BaseGuiTest {
 
 ```java
 @UITest
-@Tag(Groups.FEATURE)
-class FeatureTest extends BaseGuiTest {
+@Tags({@Tag(Groups.FEATURE), @Tag(Groups.REGRESSION)})
+public class FeatureTest extends BaseGuiTest {
 
-    @Test
-    void testWithAPIPrecondition() {
+    @Test(groups = {Groups.FEATURE, Groups.REGRESSION})
+    public void testWithAPIPrecondition() {
         // Precondition via API
         LombokUserData userData = LombokUserData.withRandomData();
         new UserManagementAPI().createRegisterUserAccount(userData.toMap())
@@ -616,7 +711,8 @@ class FeatureTest extends BaseGuiTest {
                 .verifyResult();
 
         // Cleanup via API
-        new UserManagementAPI().deleteUserAccount(userData.getEmail(), userData.getPassword());
+        new UserManagementAPI().deleteUserAccount(
+            userData.getEmail(), userData.getPassword());
     }
 }
 ```
@@ -625,11 +721,11 @@ class FeatureTest extends BaseGuiTest {
 
 ```java
 @UITest
-@Tag(Groups.FEATURE)
-class FeatureTest extends BaseGuiTest {
+@Tags({@Tag(Groups.FEATURE), @Tag(Groups.REGRESSION)})
+public class FeatureTest extends BaseGuiTest {
 
-    @Test
-    void dataDrivenTest() {
+    @Test(groups = {Groups.FEATURE, Groups.REGRESSION})
+    public void dataDrivenTest() {
         String[] testInputs = {
             testData.getJsonData("input1"),
             testData.getJsonData("input2"),
@@ -646,69 +742,81 @@ class FeatureTest extends BaseGuiTest {
 }
 ```
 
----
-
-## JUnit 5 Migration Notes
-
-### TestNG vs JUnit 5 Differences
-
-This framework is transitioning from TestNG to JUnit 5. Key differences when using `@UITest`:
-
-| Aspect | TestNG (Old) | JUnit 5 (New) |
-|--------|-------------|---------------|
-| **Test Annotation** | `@Test(description = "...")` | `@Test` + `@DisplayName("...")` |
-| **Tags** | `@Tags({@Tag("smoke"), @Tag("login")})` | `@Tag("smoke")` + `@Tag("login")` (separate) |
-| **Setup** | `@BeforeMethod` | `@BeforeEach` |
-| **Teardown** | `@AfterMethod` | `@AfterEach` |
-| **Class Setup** | `@BeforeClass` | `@BeforeAll` |
-| **Listener** | TestNG Listener | `@ExtendWith(JUnit5TestListener.class)` |
-
-### Migration Example
-
-**TestNG Version (Old):**
+### Pattern 4: Test with Instance Variables
 
 ```java
 @UITest
-@Tags({@Tag(Groups.LOGIN), @Tag(Groups.SMOKE)})
-public class LoginTest extends BaseGuiTest {
+@Tags({@Tag(Groups.FEATURE), @Tag(Groups.REGRESSION)})
+public class FeatureTest extends BaseGuiTest {
 
-    @Test(description = "Valid Login", groups = {Groups.LOGIN, Groups.SMOKE})
-    public void validLogin() { }
+    String timestamp;  // Instance variable shared across test methods
 
-    @BeforeClass
-    protected void preCondition() { }
+    @Test(groups = {Groups.FEATURE, Groups.SMOKE})
+    public void firstTest() {
+        timestamp = TimeManager.getCompactTimeStamp();
+        // Use timestamp
+    }
 
-    @BeforeMethod
-    public void setUp() { }
-
-    @AfterMethod
-    public void tearDown() { }
+    @BeforeClass(alwaysRun = true)
+    protected void preCondition() {
+        testData = new JsonReader("feature-data");
+    }
 }
 ```
 
-**JUnit 5 Version (New):**
+---
 
-```java
-@UITest
-@Tag(Groups.LOGIN)
-@Tag(Groups.SMOKE)
-@ExtendWith(JUnit5TestListener.class)
-class LoginTest extends BaseGuiTest {
+## TestNG Configuration
 
-    @Test
-    @DisplayName("Valid Login")
-    void validLogin() { }
+### testng.xml Configuration
 
-    // @BeforeAll removed - use @BeforeEach instead
+To enable `TestNGListeners` and configure test execution, use a `testng.xml` file:
 
-    @Override
-    @BeforeEach
-    public void setUp() { }
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Automation Exercise Test Suite" parallel="methods" thread-count="4">
 
-    @Override
-    @AfterEach
-    public void tearDown() { }
-}
+    <!-- Global listeners -->
+    <listeners>
+        <listener class-name="com.taf.customListeners.TestNGListeners"/>
+    </listeners>
+
+    <!-- Test configuration -->
+    <test name="UI Tests">
+        <groups>
+            <run>
+                <include name="smoke"/>
+                <include name="regression"/>
+            </run>
+        </groups>
+
+        <packages>
+            <package name="com.taf.tests.ui"/>
+        </packages>
+    </test>
+</suite>
+```
+
+### Maven Surefire Plugin Configuration
+
+Configure in `pom.xml`:
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>3.0.0-M5</version>
+    <configuration>
+        <suiteXmlFiles>
+            <suiteXmlFile>testng.xml</suiteXmlFile>
+        </suiteXmlFiles>
+        <systemPropertyVariables>
+            <browser>${browser}</browser>
+            <headless>${headless}</headless>
+        </systemPropertyVariables>
+    </configuration>
+</plugin>
 ```
 
 ---
@@ -737,8 +845,11 @@ The framework defines the following test groups (see `Groups.java`):
 ### Run All UI Tests
 
 ```bash
-# Run all tests (includes @UITest tests)
+# Run all tests from testng.xml
 mvn clean test
+
+# Run all tests from a specific file
+mvn test -DsuiteXmlFile=testng.xml
 ```
 
 ### Run Specific Test Groups
@@ -750,11 +861,14 @@ mvn test -Dgroups=smoke
 # Run login tests
 mvn test -Dgroups=login
 
-# Run smoke AND regression
+# Run multiple groups (OR logic)
+mvn test -Dgroups="smoke,login"
+
+# Run smoke AND regression (intersection)
 mvn test -Dgroups="smoke & regression"
 
-# Run smoke OR login
-mvn test -Dgroups="smoke | login"
+# Exclude groups
+mvn test -Dgroups=regression -DexcludedGroups=slow
 ```
 
 ### Run Specific Test Class
@@ -765,6 +879,9 @@ mvn test -Dtest=LoginTest
 
 # Run specific test method
 mvn test -Dtest=LoginTest#validLoginTC
+
+# Run multiple test classes
+mvn test -Dtest=LoginTest,RegisterTest
 ```
 
 ### Run with Custom Configuration
@@ -776,8 +893,18 @@ mvn test -Dbrowser=chrome
 # Run in headless mode
 mvn test -Dheadless=true
 
-# Run with custom timeout
-mvn test -Dtimeout=60
+# Run with parallel execution
+mvn test -Dparallel=methods -DthreadCount=4
+```
+
+### Run with TestNG Suite File
+
+```bash
+# Run specific suite file
+mvn test -DsuiteXmlFile=src/test/resources/suites/smoke-tests.xml
+
+# Run with system properties
+mvn test -DsuiteXmlFile=testng.xml -Dbrowser=firefox -Dheadless=false
 ```
 
 ---
@@ -788,27 +915,28 @@ mvn test -Dtimeout=60
 
 **Symptom:** Tests run but no screen recording is attached to Allure report.
 
-**Cause:** The `instanceof UITest` check in `JUnit5TestListener` is incorrect (annotations are not interfaces).
+**Cause:** The test class may not be properly marked with `@UITest`, or the `TestNGListeners` is not configured.
 
-**Solution:** The listener needs to be updated to use:
-```java
-if (context.getTestClass().get().isAnnotationPresent(UITest.class)) {
+**Solution:**
+1. Ensure `@UITest` is applied at class level
+2. Verify `TestNGListeners` is configured in `testng.xml`:
+```xml
+<listeners>
+    <listener class-name="com.taf.customListeners.TestNGListeners"/>
+</listeners>
 ```
 
 ### Issue: Driver is Null
 
 **Symptom:** `NullPointerException` when accessing `driver` in test methods.
 
-**Cause:** `super.setUp()` not called, or called before test data initialization.
+**Cause:** `super.setUp()` not called in `@BeforeMethod`.
 
-**Solution:** Always call `super.setUp()` at the END of your `setUp()` method:
+**Solution:** Always call `super.setUp()` in your setUp method:
 ```java
-@BeforeEach
+@BeforeMethod(alwaysRun = true)
 public void setUp() {
-    if (testData == null) {
-        testData = new JsonReader("your-data");
-    }
-    super.setUp();  // Must be LAST
+    super.setUp();  // Must be called
 }
 ```
 
@@ -816,34 +944,76 @@ public void setUp() {
 
 **Symptom:** `NullPointerException` when accessing `testData.getJsonData()`.
 
-**Cause:** Test data not initialized or wrong file name.
+**Cause:** Test data not initialized in `@BeforeClass`.
 
 **Solution:**
 1. Verify file exists: `src/test/resources/testData/your-data.json`
-2. Initialize in `setUp()`:
+2. Initialize in `@BeforeClass`:
 ```java
-if (testData == null) {
+@BeforeClass(alwaysRun = true)
+protected void preCondition() {
     testData = new JsonReader("your-data");  // No .json extension
 }
 ```
 
-### Issue: Tags Not Working
+### Issue: Tests Not Running
 
-**Symptom:** Tests not filtered by tags.
+**Symptom:** TestNG doesn't find or run tests.
 
-**Cause:** Missing `@ExtendWith(JUnit5TestListener.class)` or wrong tag syntax.
+**Cause:** Test class or methods are not public, or TestNG XML not configured.
 
 **Solution:**
-1. Add `@ExtendWith(JUnit5TestListener.class)` to class
-2. Use separate `@Tag` annotations (not `@Tags`)
-3. Use correct Maven command: `mvn test -Dgroups=tagname`
+1. Make test class and methods `public`
+2. Ensure `testng.xml` includes the test package:
+```xml
+<packages>
+    <package name="com.taf.tests.ui"/>
+</packages>
+```
+
+### Issue: Groups Not Filtering Correctly
+
+**Symptom:** Tests don't filter by groups as expected.
+
+**Cause:** Groups not specified correctly in `@Test` annotation.
+
+**Solution:**
+```java
+@Test(description = "Test description",
+      groups = {Groups.SMOKE, Groups.REGRESSION})  // Correct
+public void testMethod() { }
+```
+
+### Issue: Setup/Teardown Not Running
+
+**Symptom:** `@BeforeMethod` or `@AfterMethod` not executing when running specific groups.
+
+**Cause:** Missing `alwaysRun = true`.
+
+**Solution:**
+```java
+@BeforeMethod(alwaysRun = true)  // Always runs, even with group filtering
+public void setUp() {
+    super.setUp();
+}
+```
+
+### Issue: Parallel Execution Conflicts
+
+**Symptom:** Tests fail when run in parallel.
+
+**Cause:** Shared resources or improper driver management.
+
+**Solution:**
+1. Use ThreadLocal for driver instances (already implemented in framework)
+2. Don't share mutable state between tests
+3. Use `synchronized` blocks for shared resources (logs, reports)
 
 ---
 
 ## Related Documentation
 
 - [UITEST-ANNOTATION-GUIDE.md](UITEST-ANNOTATION-GUIDE.md) - Detailed annotation theory and custom annotation concepts
-- [JUNIT5-MIGRATION-REPORT.md](JUNIT5-MIGRATION-REPORT.md) - TestNG to JUnit 5 migration guide
 - [PARALLEL-EXECUTION-GUIDE.md](PARALLEL-EXECUTION-GUIDE.md) - Parallel test execution guide
 - [RETRY-MECHANISM-GUIDE.md](RETRY-MECHANISM-GUIDE.md) - Test retry configuration guide
 - [ARCHITECTURE-ANALYSIS.md](ARCHITECTURE-ANALYSIS.md) - Framework architecture overview
@@ -852,18 +1022,64 @@ if (testData == null) {
 
 ## Summary Checklist
 
-When creating a new UI test class, ensure you:
+When creating a new UI test class with TestNG, ensure you:
 
-- [ ] Extend `BaseGuiTest`
+- [ ] Class is **public** and extends `BaseGuiTest`
 - [ ] Apply `@UITest` annotation at class level
 - [ ] Add complete Allure annotation stack (`@Epic`, `@Feature`, `@Story`, `@Severity`, `@Owner`)
-- [ ] Add appropriate `@Tag` annotations for test filtering
-- [ ] Add `@ExtendWith(JUnit5TestListener.class)`
-- [ ] Override `setUp()` with test data initialization
-- [ ] Override `tearDown()` for cleanup
-- [ ] Use `@Description` and `@DisplayName` on test methods
+- [ ] Add Allure `@Tags` annotations for reporting
+- [ ] Test methods are **public** with `@Test` annotation
+- [ ] Include `groups` in `@Test` annotation for filtering
+- [ ] Use `@Description` on test methods
+- [ ] Initialize test data in `@BeforeClass(alwaysRun = true)`
+- [ ] Override `setUp()` with `@BeforeMethod(alwaysRun = true)`
+- [ ] Override `tearDown()` with `@AfterMethod(alwaysRun = true)`
 - [ ] Follow Page Object pattern for UI interactions
 - [ ] Use `LogsManager` for logging
 - [ ] Clean up test data (prefer API cleanup)
 - [ ] Handle exceptions appropriately
 - [ ] Verify tests run in isolation (no dependencies between tests)
+- [ ] Configure `TestNGListeners` in `testng.xml`
+
+---
+
+## TestNG vs JUnit 5 Quick Reference
+
+| Aspect | TestNG (Current) | JUnit 5 (Alternative) |
+|--------|------------------|----------------------|
+| **Test Annotation** | `@Test(description = "...", groups = {...})` | `@Test` + `@DisplayName("...")` + `@Tag("...")` |
+| **Tags/Groups** | `@Tags({@Tag("smoke"), @Tag("login")})` (Allure)<br>`groups = {Groups.SMOKE}` (TestNG) | `@Tag("smoke")` + `@Tag("login")` (separate) |
+| **Setup (Before Each)** | `@BeforeMethod(alwaysRun = true)` | `@BeforeEach` |
+| **Teardown (After Each)** | `@AfterMethod(alwaysRun = true)` | `@AfterEach` |
+| **Class Setup** | `@BeforeClass(alwaysRun = true)` | `@BeforeAll` |
+| **Class Teardown** | `@AfterClass(alwaysRun = true)` | `@AfterAll` |
+| **Listener** | TestNG Listeners in `testng.xml` | `@ExtendWith(Listener.class)` |
+| **Visibility** | Must be `public` | Can be package-private |
+| **Parallel Execution** | `testng.xml` configuration | `junit-platform.properties` |
+| **Retry** | `RetryAnalyzer` via `IAnnotationTransformer` | Custom `TestExecutionExceptionHandler` |
+
+---
+
+## Additional Notes
+
+### Why Use @UITest?
+
+1. **Automatic Screen Recording**: All UI tests get screen recordings without additional configuration
+2. **Clear Test Classification**: Easily distinguish UI tests from API tests
+3. **Framework Integration**: Seamlessly integrates with TestNG listeners and Allure reporting
+4. **Maintainability**: Centralized behavior for all UI tests
+
+### Performance Considerations
+
+- Screen recording adds overhead (~5-10% slower test execution)
+- Use API preconditions/postconditions to speed up tests
+- Consider disabling screen recording for smoke tests if execution time is critical
+- Run tests in parallel to maximize throughput
+
+### Maintenance Tips
+
+- Keep test data files small and focused
+- Use meaningful test names that describe what's being tested
+- Avoid hard-coded waits - use Page Object implicit/explicit waits
+- Regularly review and clean up test data files
+- Monitor test execution times and optimize slow tests
